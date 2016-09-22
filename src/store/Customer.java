@@ -2,8 +2,6 @@ package store;
 
 public class Customer {
 
-    private int id;
-
     private String name;
     private String surname;
 
@@ -11,17 +9,17 @@ public class Customer {
     private String email;
     private String address;
 
-    private int[] idsOrders;
+    private Order[] orders;
 
     public Customer() {
     }
 
-    public int getId() {
-        return id;
+    public Customer(String name) {
+        this.name = name;
     }
 
-    public int[] getIdsOrders() {
-        return idsOrders;
+    public Order[] getOrders() {
+        return orders;
     }
 
     public String getName() {

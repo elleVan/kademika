@@ -2,23 +2,26 @@ package store;
 
 public class Order {
 
-    private int id;
-
     private String date;
-    private int idCustomer;
+    private Customer customer;
 
-    private int[] idsCandies;
+    private Sweet[] sweets;
     private double sum;
 
     public Order() {
     }
 
-    public int getId() {
-        return id;
+    public Order(Customer customer, Sweet[] sweets) {
+        this.customer = customer;
+        this.sweets = sweets;
     }
 
-    public int[] getIdsCandies() {
-        return idsCandies;
+    public Sweet[] getSweets() {
+        return sweets;
+    }
+
+    public void setSweets(Sweet[] sweets) {
+        this.sweets = sweets;
     }
 
     public double getSum() {
@@ -33,11 +36,11 @@ public class Order {
         this.date = date;
     }
 
-    public int getIdCustomer() {
-        return idCustomer;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setIdCustomer(int idCustomer) {
-        this.idCustomer = idCustomer;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 }
