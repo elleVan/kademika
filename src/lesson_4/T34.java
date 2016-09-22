@@ -3,9 +3,7 @@ package lesson_4;
 public class T34 extends Tank {
 
     public T34(TankColor color, int crew) {
-        setColor(color);
-        setCrew(crew);
-        setMaxSpeed(50);
+        super(color, crew, 50);
     }
 
     @Override

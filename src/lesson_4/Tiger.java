@@ -5,9 +5,7 @@ public class Tiger extends Tank {
     private int armor;
 
     public Tiger(TankColor color, int crew) {
-        setColor(color);
-        setCrew(crew);
-        setMaxSpeed(36);
+        super(color, crew, 36);
         setArmor(1);
     }
 

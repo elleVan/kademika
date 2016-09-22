@@ -2,9 +2,9 @@ package lesson_4;
 
 public class Tank {
 
-    public TankColor color;
-    public int crew;
-    public int maxSpeed;
+    private TankColor color;
+    private int crew;
+    private int maxSpeed;
 
     public Tank() {
 
