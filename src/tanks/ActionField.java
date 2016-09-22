@@ -2,6 +2,7 @@ package tanks;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Random;
 
 public class ActionField extends JPanel {
 
@@ -10,11 +11,20 @@ public class ActionField extends JPanel {
     private BattleField bf;
     private Tank tank;
     private Bullet bullet;
+    private Tank aggressor;
+
+    private String[] coordinatesAggressor = {"1_1", "9_1", "5_3"};
 
     public ActionField() throws Exception {
         bf = new BattleField();
         tank = new Tank(this, bf);
         bullet = new Bullet(-100, -100, Direction.NONE);
+
+        String coordAggr = getCoordinatesAggressor();
+        int xAggr = Integer.parseInt(coordAggr.split("_")[0]);
+        int yAggr = Integer.parseInt(coordAggr.split("_")[1]);
+
+        aggressor = new Tank(this, bf, xAggr, yAggr, Direction.DOWN);
 
         JFrame frame = new JFrame("BATTLE FIELD, DAY 2");
         frame.setLocation(750, 150);
@@ -32,6 +42,13 @@ public class ActionField extends JPanel {
         tank.moveToQuadrant(9, 9);
         tank.clean();
         tank.moveRandom();
+    }
+
+    private String getCoordinatesAggressor() {
+        Random random = new Random();
+        String coordAggr = coordinatesAggressor[random.nextInt(3)];
+        coordAggr = getQuadrantXY(Integer.parseInt(coordAggr.split("_")[0]), Integer.parseInt(coordAggr.split("_")[1]));
+        return coordAggr;
     }
 
     public void processTurn(Tank tank) throws Exception {
@@ -92,7 +109,7 @@ public class ActionField extends JPanel {
         }
     }
 
-    public boolean processInterception() {
+    private boolean processInterception() {
 
         String quadrant = getQuadrant(bullet.getX(), bullet.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -272,6 +289,14 @@ public class ActionField extends JPanel {
             }
         }
 
+        paintTank(g, tank);
+        paintTank(g, aggressor);
+
+        g.setColor(new Color(255, 255, 0));
+        g.fillRect(bullet.getX(), bullet.getY(), 14, 14);
+    }
+
+    private void paintTank(Graphics g, Tank tank) {
         g.setColor(new Color(255, 0, 0));
         g.fillRect(tank.getX(), tank.getY(), 64, 64);
         g.setColor(new Color(0, 255, 0));
@@ -284,10 +309,6 @@ public class ActionField extends JPanel {
         } else {
             g.fillRect(tank.getX() + 30, tank.getY() + 20, 34, 24);
         }
-
-        g.setColor(new Color(255, 255, 0));
-        g.fillRect(bullet.getX(), bullet.getY(), 14, 14);
     }
-
 
 }
