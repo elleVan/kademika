@@ -10,21 +10,16 @@ public class Tank {
     private int x; // 320
     private int y; // 384
 
-    private int UP = 1;
-    private int DOWN = 2;
-    private int LEFT = 3;
-    private int RIGHT = 4;
-
-    private int direction;
+    private Direction direction;
 
     private ActionField af;
     private BattleField bf;
 
     public Tank(ActionField af, BattleField bf) {
-        this(af, bf, 320, 384, 2);
+        this(af, bf, 320, 384, Direction.DOWN);
     }
 
-    public Tank(ActionField af, BattleField bf, int x, int y, int direction) {
+    public Tank(ActionField af, BattleField bf, int x, int y, Direction direction) {
         this.af = af;
         this.bf = bf;
         this.x = x;
@@ -32,7 +27,12 @@ public class Tank {
         this.direction = direction;
     }
 
-    void clean() throws Exception {
+    public void destroy() {
+        x = -100;
+        y = -100;
+    }
+
+    public void clean() throws Exception {
 
         String quadrant = af.getQuadrant(x, y);
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -75,12 +75,12 @@ public class Tank {
         if (x != xDest) {
             while (x < xDest) {
                 smashingFireVertical();
-                fireMove(RIGHT);
+                fireMove(Direction.RIGHT);
             }
 
             while (x > xDest) {
                 smashingFireVertical();
-                fireMove(LEFT);
+                fireMove(Direction.LEFT);
             }
 
             smashingFireVertical();
@@ -92,12 +92,12 @@ public class Tank {
         if (y != yDest) {
             while (y < yDest) {
                 smashingFireHorizontal();
-                fireMove(DOWN);
+                fireMove(Direction.DOWN);
             }
 
             while (y > yDest) {
                 smashingFireHorizontal();
-                fireMove(UP);
+                fireMove(Direction.UP);
             }
 
             smashingFireHorizontal();
@@ -106,25 +106,25 @@ public class Tank {
 
     private void smashingFireVertical() throws Exception {
 
-        smashingWhatSee(UP);
-        smashingWhatSee(DOWN);
+        smashingWhatSee(Direction.UP);
+        smashingWhatSee(Direction.DOWN);
     }
 
     private void smashingFireHorizontal() throws Exception {
 
-        smashingWhatSee(LEFT);
-        smashingWhatSee(RIGHT);
+        smashingWhatSee(Direction.LEFT);
+        smashingWhatSee(Direction.RIGHT);
     }
 
     private void smashingAround() throws Exception {
 
-        smashingWhatSee(UP);
-        smashingWhatSee(DOWN);
-        smashingWhatSee(LEFT);
-        smashingWhatSee(RIGHT);
+        smashingWhatSee(Direction.UP);
+        smashingWhatSee(Direction.DOWN);
+        smashingWhatSee(Direction.LEFT);
+        smashingWhatSee(Direction.RIGHT);
     }
 
-    private void smashingWhatSee(int direction) throws Exception {
+    private void smashingWhatSee(Direction direction) throws Exception {
 
         String quadrant = af.getQuadrant(x, y);
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -132,19 +132,19 @@ public class Tank {
 
         int shoot = 0;
 
-        if (direction == UP) {
+        if (direction == Direction.UP) {
             for (int i = bf.getQ_MIN(); i <= y; i++) {
                 if (!af.isCellEmpty(x, i)) {
                     shoot++;
                 }
             }
-        } else if (direction == DOWN) {
+        } else if (direction == Direction.DOWN) {
             for (int i = y; i <= bf.getQ_MAX(); i++) {
                 if (!af.isCellEmpty(x, i)) {
                     shoot++;
                 }
             }
-        } else if (direction == LEFT) {
+        } else if (direction == Direction.LEFT) {
             for (int i = bf.getQ_MIN(); i <= x; i++) {
                 if (!af.isCellEmpty(i, y)) {
                     shoot++;
@@ -161,7 +161,7 @@ public class Tank {
         fireInOneWay(direction, shoot);
     }
 
-    private void fireInOneWay(int direction, int shoots) throws Exception {
+    private void fireInOneWay(Direction direction, int shoots) throws Exception {
         turn(direction);
         for (int i = 0; i < shoots; i++) {
             fire();
@@ -183,34 +183,35 @@ public class Tank {
             String time = String.valueOf(System.currentTimeMillis());
             String maxAll;
             int direction = Integer.parseInt(time.substring(time.length() - 1));
+            Direction dir = Direction.DOWN;
 
             if ((direction == 1 || direction == 5) && countMoveUp < maxMoveUp) {
 
-                direction = UP;
-                fireMove(direction);
+                dir = Direction.UP;
+                fireMove(dir);
                 countMoveUp++;
 
             } else if ((direction == 2 || direction == 6 || direction == 9) && countMoveDown < maxMoveDown) {
 
-                direction = DOWN;
-                fireMove(direction);
+                dir = Direction.DOWN;
+                fireMove(dir);
                 countMoveDown++;
 
             } else if ((direction == 3 || direction == 7) && countMoveLeft < maxMoveLeft) {
 
-                direction = LEFT;
-                fireMove(direction);
+                dir = Direction.LEFT;
+                fireMove(dir);
                 countMoveLeft++;
 
             } else if ((direction == 4 || direction == 8 || direction == 0) && countMoveRight < maxMoveRight) {
 
-                direction = RIGHT;
-                fireMove(direction);
+                dir = Direction.RIGHT;
+                fireMove(dir);
                 countMoveRight++;
 
             }
 
-            maxAll = findMaxAll(direction, countMoveUp, countMoveDown, countMoveLeft, countMoveRight, maxMoveUp,
+            maxAll = findMaxAll(dir, countMoveUp, countMoveDown, countMoveLeft, countMoveRight, maxMoveUp,
                     maxMoveDown, maxMoveLeft, maxMoveRight);
 
             if (!maxAll.equals("0")) {
@@ -224,32 +225,32 @@ public class Tank {
 
     }
 
-    private String findMaxAll(int direction, int countUp, int countDown, int countLeft, int countRight,
+    private String findMaxAll(Direction direction, int countUp, int countDown, int countLeft, int countRight,
                               int maxUp, int maxDown, int maxLeft, int maxRight) {
 
         if (countUp == maxUp && countDown == maxDown && countLeft == maxLeft && countRight == maxRight) {
-            if (direction == UP) {
+            if (direction == Direction.UP) {
 
                 maxLeft = countLeft + RANDOM_STEP * 2;
                 maxUp = findMax(countUp, countDown, countRight) + RANDOM_STEP;
                 maxDown = maxUp;
                 maxRight = maxUp;
 
-            } else if (direction == DOWN) {
+            } else if (direction == Direction.DOWN) {
 
                 maxRight = countRight + RANDOM_STEP * 2;
                 maxUp = findMax(countUp, countDown, countLeft) + RANDOM_STEP;
                 maxDown = maxUp;
                 maxLeft = maxUp;
 
-            } else if (direction == LEFT) {
+            } else if (direction == Direction.LEFT) {
 
                 maxUp = countUp + RANDOM_STEP * 2;
                 maxDown = findMax(countRight, countDown, countLeft) + RANDOM_STEP;
                 maxLeft = maxDown;
                 maxRight = maxDown;
 
-            } else if (direction == RIGHT) {
+            } else if (direction == Direction.RIGHT) {
 
                 maxDown = countDown + RANDOM_STEP * 2;
                 maxUp = findMax(countRight, countUp, countLeft) + RANDOM_STEP;
@@ -287,11 +288,11 @@ public class Tank {
 
         if (x < xDest) {
             while (x != xDest) {
-                fireMove(RIGHT);
+                fireMove(Direction.RIGHT);
             }
         } else {
             while (x != xDest) {
-                fireMove(LEFT);
+                fireMove(Direction.LEFT);
             }
         }
     }
@@ -300,16 +301,16 @@ public class Tank {
 
         if (y < yDest) {
             while (y != yDest) {
-                fireMove(DOWN);
+                fireMove(Direction.DOWN);
             }
         } else {
             while (y != yDest) {
-                fireMove(UP);
+                fireMove(Direction.UP);
             }
         }
     }
 
-    private void fireMove(int direction) throws Exception {
+    private void fireMove(Direction direction) throws Exception {
         if (af.isOccupied(direction)) {
             turn(direction);
             fire();
@@ -318,7 +319,7 @@ public class Tank {
         move();
     }
 
-    public void turn(int direction) throws Exception {
+    public void turn(Direction direction) throws Exception {
         this.direction = direction;
         af.processTurn(this);
     }
@@ -352,7 +353,7 @@ public class Tank {
         return y;
     }
 
-    public int getDirection() {
+    public Direction getDirection() {
         return direction;
     }
 

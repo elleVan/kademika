@@ -14,7 +14,7 @@ public class ActionField extends JPanel {
     public ActionField() throws Exception {
         bf = new BattleField();
         tank = new Tank(this, bf);
-        bullet = new Bullet(-100, -100, -1);
+        bullet = new Bullet(-100, -100, Direction.DOWN);
 
         JFrame frame = new JFrame("BATTLE FIELD, DAY 2");
         frame.setLocation(750, 150);
@@ -28,6 +28,8 @@ public class ActionField extends JPanel {
     public void runTheGame() throws Exception {
 
         tank.moveToQuadrant(4, 4);
+        tank.moveToQuadrant(6, 7);
+        tank.moveToQuadrant(9, 9);
         tank.clean();
         tank.moveRandom();
     }
@@ -40,19 +42,19 @@ public class ActionField extends JPanel {
 
         int covered = 0;
         int step = tank.getTANK_STEP();
-        int direction = tank.getDirection();
+        Direction direction = tank.getDirection();
 
-        if ((direction == 1 && tank.getY() <= 0) || (direction == 2 && tank.getY() >= 512) ||
-                (direction == 3 && tank.getX() <= 0) || (direction == 4 && tank.getX() >= 512)) {
+        if ((direction == Direction.UP && tank.getY() <= 0) || (direction == Direction.DOWN && tank.getY() >= 512) ||
+                (direction == Direction.LEFT && tank.getX() <= 0) || (direction == Direction.RIGHT && tank.getX() >= 512)) {
             return;
         }
 
         while (covered < 64) {
-            if (direction == 1) {
+            if (direction == Direction.UP) {
                 tank.updateY(-step);
-            } else if (direction == 2) {
+            } else if (direction == Direction.DOWN) {
                 tank.updateY(step);
-            } else if (direction == 3) {
+            } else if (direction == Direction.LEFT) {
                 tank.updateX(-step);
             } else {
                 tank.updateX(step);
@@ -67,15 +69,15 @@ public class ActionField extends JPanel {
     public void processFire(Bullet bullet) throws Exception {
         this.bullet = bullet;
         int step = bullet.getSTEP();
-        int direction = bullet.getDirection();
+        Direction direction = bullet.getDirection();
 
         while (bullet.getX() > -14 && bullet.getX() < 590 && bullet.getY() > -14 && bullet.getY() < 590) {
 
-            if (direction == 1) {
+            if (direction == Direction.UP) {
                 bullet.updateY(-step);
-            } else if (direction == 2) {
+            } else if (direction == Direction.DOWN) {
                 bullet.updateY(step);
-            } else if (direction == 3) {
+            } else if (direction == Direction.LEFT) {
                 bullet.updateX(-step);
             } else {
                 bullet.updateX(step);
@@ -185,17 +187,17 @@ public class ActionField extends JPanel {
                 Integer.toString(leftBorder) + "_" + Integer.toString(rightBorder);
     }
 
-    public boolean isOccupied(int direction) {
+    public boolean isOccupied(Direction direction) {
 
         String quadrant = getQuadrant(tank.getX(), tank.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
         int y = Integer.parseInt(quadrant.split("_")[1]);
 
-        if (direction == 1) {
+        if (direction == Direction.UP) {
             y -= 1;
-        } else if (direction == 2) {
+        } else if (direction == Direction.DOWN) {
             y += 1;
-        } else if (direction == 3) {
+        } else if (direction == Direction.LEFT) {
             x -= 1;
         } else {
             x += 1;
@@ -273,11 +275,11 @@ public class ActionField extends JPanel {
         g.setColor(new Color(255, 0, 0));
         g.fillRect(tank.getX(), tank.getY(), 64, 64);
         g.setColor(new Color(0, 255, 0));
-        if (tank.getDirection() == 1) {
+        if (tank.getDirection() == Direction.UP) {
             g.fillRect(tank.getX() + 20, tank.getY(), 24, 34);
-        } else if (tank.getDirection() == 2) {
+        } else if (tank.getDirection() == Direction.DOWN) {
             g.fillRect(tank.getX() + 20, tank.getY() + 30, 24, 34);
-        } else if (tank.getDirection() == 3) {
+        } else if (tank.getDirection() == Direction.LEFT) {
             g.fillRect(tank.getX(), tank.getY() + 20, 34, 24);
         } else {
             g.fillRect(tank.getX() + 30, tank.getY() + 20, 34, 24);
