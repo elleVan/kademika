@@ -14,7 +14,7 @@ public class ActionField extends JPanel {
     public ActionField() throws Exception {
         bf = new BattleField();
         tank = new Tank(this, bf);
-        bullet = new Bullet(-100, -100, Direction.DOWN);
+        bullet = new Bullet(-100, -100, Direction.NONE);
 
         JFrame frame = new JFrame("BATTLE FIELD, DAY 2");
         frame.setLocation(750, 150);

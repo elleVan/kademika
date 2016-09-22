@@ -5,7 +5,7 @@ public class Tank {
     private int TANK_STEP = 1;
     private int RANDOM_STEP = 2;
 
-    private int speed = 5; // 10
+    protected int speed = 5; // 10
 
     private int x; // 320
     private int y; // 384
@@ -183,7 +183,7 @@ public class Tank {
             String time = String.valueOf(System.currentTimeMillis());
             String maxAll;
             int direction = Integer.parseInt(time.substring(time.length() - 1));
-            Direction dir = Direction.DOWN;
+            Direction dir = Direction.NONE;
 
             if ((direction == 1 || direction == 5) && countMoveUp < maxMoveUp) {
 
