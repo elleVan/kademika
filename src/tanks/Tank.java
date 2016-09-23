@@ -27,9 +27,12 @@ public class Tank {
         this.direction = direction;
     }
 
-    public void destroy() {
+    public void destroy() throws Exception {
         x = -100;
         y = -100;
+        af.repaint();
+        Thread.sleep(3000);
+        af.newAggressor();
     }
 
     public void clean() throws Exception {

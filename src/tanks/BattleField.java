@@ -10,8 +10,10 @@ public class BattleField {
     private int bfWidth = 576;
     private int bfHeight = 576;
 
+    private String[] coordinatesAggressor = {"1_1", "5_1", "9_1"};
+
     private String[][] battleField = {
-            { " ", " ", " ", " ", "B", " ", " ", " ", " " },
+            { " ", " ", " ", " ", " ", " ", " ", " ", " " },
             { " ", "B", "B", "B", "B", "B", "B", "B", " " },
             { " ", " ", " ", " ", " ", " ", " ", " ", " " },
             { " ", "B", "B", "B", " ", "B", "B", "B", " " },
@@ -55,5 +57,9 @@ public class BattleField {
 
     public int getQ_MAX() {
         return Q_MAX;
+    }
+
+    public String[] getCoordinatesAggressor() {
+        return coordinatesAggressor;
     }
 }

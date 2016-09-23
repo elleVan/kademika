@@ -9,22 +9,16 @@ public class ActionField extends JPanel {
     private boolean COLORDED_MODE = false;
 
     private BattleField bf;
-    private Tank tank;
+    private Tank defender;
     private Bullet bullet;
     private Tank aggressor;
 
-    private String[] coordinatesAggressor = {"1_1", "9_1", "5_3"};
-
     public ActionField() throws Exception {
         bf = new BattleField();
-        tank = new Tank(this, bf);
+        defender = new Tank(this, bf);
         bullet = new Bullet(-100, -100, Direction.NONE);
 
-        String coordAggr = getCoordinatesAggressor();
-        int xAggr = Integer.parseInt(coordAggr.split("_")[0]);
-        int yAggr = Integer.parseInt(coordAggr.split("_")[1]);
-
-        aggressor = new Tank(this, bf, xAggr, yAggr, Direction.DOWN);
+        newAggressor();
 
         JFrame frame = new JFrame("BATTLE FIELD, DAY 2");
         frame.setLocation(750, 150);
@@ -37,16 +31,22 @@ public class ActionField extends JPanel {
 
     public void runTheGame() throws Exception {
 
-        tank.moveToQuadrant(4, 4);
-        tank.moveToQuadrant(6, 7);
-        tank.moveToQuadrant(9, 9);
-        tank.clean();
-        tank.moveRandom();
+        String aggrQuad = getQuadrant(aggressor.getX(), aggressor.getY());
+        defender.moveToQuadrant(Integer.parseInt(aggrQuad.split("_")[0]) + 1,
+                Integer.parseInt(aggrQuad.split("_")[1]) + 1);
+        defender.clean();
+        defender.moveRandom();
+    }
+
+    public void newAggressor() {
+        String aggrCoord = getCoordinatesAggressor();
+        aggressor = new Tank(this, bf, Integer.parseInt(aggrCoord.split("_")[0]),
+                Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
     }
 
     private String getCoordinatesAggressor() {
         Random random = new Random();
-        String coordAggr = coordinatesAggressor[random.nextInt(3)];
+        String coordAggr = bf.getCoordinatesAggressor()[random.nextInt(3)];
         coordAggr = getQuadrantXY(Integer.parseInt(coordAggr.split("_")[0]), Integer.parseInt(coordAggr.split("_")[1]));
         return coordAggr;
     }
@@ -100,16 +100,14 @@ public class ActionField extends JPanel {
                 bullet.updateX(step);
             }
 
-            if (processInterception()) {
-                bullet.destroy();
-            }
+            processInterception();
 
             repaint();
             Thread.sleep(bullet.getSpeed());
         }
     }
 
-    private boolean processInterception() {
+    private void processInterception() throws Exception {
 
         String quadrant = getQuadrant(bullet.getX(), bullet.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -117,17 +115,31 @@ public class ActionField extends JPanel {
 
         if (isQuadrantOnTheField(x, y)) {
             if (!isCellEmpty(x, y)) {
+                bullet.destroy();
                 bf.updateQuandrant(x, y, "");
-                return true;
+            }
+            if (isTankOnTheQuadrantXY(aggressor, bullet.getX(), bullet.getY())) {
+                bullet.destroy();
+                aggressor.destroy();
             }
         }
+    }
 
-        return false;
+    public boolean isTankOnTheQuadrantXY(Tank tank, int x, int y) {
+        String quadrant = getQuadrant(x, y);
+        String tankQ = getQuadrant(tank.getX(), tank.getY());
+        return tankQ.equals(quadrant);
+    }
+
+    public boolean isTankOnTheQuadrant(Tank tank, int x, int y) {
+        String quadrant = x + "_" + y;
+        String tankQ = getQuadrant(tank.getX(), tank.getY());
+        return tankQ.equals(quadrant);
     }
 
     public String findDirections() throws Exception {
 
-        String quadrant = getQuadrant(tank.getX(), tank.getY());
+        String quadrant = getQuadrant(defender.getX(), defender.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
         int y = Integer.parseInt(quadrant.split("_")[1]);
 
@@ -172,7 +184,7 @@ public class ActionField extends JPanel {
 
     private String findExtremeFilledQuadrants() {
 
-        String quadrant = getQuadrant(tank.getX(), tank.getY());
+        String quadrant = getQuadrant(defender.getX(), defender.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
         int y = Integer.parseInt(quadrant.split("_")[1]);
 
@@ -206,7 +218,7 @@ public class ActionField extends JPanel {
 
     public boolean isOccupied(Direction direction) {
 
-        String quadrant = getQuadrant(tank.getX(), tank.getY());
+        String quadrant = getQuadrant(defender.getX(), defender.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
         int y = Integer.parseInt(quadrant.split("_")[1]);
 
@@ -221,7 +233,7 @@ public class ActionField extends JPanel {
         }
 
         if (isQuadrantOnTheField(x, y)) {
-            if (!isCellEmpty(x, y)) {
+            if (!isCellEmpty(x, y) || isTankOnTheQuadrant(aggressor, x, y)) {
                 return true;
             }
         }
@@ -289,17 +301,17 @@ public class ActionField extends JPanel {
             }
         }
 
-        paintTank(g, tank);
-        paintTank(g, aggressor);
+        paintTank(g, defender, new Color(0, 210, 0), new Color(255, 220, 0));
+        paintTank(g, aggressor, new Color(255, 0, 0), new Color(0, 255, 0));
 
         g.setColor(new Color(255, 255, 0));
         g.fillRect(bullet.getX(), bullet.getY(), 14, 14);
     }
 
-    private void paintTank(Graphics g, Tank tank) {
-        g.setColor(new Color(255, 0, 0));
+    private void paintTank(Graphics g, Tank tank, Color colorTank, Color colorTower) {
+        g.setColor(colorTank);
         g.fillRect(tank.getX(), tank.getY(), 64, 64);
-        g.setColor(new Color(0, 255, 0));
+        g.setColor(colorTower);
         if (tank.getDirection() == Direction.UP) {
             g.fillRect(tank.getX() + 20, tank.getY(), 24, 34);
         } else if (tank.getDirection() == Direction.DOWN) {
