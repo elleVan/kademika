@@ -314,7 +314,7 @@ public class Tank {
     }
 
     private void fireMove(Direction direction) throws Exception {
-        if (af.isOccupied(direction)) {
+        while (af.isOccupied(direction)) {
             turn(direction);
             fire();
         }

@@ -14,6 +14,16 @@ public class Tiger extends Tank {
         armor = 1;
     }
 
+    @Override
+    public void destroy() throws Exception {
+        if (armor == 0) {
+            super.destroy();
+        } else {
+            armor--;
+        }
+
+    }
+
     public int getArmor() {
         return armor;
     }

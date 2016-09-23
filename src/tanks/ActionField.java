@@ -40,7 +40,7 @@ public class ActionField extends JPanel {
 
     public void newAggressor() {
         String aggrCoord = getCoordinatesAggressor();
-        aggressor = new Tank(this, bf, Integer.parseInt(aggrCoord.split("_")[0]),
+        aggressor = new Tiger(this, bf, Integer.parseInt(aggrCoord.split("_")[0]),
                 Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
     }
 
@@ -100,14 +100,16 @@ public class ActionField extends JPanel {
                 bullet.updateX(step);
             }
 
-            processInterception();
+            if (processInterception()) {
+                bullet.destroy();
+            }
 
             repaint();
             Thread.sleep(bullet.getSpeed());
         }
     }
 
-    private void processInterception() throws Exception {
+    private boolean processInterception() throws Exception {
 
         String quadrant = getQuadrant(bullet.getX(), bullet.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -115,14 +117,18 @@ public class ActionField extends JPanel {
 
         if (isQuadrantOnTheField(x, y)) {
             if (!isCellEmpty(x, y)) {
-                bullet.destroy();
                 bf.updateQuandrant(x, y, "");
+                return true;
             }
             if (isTankOnTheQuadrantXY(aggressor, bullet.getX(), bullet.getY())) {
                 bullet.destroy();
                 aggressor.destroy();
+                return true;
             }
+
         }
+
+        return false;
     }
 
     public boolean isTankOnTheQuadrantXY(Tank tank, int x, int y) {
