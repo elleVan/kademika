@@ -4,11 +4,11 @@ import java.util.Arrays;
 
 public class Base {
 
-    private int FAIL = -1;
+    public static final int FAIL = -1;
 
-    Sweet[] sweets = new Sweet[100];
-    Order[][] orders = new Order[30][];
-    Customer[] customers = new Customer[10];
+    private Sweet[] sweets = new Sweet[100];
+    private Order[][] orders = new Order[30][];
+    private Customer[] customers = new Customer[10];
 
 
     public void initDemoBase() {
@@ -63,14 +63,8 @@ public class Base {
 
     public void printBase() {
         System.out.println("=========== CATALOG ============");
-        for (Category category : Category.values()) {
-            System.out.println(category);
-            for (Sweet sweet : sweets) {
-                if (sweet != null && sweet.category == category) {
-                    System.out.println("\t" + sweet.name);
-                }
-            }
-        }
+        Catalog catalog = new Catalog();
+        catalog.initCatalog(this);
     }
 
     public void getPrices() {
@@ -164,5 +158,17 @@ public class Base {
             }
         }
         return FAIL;
+    }
+
+    public Sweet[] getSweets() {
+        return sweets;
+    }
+
+    public Order[][] getOrders() {
+        return orders;
+    }
+
+    public Customer[] getCustomers() {
+        return customers;
     }
 }

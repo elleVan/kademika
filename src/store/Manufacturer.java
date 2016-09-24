@@ -1,5 +1,5 @@
 package store;
 
 public enum Manufacturer {
-    KONTI;
+    NONE, KONTI, ROSHEN, ABK, SVITOCH;
 }

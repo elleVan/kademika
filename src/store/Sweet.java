@@ -2,17 +2,14 @@ package store;
 
 public class Sweet {
 
-    protected Category category;
-    protected Manufacturer manufacturer;
-    protected String name;
+    public static final Category category = Category.NONE;
+    public static final Manufacturer manufacturer = Manufacturer.NONE;
+    public final String name = getClass().getSimpleName();
 
     protected double price;
     protected int quantity;
 
     protected int kgInStock;
-
-    public Sweet() {
-    }
 
     public Sweet(int quantity) {
         this.quantity = quantity;
@@ -22,24 +19,12 @@ public class Sweet {
         return category;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
     public Manufacturer getManufacturer() {
         return manufacturer;
     }
 
-    public void setManufacturer(Manufacturer manufacturer) {
-        this.manufacturer = manufacturer;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public double getPrice() {

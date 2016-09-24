@@ -1,5 +1,5 @@
 package store;
 
 public enum Category {
-    CHOCOLATES, COMBINED, FONDANT, PRALINE;
+    NONE, CHOCOLATES, COMBINED, FONDANT, PRALINE;
 }
