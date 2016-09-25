@@ -136,26 +136,26 @@ public class Tank {
         int shoot = 0;
 
         if (direction == Direction.UP) {
-            for (int i = bf.getQ_MIN(); i <= y; i++) {
-                if (!af.isCellEmpty(x, i)) {
+            for (int i = BattleField.Q_MIN; i <= y; i++) {
+                if (!af.isCellArrayBFEmpty(x, i)) {
                     shoot++;
                 }
             }
         } else if (direction == Direction.DOWN) {
-            for (int i = y; i <= bf.getQ_MAX(); i++) {
-                if (!af.isCellEmpty(x, i)) {
+            for (int i = y; i <= BattleField.Q_MAX; i++) {
+                if (!af.isCellArrayBFEmpty(x, i)) {
                     shoot++;
                 }
             }
         } else if (direction == Direction.LEFT) {
-            for (int i = bf.getQ_MIN(); i <= x; i++) {
-                if (!af.isCellEmpty(i, y)) {
+            for (int i = BattleField.Q_MIN; i <= x; i++) {
+                if (!af.isCellArrayBFEmpty(i, y)) {
                     shoot++;
                 }
             }
         } else {
-            for (int i = x; i <= bf.getQ_MAX(); i++) {
-                if (!af.isCellEmpty(i, y)) {
+            for (int i = x; i <= BattleField.Q_MAX; i++) {
+                if (!af.isCellArrayBFEmpty(i, y)) {
                     shoot++;
                 }
             }

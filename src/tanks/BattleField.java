@@ -2,10 +2,10 @@ package tanks;
 
 public class BattleField {
 
-    private int Q_SIZE = 64;
+    public static final int Q_SIZE = 64;
 
-    private int Q_MIN = 0;
-    private int Q_MAX = 8;
+    public static final int Q_MIN = 0;
+    public static final int Q_MAX = 8;
 
     private int bfWidth = 576;
     private int bfHeight = 576;
@@ -45,18 +45,6 @@ public class BattleField {
 
     public int getBfHeight() {
         return bfHeight;
-    }
-
-    public int getQ_SIZE() {
-        return Q_SIZE;
-    }
-
-    public int getQ_MIN() {
-        return Q_MIN;
-    }
-
-    public int getQ_MAX() {
-        return Q_MAX;
     }
 
     public String[] getCoordinatesAggressor() {

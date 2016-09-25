@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class ActionField extends JPanel {
 
-    private boolean COLORDED_MODE = false;
+    public static final boolean COLORED_MODE = false;
 
     private BattleField bf;
     private Tank defender;
@@ -20,7 +20,7 @@ public class ActionField extends JPanel {
 
         newAggressor();
 
-        JFrame frame = new JFrame("BATTLE FIELD, DAY 2");
+        JFrame frame = new JFrame("BATTLE FIELD");
         frame.setLocation(750, 150);
         frame.setMinimumSize(new Dimension(bf.getBfWidth() + 16, bf.getBfHeight() + 38));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -31,24 +31,41 @@ public class ActionField extends JPanel {
 
     public void runTheGame() throws Exception {
 
-        String aggrQuad = getQuadrant(aggressor.getX(), aggressor.getY());
-        defender.moveToQuadrant(Integer.parseInt(aggrQuad.split("_")[0]) + 1,
-                Integer.parseInt(aggrQuad.split("_")[1]) + 1);
-        defender.clean();
-        defender.moveRandom();
+
+        while (true) {
+            String aggrQuad = getQuadrant(aggressor.getX(), aggressor.getY());
+            defender.moveToQuadrant(Integer.parseInt(aggrQuad.split("_")[0]) + 1,
+                    Integer.parseInt(aggrQuad.split("_")[1]) + 1);
+        }
+
+//        defender.clean();
+//        defender.moveRandom();
     }
 
     public void newAggressor() {
-        String aggrCoord = getCoordinatesAggressor();
+        String aggrCoord = getRandomEmptyQuadrantInTheTopXY();
         aggressor = new Tiger(this, bf, Integer.parseInt(aggrCoord.split("_")[0]),
                 Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
     }
 
     private String getCoordinatesAggressor() {
         Random random = new Random();
-        String coordAggr = bf.getCoordinatesAggressor()[random.nextInt(3)];
-        coordAggr = getQuadrantXY(Integer.parseInt(coordAggr.split("_")[0]), Integer.parseInt(coordAggr.split("_")[1]));
-        return coordAggr;
+        String aggrCoord = bf.getCoordinatesAggressor()[random.nextInt(bf.getCoordinatesAggressor().length)];
+        aggrCoord = getQuadrantXY(Integer.parseInt(aggrCoord.split("_")[0]), Integer.parseInt(aggrCoord.split("_")[1]));
+        return aggrCoord;
+    }
+
+    private String getRandomEmptyQuadrantInTheTopXY() {
+        Random random = new Random();
+        int x = random.nextInt(bf.getDimensionX());
+        int y = random.nextInt(4);
+
+        while (!isQuadrantEmpty(x, y)) {
+            x = random.nextInt(bf.getDimensionX());
+            y = random.nextInt(4);
+        }
+
+        return getQuadrantXY(x + 1, y + 1);
     }
 
     public void processTurn(Tank tank) throws Exception {
@@ -116,7 +133,7 @@ public class ActionField extends JPanel {
         int y = Integer.parseInt(quadrant.split("_")[1]);
 
         if (isQuadrantOnTheField(x, y)) {
-            if (!isCellEmpty(x, y)) {
+            if (!isCellArrayBFEmpty(x, y)) {
                 bf.updateQuandrant(x, y, "");
                 return true;
             }
@@ -129,18 +146,6 @@ public class ActionField extends JPanel {
         }
 
         return false;
-    }
-
-    public boolean isTankOnTheQuadrantXY(Tank tank, int x, int y) {
-        String quadrant = getQuadrant(x, y);
-        String tankQ = getQuadrant(tank.getX(), tank.getY());
-        return tankQ.equals(quadrant);
-    }
-
-    public boolean isTankOnTheQuadrant(Tank tank, int x, int y) {
-        String quadrant = x + "_" + y;
-        String tankQ = getQuadrant(tank.getX(), tank.getY());
-        return tankQ.equals(quadrant);
     }
 
     public String findDirections() throws Exception {
@@ -199,9 +204,9 @@ public class ActionField extends JPanel {
         int leftBorder = x;
         int rightBorder = x;
 
-        for (int i = bf.getQ_MIN(); i <= bf.getQ_MAX(); i++) {
-            for (int j = bf.getQ_MIN(); j <= bf.getQ_MAX(); j++) {
-                if (!isCellEmpty(j, i)) {
+        for (int i = BattleField.Q_MIN; i <= BattleField.Q_MAX; i++) {
+            for (int j = BattleField.Q_MIN; j <= BattleField.Q_MAX; j++) {
+                if (!isCellArrayBFEmpty(j, i)) {
                     if (j < leftBorder) {
                         leftBorder = j;
                     }
@@ -239,7 +244,7 @@ public class ActionField extends JPanel {
         }
 
         if (isQuadrantOnTheField(x, y)) {
-            if (!isCellEmpty(x, y) || isTankOnTheQuadrant(aggressor, x, y)) {
+            if (!isQuadrantEmpty(x, y)) {
                 return true;
             }
         }
@@ -248,27 +253,38 @@ public class ActionField extends JPanel {
 
     }
 
-    private boolean isQuadrantOnTheField(int x, int y) {
-        if (y >= bf.getQ_MIN() && y <= bf.getQ_MAX() && x >= bf.getQ_MIN() && x <= bf.getQ_MAX()) {
-            return true;
-        }
-        return false;
+    public boolean isQuadrantEmpty(int x, int y) {
+        return isCellArrayBFEmpty(x, y) && (defender == null || !isTankOnTheQuadrant(defender, x, y)) &&
+                (aggressor == null || !isTankOnTheQuadrant(aggressor, x, y));
     }
 
-    public boolean isCellEmpty(int x, int y) {
-        if (bf.scanQuadrant(x, y).trim().isEmpty()) {
-            return true;
-        }
-        return false;
+    private boolean isTankOnTheQuadrantXY(Tank tank, int x, int y) {
+        String quadrant = getQuadrant(x, y);
+        String tankQ = getQuadrant(tank.getX(), tank.getY());
+        return tankQ.equals(quadrant);
+    }
+
+    private boolean isTankOnTheQuadrant(Tank tank, int x, int y) {
+        String quadrant = x + "_" + y;
+        String tankQ = getQuadrant(tank.getX(), tank.getY());
+        return tankQ.equals(quadrant);
+    }
+
+    private boolean isQuadrantOnTheField(int x, int y) {
+        return (y >= BattleField.Q_MIN && y <= BattleField.Q_MAX && x >= BattleField.Q_MIN && x <= BattleField.Q_MAX);
+    }
+
+    public boolean isCellArrayBFEmpty(int x, int y) {
+        return bf.scanQuadrant(x, y).trim().isEmpty();
     }
 
     public String getQuadrant(int x, int y) {
-        return x / bf.getQ_SIZE() + "_" + y / bf.getQ_SIZE();
+        return x / BattleField.Q_SIZE + "_" + y / BattleField.Q_SIZE;
     }
 
     // if input from the program, remember +1 to arguments
     public String getQuadrantXY(int x, int y) {
-        return (x - 1) * bf.getQ_SIZE() + "_" + (y - 1) * bf.getQ_SIZE();
+        return (x - 1) * BattleField.Q_SIZE + "_" + (y - 1) * BattleField.Q_SIZE;
     }
 
     @Override
@@ -279,7 +295,7 @@ public class ActionField extends JPanel {
         Color cc;
         for (int v = 0; v < 9; v++) {
             for (int h = 0; h < 9; h++) {
-                if (COLORDED_MODE) {
+                if (COLORED_MODE) {
                     if (i % 2 == 0) {
                         cc = new Color(252, 241, 177);
                     } else {
