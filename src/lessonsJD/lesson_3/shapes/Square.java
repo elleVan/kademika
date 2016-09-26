@@ -2,15 +2,15 @@ package lessonsJD.lesson_3.shapes;
 
 import java.awt.*;
 
-public class Rectangle extends Shape {
+public class Square extends Rectangle {
 
     @Override
     public void draw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(4));
         g.setColor(Color.yellow);
-        g.fillRect(250, 90, 100, 90);
+        g.fillRect(400, 190, 70, 70);
         g.setColor(Color.blue);
-        g.drawRect(250, 90, 100, 90);
+        g.drawRect(400, 190, 70, 70);
     }
 }

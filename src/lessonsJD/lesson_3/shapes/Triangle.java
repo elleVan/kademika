@@ -6,6 +6,8 @@ public class Triangle extends Shape {
 
     @Override
     public void draw(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(5));
         int[] coordinatesX = {200, 300, 150};
         int[] coordinatesY = {200, 300, 250};
         g.setColor(Color.red);
