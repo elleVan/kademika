@@ -1,4 +1,4 @@
-package lesson_4;
+package lessonsJD.lesson_1;
 
 public class Tank {
 
