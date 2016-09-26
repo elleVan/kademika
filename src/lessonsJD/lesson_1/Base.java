@@ -1,4 +1,4 @@
-package lesson_4;
+package lessonsJD.lesson_1;
 
 /**
  * Created by Mary on 16.09.2016.

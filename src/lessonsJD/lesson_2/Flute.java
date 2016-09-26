@@ -1,4 +1,4 @@
-package lesson_5_2;
+package lessonsJD.lesson_2;
 
 public class Flute extends Instrument {
 

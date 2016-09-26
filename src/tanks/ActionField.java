@@ -134,7 +134,7 @@ public class ActionField extends JPanel {
 
         if (isQuadrantOnTheField(x, y)) {
             if (!isCellArrayBFEmpty(x, y)) {
-                bf.updateQuandrant(x, y, "");
+                bf.updateQuadrant(x, y, "");
                 return true;
             }
             if (isTankOnTheQuadrantXY(aggressor, bullet.getX(), bullet.getY())) {

@@ -27,7 +27,7 @@ public class BattleField {
         return battleField[y][x];
     }
 
-    public void updateQuandrant(int x, int y, String value) {
+    public void updateQuadrant(int x, int y, String value) {
         battleField[y][x] = value;
     }
 
