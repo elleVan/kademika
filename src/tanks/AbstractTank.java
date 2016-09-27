@@ -1,14 +1,19 @@
 package tanks;
 
-public abstract class AbstractTank {
+import java.awt.*;
 
-    private int TANK_STEP = 1;
-    private int RANDOM_STEP = 2;
+public abstract class AbstractTank implements Drawable, Destroyable {
+
+    public static final int TANK_STEP = 1;
+    private final int RANDOM_STEP = 2;
 
     protected int speed = 10;
 
     private int x;
     private int y;
+
+    protected Color colorTank = new Color(255, 0, 0);
+    protected Color colorTower = new Color(0, 255, 0);
 
     private Direction direction;
 
@@ -27,15 +32,9 @@ public abstract class AbstractTank {
         this.direction = direction;
     }
 
-    public void destroy() throws Exception {
-        x = -100;
-        y = -100;
-        af.repaint();
-        Thread.sleep(3000);
-        af.newAggressor();
-    }
 
-    public void clean() throws Exception {
+
+    public void clean() throws InterruptedException {
 
         String quadrant = af.getQuadrant(x, y);
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -63,7 +62,7 @@ public abstract class AbstractTank {
 
     }
 
-    private void moveToQuadrantSmash(int hx, int vy) throws Exception {
+    private void moveToQuadrantSmash(int hx, int vy) throws InterruptedException {
 
         String coordinates = af.getQuadrantXY(hx, vy);
         int xDest = Integer.parseInt(coordinates.split("_")[0]);
@@ -73,7 +72,7 @@ public abstract class AbstractTank {
         smashingMoveVertical(yDest);
     }
 
-    private void smashingMoveHorizontal(int xDest) throws Exception {
+    private void smashingMoveHorizontal(int xDest) throws InterruptedException {
 
         if (x != xDest) {
             while (x < xDest) {
@@ -90,7 +89,7 @@ public abstract class AbstractTank {
         }
     }
 
-    private void smashingMoveVertical(int yDest) throws Exception {
+    private void smashingMoveVertical(int yDest) throws InterruptedException {
 
         if (y != yDest) {
             while (y < yDest) {
@@ -107,19 +106,19 @@ public abstract class AbstractTank {
         }
     }
 
-    private void smashingFireVertical() throws Exception {
+    private void smashingFireVertical() throws InterruptedException {
 
         smashingWhatSee(Direction.UP);
         smashingWhatSee(Direction.DOWN);
     }
 
-    private void smashingFireHorizontal() throws Exception {
+    private void smashingFireHorizontal() throws InterruptedException {
 
         smashingWhatSee(Direction.LEFT);
         smashingWhatSee(Direction.RIGHT);
     }
 
-    private void smashingAround() throws Exception {
+    private void smashingAround() throws InterruptedException {
 
         smashingWhatSee(Direction.UP);
         smashingWhatSee(Direction.DOWN);
@@ -127,7 +126,7 @@ public abstract class AbstractTank {
         smashingWhatSee(Direction.RIGHT);
     }
 
-    private void smashingWhatSee(Direction direction) throws Exception {
+    private void smashingWhatSee(Direction direction) throws InterruptedException {
 
         String quadrant = af.getQuadrant(x, y);
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -164,14 +163,14 @@ public abstract class AbstractTank {
         fireInOneWay(direction, shoot);
     }
 
-    private void fireInOneWay(Direction direction, int shoots) throws Exception {
+    private void fireInOneWay(Direction direction, int shoots) throws InterruptedException {
         turn(direction);
         for (int i = 0; i < shoots; i++) {
             fire();
         }
     }
 
-    public void moveRandom() throws Exception {
+    public void moveRandom() throws InterruptedException {
 
         int countMoveUp = 0,
                 countMoveDown = 0,
@@ -277,7 +276,7 @@ public abstract class AbstractTank {
         return c;
     }
 
-    public void moveToQuadrant(int hx, int vy) throws Exception {
+    public void moveToQuadrant(int hx, int vy) throws InterruptedException {
 
         String coordinates = af.getQuadrantXY(hx, vy);
         int xDest = Integer.parseInt(coordinates.split("_")[0]);
@@ -287,7 +286,7 @@ public abstract class AbstractTank {
         fireMoveVertical(yDest);
     }
 
-    private void fireMoveHorizontal(int xDest) throws Exception {
+    private void fireMoveHorizontal(int xDest) throws InterruptedException {
 
         if (x < xDest) {
             while (x != xDest) {
@@ -300,7 +299,7 @@ public abstract class AbstractTank {
         }
     }
 
-    private void fireMoveVertical(int yDest) throws Exception {
+    private void fireMoveVertical(int yDest) throws InterruptedException {
 
         if (y < yDest) {
             while (y != yDest) {
@@ -313,7 +312,7 @@ public abstract class AbstractTank {
         }
     }
 
-    private void fireMove(Direction direction) throws Exception {
+    private void fireMove(Direction direction) throws InterruptedException {
         while (af.isOccupied(direction)) {
             turn(direction);
             fire();
@@ -322,18 +321,43 @@ public abstract class AbstractTank {
         move();
     }
 
-    public void turn(Direction direction) throws Exception {
+    public void turn(Direction direction) throws InterruptedException {
         this.direction = direction;
         af.processTurn(this);
     }
 
-    public void move() throws Exception {
+    public void move() throws InterruptedException {
         af.processMove(this);
     }
 
-    public void fire() throws Exception {
+    public void fire() throws InterruptedException {
         Bullet bullet = new Bullet((x + 25), (y + 25), direction);
         af.processFire(bullet);
+    }
+
+    @Override
+    public void destroy() throws InterruptedException {
+        x = -100;
+        y = -100;
+        af.repaint();
+        Thread.sleep(3000);
+        af.newAggressor();
+    }
+
+    @Override
+    public void draw(Graphics g) {
+        g.setColor(colorTank);
+        g.fillRect(x, y, 64, 64);
+        g.setColor(colorTower);
+        if (direction == Direction.UP) {
+            g.fillRect(x + 20, y, 24, 34);
+        } else if (direction == Direction.DOWN) {
+            g.fillRect(x + 20, y + 30, 24, 34);
+        } else if (direction == Direction.LEFT) {
+            g.fillRect(x, y + 20, 34, 24);
+        } else {
+            g.fillRect(x + 30, y + 20, 34, 24);
+        }
     }
 
     public void updateX(int i) {
@@ -358,9 +382,5 @@ public abstract class AbstractTank {
 
     public Direction getDirection() {
         return direction;
-    }
-
-    public int getTANK_STEP() {
-        return TANK_STEP;
     }
 }

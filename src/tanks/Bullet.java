@@ -1,9 +1,11 @@
 package tanks;
 
-public class Bullet {
+import java.awt.*;
 
-    private int STEP = 1;
-    private int speed = 1; // 5
+public class Bullet implements Drawable, Destroyable {
+
+    public static final int STEP = 1;
+    private final int speed = 1;
 
     private int x;
     private int y;
@@ -23,9 +25,16 @@ public class Bullet {
         y += i;
     }
 
+    @Override
     public void destroy() {
         x = -100;
         y = -100;
+    }
+
+    @Override
+    public void draw(Graphics g) {
+        g.setColor(new Color(255, 255, 0));
+        g.fillRect(x, y, 14, 14);
     }
 
     public int getX() {
@@ -42,9 +51,5 @@ public class Bullet {
 
     public int getSpeed() {
         return speed;
-    }
-
-    public int getSTEP() {
-        return STEP;
     }
 }

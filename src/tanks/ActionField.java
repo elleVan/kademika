@@ -29,7 +29,7 @@ public class ActionField extends JPanel {
         frame.setVisible(true);
     }
 
-    public void runTheGame() throws Exception {
+    public void runTheGame() throws InterruptedException {
 
 
         while (true) {
@@ -68,14 +68,14 @@ public class ActionField extends JPanel {
         return getQuadrantXY(x + 1, y + 1);
     }
 
-    public void processTurn(AbstractTank tank) throws Exception {
+    public void processTurn(AbstractTank tank) throws InterruptedException {
         repaint();
     }
 
-    public void processMove(AbstractTank tank) throws Exception {
+    public void processMove(AbstractTank tank) throws InterruptedException {
 
         int covered = 0;
-        int step = tank.getTANK_STEP();
+        int step = AbstractTank.TANK_STEP;
         Direction direction = tank.getDirection();
 
         if ((direction == Direction.UP && tank.getY() <= 0) || (direction == Direction.DOWN && tank.getY() >= 512) ||
@@ -95,14 +95,29 @@ public class ActionField extends JPanel {
             }
             covered += step;
 
+            if (covered + step > BattleField.Q_SIZE) {
+
+                int last = BattleField.Q_SIZE - covered;
+                if (direction == Direction.UP) {
+                    tank.updateY(-last);
+                } else if (direction == Direction.DOWN) {
+                    tank.updateY(last);
+                } else if (direction == Direction.LEFT) {
+                    tank.updateX(-last);
+                } else {
+                    tank.updateX(last);
+                }
+                covered += last;
+            }
+
             repaint();
             Thread.sleep(tank.getSpeed());
         }
     }
 
-    public void processFire(Bullet bullet) throws Exception {
+    public void processFire(Bullet bullet) throws InterruptedException {
         this.bullet = bullet;
-        int step = bullet.getSTEP();
+        int step = Bullet.STEP;
         Direction direction = bullet.getDirection();
 
         while (bullet.getX() > -14 && bullet.getX() < 590 && bullet.getY() > -14 && bullet.getY() < 590) {
@@ -126,7 +141,7 @@ public class ActionField extends JPanel {
         }
     }
 
-    private boolean processInterception() throws Exception {
+    private boolean processInterception() throws InterruptedException {
 
         String quadrant = getQuadrant(bullet.getX(), bullet.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -148,7 +163,7 @@ public class ActionField extends JPanel {
         return false;
     }
 
-    public String findDirections() throws Exception {
+    public String findDirections() throws InterruptedException {
 
         String quadrant = getQuadrant(defender.getX(), defender.getY());
         int x = Integer.parseInt(quadrant.split("_")[0]);
@@ -323,26 +338,10 @@ public class ActionField extends JPanel {
             }
         }
 
-        paintTank(g, defender, new Color(0, 210, 0), new Color(255, 220, 0));
-        paintTank(g, aggressor, new Color(255, 0, 0), new Color(0, 255, 0));
+        defender.draw(g);
+        aggressor.draw(g);
 
-        g.setColor(new Color(255, 255, 0));
-        g.fillRect(bullet.getX(), bullet.getY(), 14, 14);
-    }
-
-    private void paintTank(Graphics g, AbstractTank tank, Color colorTank, Color colorTower) {
-        g.setColor(colorTank);
-        g.fillRect(tank.getX(), tank.getY(), 64, 64);
-        g.setColor(colorTower);
-        if (tank.getDirection() == Direction.UP) {
-            g.fillRect(tank.getX() + 20, tank.getY(), 24, 34);
-        } else if (tank.getDirection() == Direction.DOWN) {
-            g.fillRect(tank.getX() + 20, tank.getY() + 30, 24, 34);
-        } else if (tank.getDirection() == Direction.LEFT) {
-            g.fillRect(tank.getX(), tank.getY() + 20, 34, 24);
-        } else {
-            g.fillRect(tank.getX() + 30, tank.getY() + 20, 34, 24);
-        }
+        bullet.draw(g);
     }
 
 }
