@@ -15,7 +15,7 @@ public class ActionField extends JPanel {
 
     public ActionField() throws Exception {
         bf = new BattleField();
-        defender = new BT7(this, bf);
+        defender = new T34(this, bf);
         bullet = new Bullet(-100, -100, Direction.NONE);
 
         newAggressor();
