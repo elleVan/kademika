@@ -1,25 +1,25 @@
 package tanks;
 
-public class Tank {
+public abstract class AbstractTank {
 
     private int TANK_STEP = 1;
     private int RANDOM_STEP = 2;
 
-    protected int speed = 5; // 10
+    protected int speed = 10;
 
-    private int x; // 320
-    private int y; // 384
+    private int x;
+    private int y;
 
     private Direction direction;
 
     private ActionField af;
     private BattleField bf;
 
-    public Tank(ActionField af, BattleField bf) {
+    public AbstractTank(ActionField af, BattleField bf) {
         this(af, bf, 320, 384, Direction.DOWN);
     }
 
-    public Tank(ActionField af, BattleField bf, int x, int y, Direction direction) {
+    public AbstractTank(ActionField af, BattleField bf, int x, int y, Direction direction) {
         this.af = af;
         this.bf = bf;
         this.x = x;

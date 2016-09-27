@@ -1,17 +1,17 @@
 package tanks;
 
-public class Tiger extends Tank {
+public class Tiger extends AbstractTank {
 
     private int armor;
 
     public Tiger(ActionField af, BattleField bf) {
         super(af, bf);
-        armor = 1;
+        setArmor(1);
     }
 
     public Tiger(ActionField af, BattleField bf, int x, int y, Direction direction) {
         super(af, bf, x, y, direction);
-        armor = 1;
+        setArmor(1);
     }
 
     @Override
@@ -26,5 +26,9 @@ public class Tiger extends Tank {
 
     public int getArmor() {
         return armor;
+    }
+
+    public void setArmor(int armor) {
+        this.armor = armor;
     }
 }

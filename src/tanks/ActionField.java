@@ -9,13 +9,13 @@ public class ActionField extends JPanel {
     public static final boolean COLORED_MODE = false;
 
     private BattleField bf;
-    private Tank defender;
+    private AbstractTank defender;
     private Bullet bullet;
-    private Tank aggressor;
+    private AbstractTank aggressor;
 
     public ActionField() throws Exception {
         bf = new BattleField();
-        defender = new Tank(this, bf);
+        defender = new BT7(this, bf);
         bullet = new Bullet(-100, -100, Direction.NONE);
 
         newAggressor();
@@ -68,11 +68,11 @@ public class ActionField extends JPanel {
         return getQuadrantXY(x + 1, y + 1);
     }
 
-    public void processTurn(Tank tank) throws Exception {
+    public void processTurn(AbstractTank tank) throws Exception {
         repaint();
     }
 
-    public void processMove(Tank tank) throws Exception {
+    public void processMove(AbstractTank tank) throws Exception {
 
         int covered = 0;
         int step = tank.getTANK_STEP();
@@ -258,13 +258,13 @@ public class ActionField extends JPanel {
                 (aggressor == null || !isTankOnTheQuadrant(aggressor, x, y));
     }
 
-    private boolean isTankOnTheQuadrantXY(Tank tank, int x, int y) {
+    private boolean isTankOnTheQuadrantXY(AbstractTank tank, int x, int y) {
         String quadrant = getQuadrant(x, y);
         String tankQ = getQuadrant(tank.getX(), tank.getY());
         return tankQ.equals(quadrant);
     }
 
-    private boolean isTankOnTheQuadrant(Tank tank, int x, int y) {
+    private boolean isTankOnTheQuadrant(AbstractTank tank, int x, int y) {
         String quadrant = x + "_" + y;
         String tankQ = getQuadrant(tank.getX(), tank.getY());
         return tankQ.equals(quadrant);
@@ -330,7 +330,7 @@ public class ActionField extends JPanel {
         g.fillRect(bullet.getX(), bullet.getY(), 14, 14);
     }
 
-    private void paintTank(Graphics g, Tank tank, Color colorTank, Color colorTower) {
+    private void paintTank(Graphics g, AbstractTank tank, Color colorTank, Color colorTower) {
         g.setColor(colorTank);
         g.fillRect(tank.getX(), tank.getY(), 64, 64);
         g.setColor(colorTower);
