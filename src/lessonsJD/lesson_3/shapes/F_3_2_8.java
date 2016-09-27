@@ -3,7 +3,7 @@ package lessonsJD.lesson_3.shapes;
 public class F_3_2_8 {
 
     public static void main(String[] args) {
-        Shape[] shapes = {
+        Drawable[] shapes = {
                 new Circle(), new Rectangle(), new Square(), new Triangle()
         };
 

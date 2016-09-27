@@ -6,7 +6,7 @@ public class F_3_2_2 {
         Rectangle rectangle = new Rectangle();
 //        rectangle.draw();
 
-        Shape triangle = new Triangle();
+        AbstractShape triangle = new Triangle();
 //        triangle.draw();
 
         Circle circle = new Circle();
