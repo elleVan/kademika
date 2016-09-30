@@ -3,11 +3,12 @@ package shop;
 public class ShopLauncher {
 
     public static void main(String[] args) {
-        Base base = new Base();
-        base.getPrices();
-        base.getStock();
-        base.getNumberOfOrdersForTheLastWeek();
-        base.getOrdersOfToday();
-        base.printBase();
+        Shop shop = new Shop();
+        shop.run();
+        shop.printPrices();
+        shop.printStock();
+        shop.getNumberOfOrdersForTheLastWeek();
+        shop.getOrdersForOneDay(shop.getToday());
+        shop.printBase();
     }
 }

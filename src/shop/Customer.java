@@ -9,7 +9,7 @@ public class Customer {
     private String email;
     private String address;
 
-    private Order[] orders;
+    private Transaction[] transactions;
 
     public Customer() {
     }
@@ -18,8 +18,8 @@ public class Customer {
         this.name = name;
     }
 
-    public Order[] getOrders() {
-        return orders;
+    public Transaction[] getTransactions() {
+        return transactions;
     }
 
     public String getName() {

@@ -1,31 +1,26 @@
 package shop;
 
-public class Order {
+public class Transaction {
 
     private String date;
     private Customer customer;
 
-    private AbstractSweet[] sweets;
-    private double sum;
+    private Sweet[] sweets;
 
-    public Order() {
+    public Transaction() {
     }
 
-    public Order(Customer customer, AbstractSweet[] sweets) {
+    public Transaction(Customer customer, Sweet[] sweets) {
         this.customer = customer;
         this.sweets = sweets;
     }
 
-    public AbstractSweet[] getSweets() {
+    public Sweet[] getSweets() {
         return sweets;
     }
 
-    public void setSweets(AbstractSweet[] sweets) {
+    public void setSweets(Sweet[] sweets) {
         this.sweets = sweets;
-    }
-
-    public double getSum() {
-        return sum;
     }
 
     public String getDate() {
