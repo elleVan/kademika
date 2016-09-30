@@ -1,4 +1,4 @@
-package store;
+package shop;
 
 public class Customer {
 

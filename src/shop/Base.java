@@ -1,4 +1,4 @@
-package store;
+package shop;
 
 import java.util.Arrays;
 
@@ -6,18 +6,22 @@ public class Base {
 
     public static final int FAIL = -1;
 
-    private Sweet[] sweets = new Sweet[100];
+    private AbstractSweet[] sweets = new AbstractSweet[100];
     private Order[][] orders = new Order[30][];
     private Customer[] customers = new Customer[10];
 
+    public Base() {
+        initDemoBase();
+    }
+
 
     public void initDemoBase() {
-        initDemoCandies();
+        initDemoSweets();
         initDemoCustomers();
         initDemoOrders();
     }
 
-    public void initDemoCandies() {
+    public void initDemoSweets() {
         sweets[0] = new Amour(1);
         sweets[1] = new Belissimo(1);
         sweets[2] = new Konti(1);
@@ -50,13 +54,13 @@ public class Base {
         }
 
         orders[8][0].setCustomer(customers[0]);
-        Sweet[] sweets1 = new Sweet[2];
+        AbstractSweet[] sweets1 = new AbstractSweet[2];
         sweets1[0] = sweets[0];
         sweets1[1] = sweets[3];
         orders[8][0].setSweets(sweets1);
 
         orders[8][1].setCustomer(customers[2]);
-        Sweet[] sweets2 = new Sweet[1];
+        AbstractSweet[] sweets2 = new AbstractSweet[1];
         sweets2[0] = sweets[2];
         orders[8][1].setSweets(sweets2);
     }
@@ -69,7 +73,7 @@ public class Base {
 
     public void getPrices() {
         System.out.println("============ PRICES ============");
-        for (Sweet sweet : sweets) {
+        for (AbstractSweet sweet : sweets) {
             if (sweet != null) {
                 System.out.println(sweet.getName() + " - " + sweet.getPrice());
             }
@@ -79,7 +83,7 @@ public class Base {
 
     public void getStock() {
         System.out.println("============ STOCK =============");
-        for (Sweet sweet : sweets) {
+        for (AbstractSweet sweet : sweets) {
             if (sweet != null) {
                 System.out.println(sweet.getName() + " - " + sweet.getKgInStock());
             }
@@ -111,14 +115,14 @@ public class Base {
         int j = 1;
 
         System.out.println("============= SOLD TODAY =============");
-        System.out.printf("%-4s%-12s%-10s%-5s%7s%n", "#", "Customer", "Sweet", "Price", "kg");
+        System.out.printf("%-4s%-12s%-10s%-5s%7s%n", "#", "Customer", "AbstractSweet", "Price", "kg");
         System.out.println("--------------------------------------");
 
         if (day >= 0 && day < orders.length) {
             for (Order order : orders[day]) {
                 if (order != null) {
                     customer = order.getCustomer().getName();
-                    for (Sweet sweet : order.getSweets()) {
+                    for (AbstractSweet sweet : order.getSweets()) {
                         System.out.printf("%-4d%-12s%-10s%-5.2f%7d%n", j++, customer, sweet.getName(), sweet.getPrice(),
                                 sweet.getQuantity());
                     }
@@ -140,7 +144,7 @@ public class Base {
             for (Order order : orders[day]) {
                 if (order != null) {
                     ordersNum++;
-                    for (Sweet sweet : order.getSweets()) {
+                    for (AbstractSweet sweet : order.getSweets()) {
                         sum += sweet.getPrice() * sweet.getQuantity();
                         quantity += sweet.getQuantity();
                     }
@@ -160,7 +164,7 @@ public class Base {
         return FAIL;
     }
 
-    public Sweet[] getSweets() {
+    public AbstractSweet[] getSweets() {
         return sweets;
     }
 

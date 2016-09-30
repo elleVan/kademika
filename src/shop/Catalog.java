@@ -1,8 +1,8 @@
-package store;
+package shop;
 
 public class Catalog {
 
-    private Sweet[][] sweets = new Sweet[Category.values().length][];
+    private AbstractSweet[][] sweets = new AbstractSweet[Category.values().length][];
 
     public Catalog() {
     }
@@ -14,9 +14,9 @@ public class Catalog {
             Category category = categories[i];
             System.out.println(category);
 
-            for (Sweet sweet : base.getSweets()) {
+            for (AbstractSweet sweet : base.getSweets()) {
                 if (sweet != null && sweet.getCategory() == category) {
-                    System.out.println("\t" + sweet.name);
+                    System.out.println("\t" + sweet.getName());
                     // filling sweets here
                 }
             }

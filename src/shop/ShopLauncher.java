@@ -1,10 +1,9 @@
-package store;
+package shop;
 
-public class StoreLauncher {
+public class ShopLauncher {
 
     public static void main(String[] args) {
         Base base = new Base();
-        base.initDemoBase();
         base.getPrices();
         base.getStock();
         base.getNumberOfOrdersForTheLastWeek();
