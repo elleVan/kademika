@@ -19,28 +19,56 @@ public class Shop {
 
     public Shop() {
 
-        transactions[8][0].setCustomer(customers[0]);
-        Sweet[] sweets1 = new Sweet[] {
-                newSweet("Amour", 5),
-                newSweet("MAK", 3)
-        };
-        transactions[8][0].setSweets(sweets1);
-
-        transactions[8][1].setCustomer(customers[2]);
-        Sweet[] sweets2 = new Sweet[] {
-                newSweet("Konti", 4)
-        };
-        transactions[8][1].setSweets(sweets2);
-
     }
 
     public void run() {
+        newTransaction(newCustomer("Alla"), new Sweet[] {
+                newSweet("MAK", 3),
+                newSweet("Konti", 5)
+        });
+        newTransaction(newCustomer("Ben"), new Sweet[] {
+                newSweet("Amour", 5),
+        });
+
         newTransaction(customers[1], new Sweet[] {
-                newSweet("Konti", 20)
+                newSweet("Konti", 10)
         });
     }
 
+    public void newDay() {
+        today++;
+        if (today >= transactions.length) {
+            extendTransactions();
+        }
+    }
+
     public void printBase() {
+        System.out.println("SWEETS");
+        for (String[] array : sweets) {
+            System.out.println(Arrays.toString(array));
+        }
+        System.out.println();
+        System.out.println("CUSTOMERS");
+        for (Customer customer : customers) {
+            if (customer != null) {
+                System.out.println(customer.getName().toUpperCase());
+                if (customer.getTransactions() != null) {
+                    for (Transaction transaction : customer.getTransactions()) {
+                        if (transaction != null) {
+                            for (Sweet sweet : transaction.getSweets()) {
+                                System.out.println(sweet.getName() + " - " + sweet.getQuantity() + " - " +
+                                        sweet.getPrice() + " - " + sweet.getInStock());
+                            }
+                            System.out.println();
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    public void printCatalog() {
         System.out.println("=========== CATALOG ============");
         Catalog catalog = new Catalog();
         catalog.initCatalog(this);
@@ -151,10 +179,11 @@ public class Shop {
     public boolean newTransaction(Customer customer, Sweet[] sweets) {
         if (sweets != null) {
             for (Sweet sweet : sweets) {
-                if (sweet.getQuantity() <= 0) {
+                int idx = findSweet(sweet.getName());
+                if (sweet.getQuantity() <= 0 || idx == FAIL) {
                     continue;
                 }
-                int idx = findSweet(sweet.getName());
+
                 int left = FAIL;
                 try {
                     left = Integer.parseInt(this.sweets[idx][IN_STOCK]) - sweet.getQuantity();
@@ -171,6 +200,13 @@ public class Shop {
 
         int idx = findEmptyInTransactionsToday();
         transactions[today][idx] = new Transaction(customer, sweets);
+
+        customer.addTransaction(transactions[today][idx]);
+
+        if (findCustomer(customer.getName()) == FAIL) {
+            customers[findEmptyInCustomers()] = customer;
+        }
+
         return true;
     }
 
@@ -228,6 +264,14 @@ public class Shop {
         Transaction[] newArray = new Transaction[length + length / 4 + 1];
         System.arraycopy(transactions[today], 0, newArray, 0, length);
         transactions[today] = newArray;
+        return length;
+    }
+
+    public int extendTransactions() {
+        int length = transactions.length;
+        Transaction[][] newArray = new Transaction[length + length / 4 + 1][];
+        System.arraycopy(transactions, 0, newArray, 0, length);
+        transactions = newArray;
         return length;
     }
 
