@@ -13,10 +13,15 @@ public class ActionField extends JPanel {
     private Bullet bullet;
     private AbstractTank aggressor;
 
-    public ActionField() throws Exception {
+    private AbstractBFElement[] bfElements;
+
+    public ActionField() {
         bf = new BattleField();
         defender = new T34(this, bf);
         bullet = new Bullet(-100, -100, Direction.NONE);
+        bfElements = new AbstractBFElement[] {
+                new Brick(this), new Rock(this), new Water(this), new Eagle(this)
+        };
 
         newAggressor();
 
@@ -325,17 +330,8 @@ public class ActionField extends JPanel {
             }
         }
 
-        for (int j = 0; j < bf.getDimensionY(); j++) {
-            for (int k = 0; k < bf.getDimensionX(); k++) {
-                if (bf.scanQuadrant(k, j).equals("B")) {
-                    String coordinates = getQuadrantXY(j + 1, k + 1);
-                    int separator = coordinates.indexOf("_");
-                    int y = Integer.parseInt(coordinates.substring(0, separator));
-                    int x = Integer.parseInt(coordinates.substring(separator + 1));
-                    g.setColor(new Color(0, 0, 255));
-                    g.fillRect(x, y, 64, 64);
-                }
-            }
+        for (AbstractBFElement element : bfElements) {
+            element.draw(g);
         }
 
         defender.draw(g);
@@ -344,4 +340,7 @@ public class ActionField extends JPanel {
         bullet.draw(g);
     }
 
+    public BattleField getBf() {
+        return bf;
+    }
 }
