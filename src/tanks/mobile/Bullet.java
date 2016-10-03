@@ -1,4 +1,8 @@
-package tanks;
+package tanks.mobile;
+
+import tanks.helpers.Destroyable;
+import tanks.helpers.Direction;
+import tanks.helpers.Drawable;
 
 import java.awt.*;
 

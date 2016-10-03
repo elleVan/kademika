@@ -1,4 +1,4 @@
-package tanks;
+package tanks.fixed;
 
 public class BattleField {
 

@@ -1,4 +1,7 @@
-package tanks;
+package tanks.fixed;
+
+import tanks.ActionField;
+import tanks.helpers.Drawable;
 
 import java.awt.*;
 

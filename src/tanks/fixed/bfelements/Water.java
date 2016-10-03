@@ -1,4 +1,7 @@
-package tanks;
+package tanks.fixed.bfelements;
+
+import tanks.ActionField;
+import tanks.fixed.AbstractBFElement;
 
 import java.awt.*;
 

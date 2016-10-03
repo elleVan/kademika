@@ -1,4 +1,8 @@
-package tanks;
+package tanks.fixed.bfelements;
+
+import tanks.ActionField;
+import tanks.helpers.Destroyable;
+import tanks.fixed.AbstractBFElement;
 
 import java.awt.*;
 

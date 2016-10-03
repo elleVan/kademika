@@ -1,4 +1,4 @@
-package tanks;
+package tanks.helpers;
 
 public interface Destroyable {
 

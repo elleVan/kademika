@@ -1,5 +1,16 @@
 package tanks;
 
+import tanks.fixed.*;
+import tanks.fixed.bfelements.Brick;
+import tanks.fixed.bfelements.Eagle;
+import tanks.fixed.bfelements.Rock;
+import tanks.fixed.bfelements.Water;
+import tanks.helpers.Direction;
+import tanks.mobile.AbstractTank;
+import tanks.mobile.Bullet;
+import tanks.mobile.tanks.T34;
+import tanks.mobile.tanks.Tiger;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.Random;

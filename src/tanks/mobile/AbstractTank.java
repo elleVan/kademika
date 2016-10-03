@@ -1,4 +1,10 @@
-package tanks;
+package tanks.mobile;
+
+import tanks.*;
+import tanks.fixed.BattleField;
+import tanks.helpers.Destroyable;
+import tanks.helpers.Direction;
+import tanks.helpers.Drawable;
 
 import java.awt.*;
 

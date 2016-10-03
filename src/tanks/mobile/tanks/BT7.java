@@ -1,4 +1,9 @@
-package tanks;
+package tanks.mobile.tanks;
+
+import tanks.ActionField;
+import tanks.helpers.Direction;
+import tanks.fixed.BattleField;
+import tanks.mobile.AbstractTank;
 
 public class BT7 extends AbstractTank {
 
