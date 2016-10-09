@@ -1,10 +1,8 @@
 package tanks;
 
 import tanks.fixed.*;
-import tanks.fixed.bfelements.Brick;
-import tanks.fixed.bfelements.Eagle;
-import tanks.fixed.bfelements.Rock;
-import tanks.fixed.bfelements.Water;
+import tanks.fixed.bfelements.*;
+import tanks.helpers.Destroyable;
 import tanks.helpers.Direction;
 import tanks.mobile.AbstractTank;
 import tanks.mobile.Bullet;
@@ -21,18 +19,16 @@ public class ActionField extends JPanel {
 
     private BattleField bf;
     private AbstractTank defender;
-    private Bullet bullet;
     private AbstractTank aggressor;
+    private Bullet bullet;
 
-    private AbstractBFElement[] bfElements;
+    private AbstractBFElement[][] battleFieldObj;
 
     public ActionField() {
         bf = new BattleField();
         defender = new T34(this, bf);
-        bullet = new Bullet(-100, -100, Direction.NONE);
-        bfElements = new AbstractBFElement[] {
-                new Brick(this), new Rock(this), new Water(this), new Eagle(this)
-        };
+        bullet = new Bullet(defender, -100, -100, Direction.NONE);
+        battleFieldObj = generateBFObj(bf.getBattleField());
 
         newAggressor();
 
@@ -164,13 +160,23 @@ public class ActionField extends JPanel {
         int y = Integer.parseInt(quadrant.split("_")[1]);
 
         if (isQuadrantOnTheField(x, y)) {
-            if (!isCellArrayBFEmpty(x, y)) {
-                bf.updateQuadrant(x, y, "");
+            if (!isCellArrayBFObjEmpty(x, y) && battleFieldObj[y][x] instanceof Destroyable) {
+                ((Destroyable) battleFieldObj[y][x]).destroy();
                 return true;
             }
-            if (isTankOnTheQuadrantXY(aggressor, bullet.getX(), bullet.getY())) {
+
+            if (bullet.getTank() != aggressor && isTankOnTheQuadrantXY(aggressor, bullet.getX(), bullet.getY())) {
                 bullet.destroy();
                 aggressor.destroy();
+                if (aggressor.getX() == -100 && aggressor.getY() == -100) {
+                    aggressor.renovate();
+                }
+                return true;
+            }
+
+            if (bullet.getTank() != defender && isTankOnTheQuadrantXY(defender, bullet.getX(), bullet.getY())) {
+                bullet.destroy();
+                defender.destroy();
                 return true;
             }
 
@@ -285,7 +291,7 @@ public class ActionField extends JPanel {
     }
 
     public boolean isQuadrantEmpty(int x, int y) {
-        return isCellArrayBFEmpty(x, y) && (defender == null || !isTankOnTheQuadrant(defender, x, y)) &&
+        return isCellArrayBFObjEmpty(x, y) && (defender == null || !isTankOnTheQuadrant(defender, x, y)) &&
                 (aggressor == null || !isTankOnTheQuadrant(aggressor, x, y));
     }
 
@@ -307,6 +313,10 @@ public class ActionField extends JPanel {
 
     public boolean isCellArrayBFEmpty(int x, int y) {
         return bf.scanQuadrant(x, y).trim().isEmpty();
+    }
+
+    public boolean isCellArrayBFObjEmpty(int x, int y) {
+        return battleFieldObj[y][x].isEmpty();
     }
 
     public String getQuadrant(int x, int y) {
@@ -341,8 +351,10 @@ public class ActionField extends JPanel {
             }
         }
 
-        for (AbstractBFElement element : bfElements) {
-            element.draw(g);
+        for (AbstractBFElement[] y : battleFieldObj) {
+            for (AbstractBFElement element : y) {
+                element.draw(g);
+            }
         }
 
         defender.draw(g);
@@ -351,7 +363,32 @@ public class ActionField extends JPanel {
         bullet.draw(g);
     }
 
-    public BattleField getBf() {
-        return bf;
+    private AbstractBFElement[][] generateBFObj(String[][] battleField) {
+        AbstractBFElement[][] result = new AbstractBFElement[battleField.length][battleField.length];
+        for (int i = 0; i < battleField.length; i++) {
+            for (int j = 0; j < battleField[i].length; j++) {
+                String coordinates = getQuadrantXY(j + 1, i + 1);
+                int x = Integer.parseInt(coordinates.split("_")[0]);
+                int y = Integer.parseInt(coordinates.split("_")[1]);
+
+                if (battleField[i][j].trim().isEmpty()) {
+                    result[i][j] = new Brick(x, y, this);
+                    ((Destroyable) result[i][j]).destroy();
+                } else if (battleField[i][j].equals("B")) {
+                    result[i][j] = new Brick(x, y, this);
+                } else if (battleField[i][j].equals("E")) {
+                    result[i][j] = new Eagle(x, y, this);
+                } else if (battleField[i][j].equals("R")) {
+                    result[i][j] = new Rock(x, y, this);
+                } else if (battleField[i][j].equals("W")) {
+                    result[i][j] = new Water(x, y, this);
+                }
+            }
+        }
+        return result;
+    }
+
+    public Bullet getBullet() {
+        return bullet;
     }
 }

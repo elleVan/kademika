@@ -337,16 +337,18 @@ public abstract class AbstractTank implements Drawable, Destroyable {
     }
 
     public void fire() throws InterruptedException {
-        Bullet bullet = new Bullet((x + 25), (y + 25), direction);
+        Bullet bullet = new Bullet(this, (x + 25), (y + 25), direction);
         af.processFire(bullet);
     }
 
     @Override
-    public void destroy() throws InterruptedException {
+    public void destroy() {
         x = -100;
         y = -100;
-        af.repaint();
-        Thread.sleep(3000);
+    }
+
+    public void renovate() throws InterruptedException {
+        Thread.sleep(1000);
         af.newAggressor();
     }
 

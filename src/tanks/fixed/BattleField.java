@@ -51,4 +51,8 @@ public class BattleField {
     public String[] getCoordinatesAggressor() {
         return coordinatesAggressor;
     }
+
+    public String[][] getBattleField() {
+        return battleField;
+    }
 }

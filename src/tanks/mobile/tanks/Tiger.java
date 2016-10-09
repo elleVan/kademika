@@ -20,7 +20,7 @@ public class Tiger extends AbstractTank {
     }
 
     @Override
-    public void destroy() throws InterruptedException {
+    public void destroy() {
         if (armor > 0) {
             armor--;
         } else {
