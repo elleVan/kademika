@@ -36,14 +36,12 @@ public class Classroom {
     }
 
     public int getStudentCount() {
-        return students.toArray().length;
+        return students.size();
     }
 
     public boolean isPresent(String name, String secondName) {
-        for (Student student : students) {
-            if (student.getName().equals(name) && student.getSecondName().equals(secondName)) {
-                return true;
-            }
+        if (students.contains(new Student(name, secondName))) {
+            return true;
         }
         return false;
     }
@@ -57,6 +55,6 @@ public class Classroom {
     }
 
     public List<Student> getStudents() {
-        return students;
+        return new LinkedList<>(students);
     }
 }

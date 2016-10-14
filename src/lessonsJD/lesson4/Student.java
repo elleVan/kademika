@@ -17,4 +17,16 @@ public class Student {
     public String getSecondName() {
         return secondName;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Student) {
+            Student student = (Student) obj;
+            if (student.getName().equals(name) && student.getSecondName().equals(secondName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
