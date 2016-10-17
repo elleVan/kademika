@@ -8,12 +8,22 @@ public class SimpleLinkedList {
     public SimpleLinkedList() {
     }
 
-    public void addFirst(Object o) {
-        root = new Node(o, root);
+    public void addFirst(Object obj) {
+        root = new Node(obj, root);
         size++;
     }
 
-    public void addLast(Object o) {
+    public void addLast(Object obj) {
+        if (root == null) {
+            addFirst(obj);
+        } else {
+            Node node = root;
+            while (node.node != null) {
+                node = node.node;
+            }
+            node.node = new Node(obj, null);
+            size++;
+        }
     }
 
     public void addAfter(Object o, Object prev) {
@@ -24,11 +34,11 @@ public class SimpleLinkedList {
     }
 
     private class Node {
-        Object o;
+        Object obj;
         Node node;
 
-        public Node(Object o, Node node) {
-            this.o = o;
+        public Node(Object obj, Node node) {
+            this.obj = obj;
             this.node = node;
         }
     }
