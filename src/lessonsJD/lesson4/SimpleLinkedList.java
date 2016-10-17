@@ -26,7 +26,35 @@ public class SimpleLinkedList {
         }
     }
 
-    public void addAfter(Object o, Object prev) {
+    public void addAfter(Object obj, Object prev) {
+        if (root == null) {
+            throw new IllegalStateException("Element is missing");
+        } else {
+            Node node = root;
+            while (node.node != null) {
+                if (node.obj == prev) {
+                    break;
+                }
+                node = node.node;
+            }
+            if (node.obj != prev) {
+                throw new IllegalStateException("Element is missing");
+            }
+            Node next = node.node;
+            node.node = new Node(obj, next);
+            size++;
+        }
+    }
+
+    public void printList() {
+        if (root != null) {
+            System.out.println(root.obj.toString());
+            Node node = root;
+            while (node.node != null) {
+                node = node.node;
+                System.out.println(node.obj.toString());
+            }
+        }
     }
 
     public int getSize() {
