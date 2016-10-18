@@ -1,6 +1,9 @@
 package lessonsJD.lesson4;
 
-public class SimpleLinkedList {
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+public class SimpleLinkedList implements Iterable {
 
     private Node root;
     private int size;
@@ -61,6 +64,10 @@ public class SimpleLinkedList {
         return size;
     }
 
+    public Iterator iterator() {
+        return new SLLIterator();
+    }
+
     private class Node {
         Object obj;
         Node node;
@@ -68,6 +75,27 @@ public class SimpleLinkedList {
         public Node(Object obj, Node node) {
             this.obj = obj;
             this.node = node;
+        }
+    }
+
+    private class SLLIterator implements Iterator {
+
+        int cursor;
+
+        public boolean hasNext() {
+            return cursor != size;
+        }
+
+        public Node next() {
+            if (cursor + 1 <= size) {
+                Node node = root;
+                for (int i = 1; i <= cursor; i++) {
+                    node = node.node;
+                }
+                cursor++;
+                return node;
+            }
+            throw new NoSuchElementException();
         }
     }
 }
