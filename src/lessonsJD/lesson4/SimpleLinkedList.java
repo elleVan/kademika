@@ -1,9 +1,8 @@
 package lessonsJD.lesson4;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
-public class SimpleLinkedList implements Iterable {
+public class SimpleLinkedList implements Iterable<Object> {
 
     private Node root;
     private int size;
@@ -64,7 +63,7 @@ public class SimpleLinkedList implements Iterable {
         return size;
     }
 
-    public Iterator iterator() {
+    public Iterator<Object> iterator() {
         return new SLLIterator();
     }
 
@@ -78,24 +77,37 @@ public class SimpleLinkedList implements Iterable {
         }
     }
 
-    private class SLLIterator implements Iterator {
+    private class SLLIterator implements Iterator<Object> {
 
-        int cursor;
+        Node cp;
+        Node prev;
 
+        @Override
         public boolean hasNext() {
-            return cursor != size;
+            return (cp == null && root != null) || (cp != null && cp.node != null);
         }
 
-        public Node next() {
-            if (cursor + 1 <= size) {
-                Node node = root;
-                for (int i = 1; i <= cursor; i++) {
-                    node = node.node;
-                }
-                cursor++;
-                return node;
+        @Override
+        public Object next() {
+            if (cp == null && root != null) {
+                cp = root;
+                return cp.obj;
             }
-            throw new NoSuchElementException();
+            if (hasNext()) {
+                prev = cp;
+                cp = cp.node;
+                return cp.obj;
+            }
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public void remove() {
+            if (cp != null && prev != null) {
+                prev.node = cp.node;
+            } else if (cp != null) {
+                root = cp.node;
+            }
         }
     }
 }
