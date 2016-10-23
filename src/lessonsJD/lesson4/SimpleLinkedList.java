@@ -103,11 +103,14 @@ public class SimpleLinkedList implements Iterable<Object> {
 
         @Override
         public void remove() {
-            if (cp != null && prev != null) {
+            if (prev != null) {
                 prev.node = cp.node;
-            } else if (cp != null) {
+                cp = cp.node;
+            } else {
                 root = cp.node;
+                cp = cp.node;
             }
+            size--;
         }
     }
 }
