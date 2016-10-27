@@ -1,6 +1,7 @@
 package tanks.mobile.tanks;
 
 import tanks.ActionField;
+import tanks.helpers.Action;
 import tanks.helpers.Direction;
 import tanks.fixed.BattleField;
 import tanks.mobile.AbstractTank;
@@ -9,14 +10,14 @@ public class Tiger extends AbstractTank {
 
     private int armor;
 
-    public Tiger(ActionField af, BattleField bf) {
-        super(af, bf);
-        setArmor(1);
+    public Tiger(BattleField bf) {
+        super(bf);
+        armor = 1;
     }
 
-    public Tiger(ActionField af, BattleField bf, int x, int y, Direction direction) {
-        super(af, bf, x, y, direction);
-        setArmor(1);
+    public Tiger(BattleField bf, int x, int y, Direction direction) {
+        super(bf, x, y, direction);
+        armor = 1;
     }
 
     @Override
@@ -29,11 +30,8 @@ public class Tiger extends AbstractTank {
 
     }
 
-    public int getArmor() {
-        return armor;
-    }
-
-    public void setArmor(int armor) {
-        this.armor = armor;
+    @Override
+    public Action setUp() {
+        return Action.FIRE;
     }
 }

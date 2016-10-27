@@ -17,12 +17,14 @@ public class Bullet implements Drawable, Destroyable {
     private int x;
     private int y;
     private Direction direction;
+    private boolean destroyed;
 
     public Bullet(AbstractTank tank, int x, int y, Direction direction) {
         this.tank = tank;
         this.x = x;
         this.y = y;
         this.direction = direction;
+        this.destroyed = false;
     }
 
     public void updateX(int i) {
@@ -34,15 +36,21 @@ public class Bullet implements Drawable, Destroyable {
     }
 
     @Override
-    public void destroy() {
-        x = -100;
-        y = -100;
+    public void draw(Graphics g) {
+        if (!destroyed) {
+            g.setColor(new Color(255, 255, 0));
+            g.fillRect(this.x, this.y, 14, 14);
+        }
     }
 
     @Override
-    public void draw(Graphics g) {
-        g.setColor(new Color(255, 255, 0));
-        g.fillRect(x, y, 14, 14);
+    public void destroy() {
+        destroyed = true;
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        return destroyed;
     }
 
     public AbstractTank getTank() {
