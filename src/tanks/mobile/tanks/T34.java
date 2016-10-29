@@ -25,11 +25,11 @@ public class T34 extends AbstractTank {
     private Object[] actions = new Object[] {
             Direction.RIGHT,
             Action.FIRE,
-            Action.MOVE,
-            Action.FIRE,
-            Action.MOVE,
-            Action.FIRE,
-            Action.FIRE
+//            Action.MOVE,
+//            Action.FIRE,
+//            Action.MOVE,
+//            Action.FIRE,
+//            Action.FIRE
     };
 
     private int step = 0;

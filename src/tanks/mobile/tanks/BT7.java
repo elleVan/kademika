@@ -1,6 +1,6 @@
 package tanks.mobile.tanks;
 
-import tanks.ActionField;
+import tanks.fixed.AbstractBFElement;
 import tanks.helpers.Action;
 import tanks.helpers.Direction;
 import tanks.fixed.BattleField;
@@ -20,6 +20,34 @@ public class BT7 extends AbstractTank {
 
     @Override
     public Action setUp() {
-        return Action.MOVE;
+
+        AbstractBFElement eagle = getBf().scanQuadrant(4, 8);
+
+        if (getX() < eagle.getX()) {
+            if (getDirection() != Direction.RIGHT) {
+                turn(Direction.RIGHT);
+            }
+            if (getBf().isOccupied(getX() + 1, getY(), getDirection())) {
+                return Action.FIRE;
+            }
+            return Action.MOVE;
+        } else if (getX() > eagle.getX()) {
+            if (getDirection() != Direction.LEFT) {
+                turn(Direction.LEFT);
+            }
+            if (getBf().isOccupied(getX() - 1, getY(), getDirection())) {
+                return Action.FIRE;
+            }
+            return Action.MOVE;
+        } else if (getY() < eagle.getY()) {
+            if (getDirection() != Direction.DOWN) {
+                turn(Direction.DOWN);
+            }
+            if (getBf().isOccupied(getX(), getY() + 1, getDirection())) {
+                return Action.FIRE;
+            }
+            return Action.MOVE;
+        }
+        return Action.NONE;
     }
 }

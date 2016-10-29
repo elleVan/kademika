@@ -109,7 +109,7 @@ public class BattleField implements Drawable {
 
     public boolean isQuadrantEmpty(int x, int y) {
         AbstractBFElement bfElement = scanQuadrant(x, y);
-        return (bfElement instanceof Blank && bfElement.isDestroyed());
+        return (bfElement instanceof Blank || bfElement.isDestroyed());
     }
 
     public AbstractBFElement scanQuadrant(int x, int y) {

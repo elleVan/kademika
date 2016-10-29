@@ -6,8 +6,8 @@ import tanks.helpers.*;
 import tanks.mobile.AbstractTank;
 import tanks.mobile.Bullet;
 import tanks.mobile.Tank;
+import tanks.mobile.tanks.BT7;
 import tanks.mobile.tanks.T34;
-import tanks.mobile.tanks.Tiger;
 
 import javax.swing.*;
 import tanks.helpers.Action;
@@ -56,7 +56,7 @@ public class ActionField extends JPanel {
 
     public void newAggressor() {
         String aggrCoord = getRandomEmptyQuadrantInTheTopXY();
-        aggressor = new Tiger(bf, Integer.parseInt(aggrCoord.split("_")[0]),
+        aggressor = new BT7(bf, Integer.parseInt(aggrCoord.split("_")[0]),
                 Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
     }
 
