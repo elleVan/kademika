@@ -2,6 +2,8 @@ package tanks;
 
 import tanks.fixed.*;
 import tanks.fixed.bfelements.Blank;
+import tanks.fixed.bfelements.Rock;
+import tanks.fixed.bfelements.Water;
 import tanks.helpers.*;
 import tanks.mobile.AbstractTank;
 import tanks.mobile.Bullet;
@@ -11,6 +13,8 @@ import tanks.mobile.tanks.T34;
 
 import javax.swing.*;
 import tanks.helpers.Action;
+import tanks.mobile.tanks.Tiger;
+
 import java.awt.*;
 import java.util.Random;
 
@@ -58,6 +62,7 @@ public class ActionField extends JPanel {
         String aggrCoord = getRandomEmptyQuadrantInTheTopXY();
         aggressor = new BT7(bf, Integer.parseInt(aggrCoord.split("_")[0]),
                 Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
+//        aggressor = new BT7(bf, 0, 64, Direction.DOWN);
     }
 
     private String getCoordinatesAggressor() {
@@ -110,9 +115,9 @@ public class ActionField extends JPanel {
         int x = Integer.parseInt(tankQuadrant.split("_")[0]);
         int y = Integer.parseInt(tankQuadrant.split("_")[1]);
 
-        if (direction == Direction.UP && y < 8) {
+        if (direction == Direction.DOWN && y < 8) {
             y++;
-        } else if (direction == Direction.DOWN && y > 0) {
+        } else if (direction == Direction.UP && y > 0) {
             y--;
         } else if (direction == Direction.RIGHT && x < 8) {
             x++;
@@ -121,7 +126,7 @@ public class ActionField extends JPanel {
         }
 
         AbstractBFElement bfElement = bf.scanQuadrant(x, y);
-        if (!(bfElement instanceof Blank) && !bfElement.isDestroyed()) {
+        if (!(bfElement instanceof Blank) && !bfElement.isDestroyed() && !(bfElement instanceof Water)) {
             System.out.println("[illegal move] direction: " + direction + " tankX: " + tank.getX() + ", tankY: " +
                     tank.getY());
             return;
@@ -197,8 +202,12 @@ public class ActionField extends JPanel {
 
         if (isQuadrantOnTheField(x, y)) {
             AbstractBFElement bfElement = bf.scanQuadrant(x, y);
-            if (!bfElement.isDestroyed() && !(bfElement instanceof Blank)) {
-                bf.destroyObject(x, y);
+
+            if (!bfElement.isDestroyed() && (bfElement instanceof Destroyable)) {
+                if (!((bfElement instanceof Rock) && !(bullet.getTank() instanceof Tiger))) {
+                    bf.destroyObject(x, y);
+                    return true;
+                }
                 return true;
             }
 

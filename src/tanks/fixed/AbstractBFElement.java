@@ -6,7 +6,7 @@ import tanks.helpers.Drawable;
 
 import java.awt.*;
 
-public class AbstractBFElement implements Drawable, Destroyable {
+public class AbstractBFElement implements Drawable {
 
     protected int x;
     protected int y;
@@ -25,11 +25,6 @@ public class AbstractBFElement implements Drawable, Destroyable {
             g.setColor(this.color);
             g.fillRect(this.getX(), this.getY(), 64, 64);
         }
-    }
-
-    @Override
-    public void destroy() {
-        isDestroyed = true;
     }
 
     public boolean isDestroyed() {

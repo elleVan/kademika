@@ -77,7 +77,7 @@ public class BattleField implements Drawable {
         }
 
         if (isQuadrantOnTheField(x, y)) {
-            if (!isQuadrantEmpty(x, y)) {
+            if (!isQuadrantEmpty(x, y) && !(scanQuadrant(x, y) instanceof Water)) {
                 return true;
             }
         }
@@ -85,6 +85,8 @@ public class BattleField implements Drawable {
         return false;
 
     }
+
+
 
     @Override
     public void draw(Graphics g) {
@@ -117,7 +119,9 @@ public class BattleField implements Drawable {
     }
 
     public void destroyObject(int x, int y) {
-        battleFieldObj[y][x].destroy();
+        if (scanQuadrant(x, y) instanceof Destroyable) {
+            ((Destroyable) battleFieldObj[y][x]).destroy();
+        }
     }
 
     public int getBfWidth() {
