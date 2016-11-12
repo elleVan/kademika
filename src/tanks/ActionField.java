@@ -16,7 +16,7 @@ import tanks.helpers.Action;
 import tanks.mobile.tanks.Tiger;
 
 import java.awt.*;
-import java.util.Random;
+import java.util.*;
 
 public class ActionField extends JPanel {
 
@@ -50,6 +50,14 @@ public class ActionField extends JPanel {
 
         while (true) {
             if (!aggressor.isDestroyed() && !defender.isDestroyed()) {
+                if (aggressor.getPathAll().size() == aggressor.getStep()) {
+                    aggressor.setPathAll(aggressor.manager(4 * 64, 8 * 64));
+                }
+
+                for (Object el : aggressor.getPathAll()) {
+                    System.out.println(el);
+                }
+//                Thread.sleep(5000);
                 processAction(aggressor.setUp(), aggressor);
             }
             if (!aggressor.isDestroyed() && !defender.isDestroyed()) {
@@ -60,9 +68,10 @@ public class ActionField extends JPanel {
 
     public void newAggressor() {
         String aggrCoord = getRandomEmptyQuadrantInTheTopXY();
-        aggressor = new BT7(bf, Integer.parseInt(aggrCoord.split("_")[0]),
-                Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
-//        aggressor = new BT7(bf, 0, 64, Direction.DOWN);
+//        aggressor = new BT7(bf, Integer.parseInt(aggrCoord.split("_")[0]),
+//                Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
+        aggressor = new BT7(bf, 0, 64, Direction.DOWN);
+        aggressor.setAf(this);
     }
 
     private String getCoordinatesAggressor() {
@@ -87,20 +96,22 @@ public class ActionField extends JPanel {
         return getQuadrantXY(x + 1, y + 1);
     }
 
-    private void processAction(Action a, Tank t) throws InterruptedException {
+    public void processAction(Action a, AbstractTank t) throws InterruptedException {
         if (a == Action.MOVE) {
             processMove(t);
-        } else if (a == Action.FIRE) {
+        } else if (a == Action.TURN){
             processTurn(t);
-            processFire(t.fire());
-        }
+        } else if (a == Action.FIRE) {
+                processTurn(t);
+                processFire(t.fire());
+            }
     }
 
     public void processTurn(Tank tank) throws InterruptedException {
         repaint();
     }
 
-    public void processMove(Tank tank) throws InterruptedException {
+    public void processMove(AbstractTank tank) throws InterruptedException {
 
         int covered = 0;
         int step = AbstractTank.TANK_STEP;
@@ -125,7 +136,7 @@ public class ActionField extends JPanel {
             x--;
         }
 
-        AbstractBFElement bfElement = bf.scanQuadrant(x, y);
+        AbstractBFElement bfElement = tank.getBf().scanQuadrant(x, y);
         if (!(bfElement instanceof Blank) && !bfElement.isDestroyed() && !(bfElement instanceof Water)) {
             System.out.println("[illegal move] direction: " + direction + " tankX: " + tank.getX() + ", tankY: " +
                     tank.getY());
@@ -159,13 +170,18 @@ public class ActionField extends JPanel {
                 covered += last;
             }
 
-            repaint();
-            Thread.sleep(tank.getSpeed());
+            if (bf == tank.getBf()) {
+                repaint();
+                Thread.sleep(tank.getSpeed());
+            }
+
         }
     }
 
     public void processFire(Bullet bullet) throws InterruptedException {
-        this.bullet = bullet;
+            this.bullet = bullet;
+
+
         int step = Bullet.STEP;
         Direction direction = bullet.getDirection();
 
@@ -185,8 +201,11 @@ public class ActionField extends JPanel {
                 bullet.destroy();
             }
 
-            repaint();
-            Thread.sleep(bullet.getSpeed());
+            if (bf == bullet.getTank().getBf()) {
+                repaint();
+                Thread.sleep(bullet.getSpeed());
+            }
+
 
             if (bullet.isDestroyed()) {
                 break;
@@ -201,31 +220,31 @@ public class ActionField extends JPanel {
         int y = Integer.parseInt(quadrant.split("_")[1]);
 
         if (isQuadrantOnTheField(x, y)) {
-            AbstractBFElement bfElement = bf.scanQuadrant(x, y);
+            AbstractBFElement bfElement = bullet.getTank().getBf().scanQuadrant(x, y);
 
             if (!bfElement.isDestroyed() && (bfElement instanceof Destroyable)) {
                 if (!((bfElement instanceof Rock) && !(bullet.getTank() instanceof Tiger))) {
-                    bf.destroyObject(x, y);
+                    bullet.getTank().getBf().destroyObject(x, y);
                     return true;
                 }
                 return true;
             }
 
-            if (bullet.getTank() != aggressor && !aggressor.isDestroyed() &&
-                    checkInterception(getQuadrant(aggressor.getX(), aggressor.getY()), quadrant)) {
-                aggressor.destroy();
-                if (aggressor.isDestroyed()) {
-                    Thread.sleep(1000);
-                    newAggressor();
-                }
-                return true;
-            }
-
-            if (bullet.getTank() != defender && !defender.isDestroyed() &&
-                    checkInterception(getQuadrant(defender.getX(), defender.getY()), quadrant)) {
-                defender.destroy();
-                return true;
-            }
+//            if (bullet.getTank() != aggressor && !aggressor.isDestroyed() &&
+//                    checkInterception(getQuadrant(aggressor.getX(), aggressor.getY()), quadrant)) {
+//                aggressor.destroy();
+//                if (aggressor.isDestroyed()) {
+//                    Thread.sleep(1000);
+//                    newAggressor();
+//                }
+//                return true;
+//            }
+//
+//            if (bullet.getTank() != defender && !defender.isDestroyed() &&
+//                    checkInterception(getQuadrant(defender.getX(), defender.getY()), quadrant)) {
+//                defender.destroy();
+//                return true;
+//            }
 
         }
 

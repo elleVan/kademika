@@ -13,32 +13,27 @@ import tanks.helpers.Drawable;
 import tanks.mobile.tanks.BT7;
 import tanks.mobile.tanks.Tiger;
 
-import javax.management.AttributeList;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-public abstract class AbstractTank implements Tank {
-
+public abstract class AbstractTank2 implements Tank {
+/*
     public static final int TANK_STEP = 1;
 
     protected int speed = 10;
     protected int movePath = 1;
 
+    private ArrayList<Object> actions;
+
     private int x;
     private int y;
 
-    private boolean isBranching;
-
     private boolean destroyed;
-    protected int step = 0;
 
     private Set<Object> banned = new HashSet<>();
 
-    private List<Object> path;
-    private List<Object> pathAll = new ArrayList<>();
-    private List<Object> unfinished = new ArrayList<>();
-    private List<Object> paths = new ArrayList<>();
+    private List<Object> path = new ArrayList<>();
 
     protected Color colorTank = new Color(255, 0, 0);
     protected Color colorTower = new Color(0, 255, 0);
@@ -46,73 +41,33 @@ public abstract class AbstractTank implements Tank {
     private Direction direction;
 
     private BattleField bf;
-    private ActionField af;
 
-    public AbstractTank(BattleField bf) {
+    public AbstractTank2(BattleField bf) {
         this(bf, 320, 384, Direction.DOWN);
     }
 
-    public AbstractTank(BattleField bf, int x, int y, Direction direction) {
+    public AbstractTank2(BattleField bf, int x, int y, Direction direction) {
         this.bf = bf;
         this.x = x;
         this.y = y;
         this.direction = direction;
     }
 
-//    public List<Object> choosePath(int destX, int destY) {
-//        ArrayList<Object> variants = new ArrayList<>();
-//
-//
-//    }
-
-    public HashMap<String, List<Object>> buildPath(int destX, int destY) throws InterruptedException {
-        HashMap<String, List<Object>> result = new HashMap<>();
+    public void initPath() {
+        actions = buildPath(4 * 64, 8 * 64);
+    }
 
 
-        AbstractTank tank = new BT7(new BattleField(bf.getBattleField()), x, y, direction);
-        tank.setAf(this.af);
-        tank.setPathAll(this.pathAll);
-        ArrayList<Object> list = new ArrayList<>();
-        tank.isBranching = false;
-        while (tank.x != destX || tank.y != destY) {
-            list.add(tank.buildPathsPart(destX, destY));
-            tank.getAf().processAction(tank.transform(list), tank);
+
+    public ArrayList<Object> buildPath(int destX, int destY) {
+        ArrayList<Object> result = new ArrayList<>();
+        Tank tank = new BT7(bf, x, y, direction);
+        Object action = buildPathsPart(destX, destY);
+        result.add(action);
+        while (x != destX || y != destY) {
+            result.add(buildPathsPart(destX, destY));
         }
-        if (tank.pathAll.size() == 0) {
-            tank.pathAll.add(Action.NONE);
-        }
-        result.put("pathAll", tank.pathAll);
-        result.put("unfinished", tank.unfinished);
-
         return result;
-    }
-
-    public AbstractTank createVirtualTank(HashMap<String, Object> mapTank) throws InterruptedException {
-        List<Object> pathTank = (List) mapTank.get("path");
-        AbstractTank tank = new BT7(new BattleField(bf.getBattleField()), x, y, direction);
-        tank.setAf(this.af);
-        tank.pathAll = pathTank;
-        do {
-            tank.getAf().processAction(tank.transform(pathTank), tank);
-        } while (tank.getStep() < pathTank.size());
-        tank.banned = (Set) mapTank.get("banned");
-        return tank;
-    }
-
-    public Action transform(List<Object> list) {
-
-        if (step >= list.size()) {
-            step = 0;
-        }
-
-        while (!(list.get(step) instanceof Action)) {
-            turn((Direction) list.get(step++));
-        }
-
-        if (step >= list.size()) {
-            step = 0;
-        }
-        return (Action) list.get(step++);
     }
 
     public Object buildPathsPart(int destX, int destY) {
@@ -140,18 +95,21 @@ public abstract class AbstractTank implements Tank {
             }
 
         }
+        if (path.size() == 0) {
+            path.add(Action.NONE);
+        }
 
         direction = firstDirection;
 
-        while (!path.isEmpty() && path.get(0) instanceof Direction) {
-            turn((Direction) path.get(0));
-            pathAll.add(path.get(0));
-            path.remove(0);
+        int i = 0;
+        for (; i < 4; i++) {
+            if (!(path.get(i) instanceof Direction)) {
+                break;
+            }
         }
 
-        if (path.size() == 0) {
-            path.add(Action.NONE);
-            pathAll.add(Action.NONE);
+        for (int j = 0; j < i; j++) {
+            turn((Direction) path.get(j));
         }
 
         x = firstX;
@@ -166,7 +124,7 @@ public abstract class AbstractTank implements Tank {
                 banned.remove(Direction.DOWN);
             }
         }
-        pathAll.add(path.get(0));
+
         return path.get(0);
     }
 
@@ -180,12 +138,7 @@ public abstract class AbstractTank implements Tank {
         } else if (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)) {
             loop();
         }
-
-
-            path.add(Action.MOVE);
-
-
-
+        path.add(Action.MOVE);
 
         return a + BattleField.Q_SIZE * sign;
     }
@@ -193,72 +146,21 @@ public abstract class AbstractTank implements Tank {
     public void loop() {
         Direction direction;
         Direction bannedDirection;
-        Map<String, Object> map = new HashMap<>();
-        map.put("path", new ArrayList<>(pathAll));
-        map.put("banned", new HashSet<>(banned));
         if (this.direction == Direction.LEFT || this.direction == Direction.RIGHT) {
-            ((List) map.get("path")).add(Direction.UP);
-            ((List) map.get("path")).add(Action.NONE);
-            ((Set) map.get("banned")).add(Direction.DOWN);
-//            if (bf.isOccupied(x, y, Direction.UP) && isNextQuadrantDestroyable(x, y, Direction.UP)) {
-//                ((List) map.get("path")).add(Action.FIRE);
-//            } else if (!(bf.isOccupied(x, y, Direction.UP) && !isNextQuadrantDestroyable(x, y, Direction.UP))) {
-//                ((List) map.get("path")).add(Action.MOVE);
-//            } else {
-//                ((List) map.get("path")).add(Action.NONE);
-//            }
-
-            unfinished.add(map);
             direction = Direction.DOWN;
             bannedDirection = Direction.UP;
         } else {
-            ((List) map.get("path")).add(Direction.RIGHT);
-            ((List) map.get("path")).add(Action.NONE);
-            ((Set) map.get("banned")).add(Direction.LEFT);
-//            if (bf.isOccupied(x, y, Direction.RIGHT) && isNextQuadrantDestroyable(x, y, Direction.RIGHT)) {
-//                ((List) map.get("path")).add(Action.FIRE);
-//            } else if (!(bf.isOccupied(x, y, Direction.RIGHT) && !isNextQuadrantDestroyable(x, y, Direction.RIGHT))) {
-//                ((List) map.get("path")).add(Action.MOVE);
-//            } else {
-//                ((List) map.get("path")).add(Action.NONE);
-//            }
-            unfinished.add(map);
             direction = Direction.LEFT;
             bannedDirection = Direction.RIGHT;
         }
-        isBranching = true;
-        path.add(direction);
         banned.add(bannedDirection);
-
+        this.direction = direction;
+        path.add(direction);
         if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
             path.add(Action.FIRE);
         } else if (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)) {
             loop();
         }
-    }
-
-    public List<Object> manager(int destX, int destY) throws InterruptedException {
-        HashMap<String, List<Object>> map = buildPath(destX, destY);
-        paths.add(map.get("pathAll"));
-        while (!onlyNulls(map.get("unfinished"))) {
-            for (int i = 0; i < map.get("unfinished").size(); i++) {
-                if (map.get("unfinished").get(i) instanceof HashMap) {
-                    AbstractTank tank = createVirtualTank((HashMap<String, Object>) map.get("unfinished").get(i));
-                    paths.add(tank.buildPath(destX, destY).get("pathAll"));
-                    map.get("unfinished").set(i, null);
-                }
-            }
-        }
-        return (List<Object>) paths.get(1);
-    }
-
-    public boolean onlyNulls(Collection collection) {
-        for (Object el : collection) {
-            if (el != null) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
@@ -369,24 +271,8 @@ public abstract class AbstractTank implements Tank {
         return bf;
     }
 
-    public ActionField getAf() {
-        return af;
+    public ArrayList<Object> getActions() {
+        return actions;
     }
-
-    public void setAf(ActionField af) {
-        this.af = af;
-    }
-
-    public List<Object> getPathAll() {
-        return pathAll;
-    }
-
-
-    public void setPathAll(List<Object> pathAll) {
-        this.pathAll = pathAll;
-    }
-
-    public int getStep() {
-        return step;
-    }
+    */
 }

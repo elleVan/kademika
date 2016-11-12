@@ -37,6 +37,11 @@ public class BattleField implements Drawable {
         generateBFObj();
     }
 
+    public BattleField(String[][] battleField) {
+        this.battleField = battleField;
+        generateBFObj();
+    }
+
     private void generateBFObj() {
         battleFieldObj = new AbstractBFElement[battleField.length][battleField.length];
         for (int i = 0; i < battleField.length; i++) {
@@ -134,5 +139,9 @@ public class BattleField implements Drawable {
 
     public String[] getCoordinatesAggressor() {
         return coordinatesAggressor;
+    }
+
+    public String[][] getBattleField() {
+        return battleField;
     }
 }
