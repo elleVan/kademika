@@ -4,6 +4,7 @@ import tanks.fixed.bfelements.*;
 import tanks.helpers.Destroyable;
 import tanks.helpers.Direction;
 import tanks.helpers.Drawable;
+import tanks.mobile.AbstractTank;
 
 import java.awt.*;
 
@@ -30,7 +31,7 @@ public class BattleField implements Drawable {
             { " ", "B", "B", "B", "W", "B", "B", "B", " " },
             { " ", " ", " ", " ", " ", " ", " ", " ", " " },
             { " ", "R", "R", "B", "R", "B", "R", "R", " " },
-            { " ", " ", " ", "B", "E", "B", " ", " ", " " } };
+            { " ", " ", " ", "R", "E", "B", " ", " ", " " } };
 
 
     public BattleField() {
@@ -40,6 +41,10 @@ public class BattleField implements Drawable {
     public BattleField(String[][] battleField) {
         this.battleField = battleField;
         generateBFObj();
+    }
+
+    public BattleField(AbstractBFElement[][] battleFieldObj) {
+        this.battleFieldObj = battleFieldObj;
     }
 
     private void generateBFObj() {
@@ -91,7 +96,13 @@ public class BattleField implements Drawable {
 
     }
 
+    public void setDeadEnd(int x, int y, AbstractTank tank) {
+        String quadrant = getQuadrant(x, y);
+        int xQuad = Integer.parseInt(quadrant.split("_")[0]);
+        int yQuad = Integer.parseInt(quadrant.split("_")[1]);
 
+        battleFieldObj[yQuad][xQuad] = new DeadEnd(x, y, tank);
+    }
 
     @Override
     public void draw(Graphics g) {
@@ -110,8 +121,21 @@ public class BattleField implements Drawable {
         return (x - 1) * Q_SIZE + "_" + (y - 1) * Q_SIZE;
     }
 
-    private boolean isQuadrantOnTheField(int x, int y) {
+    public boolean isQuadrantOnTheField(int x, int y) {
         return (y >= Q_MIN && y <= Q_MAX && x >= Q_MIN && x <= Q_MAX);
+    }
+
+    public boolean isQuadrantOnTheFieldXY(int x, int y, Direction direction) {
+        if (direction == Direction.UP) {
+            y -= Q_SIZE;
+        } else if (direction == Direction.DOWN) {
+            y += Q_SIZE;
+        } else if (direction == Direction.LEFT) {
+            x -= Q_SIZE;
+        } else {
+            x += Q_SIZE;
+        }
+        return (y >= Q_MIN * Q_SIZE && y <= Q_MAX * Q_SIZE && x >= Q_MIN * Q_SIZE && x <= Q_MAX * Q_SIZE);
     }
 
     public boolean isQuadrantEmpty(int x, int y) {
@@ -143,5 +167,9 @@ public class BattleField implements Drawable {
 
     public String[][] getBattleField() {
         return battleField;
+    }
+
+    public AbstractBFElement[][] getBattleFieldObj() {
+        return battleFieldObj;
     }
 }
