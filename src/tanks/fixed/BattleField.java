@@ -7,6 +7,7 @@ import tanks.helpers.Drawable;
 import tanks.mobile.AbstractTank;
 
 import java.awt.*;
+import java.lang.reflect.Array;
 
 public class BattleField implements Drawable {
 
@@ -44,7 +45,7 @@ public class BattleField implements Drawable {
     }
 
     public BattleField(AbstractBFElement[][] battleFieldObj) {
-        this.battleFieldObj = battleFieldObj;
+        copyBFObj(battleFieldObj);
     }
 
     private void generateBFObj() {
@@ -64,6 +65,29 @@ public class BattleField implements Drawable {
                 } else if (battleField[i][j].equals("R")) {
                     battleFieldObj[i][j] = new Rock(x, y);
                 } else if (battleField[i][j].equals("W")) {
+                    battleFieldObj[i][j] = new Water(x, y);
+                }
+            }
+        }
+    }
+
+    private void copyBFObj(AbstractBFElement[][] array) {
+        battleFieldObj = new AbstractBFElement[array.length][array.length];
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[i].length; j++) {
+                String coordinates = getQuadrantXY(j + 1, i + 1);
+                int x = Integer.parseInt(coordinates.split("_")[0]);
+                int y = Integer.parseInt(coordinates.split("_")[1]);
+
+                if (array[i][j] instanceof Blank) {
+                    battleFieldObj[i][j] = new Blank(x, y);
+                } else if (array[i][j] instanceof Brick) {
+                    battleFieldObj[i][j] = new Brick(x, y);
+                } else if (array[i][j] instanceof Eagle) {
+                    battleFieldObj[i][j] = new Eagle(x, y);
+                } else if (array[i][j] instanceof Rock) {
+                    battleFieldObj[i][j] = new Rock(x, y);
+                } else if (array[i][j] instanceof Water) {
                     battleFieldObj[i][j] = new Water(x, y);
                 }
             }

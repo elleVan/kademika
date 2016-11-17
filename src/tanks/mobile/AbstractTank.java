@@ -163,22 +163,22 @@ public abstract class AbstractTank implements Tank {
                 y = helper(Direction.DOWN, y, 1);
             }
         }
-//        if (x < destX && path.size() == 0) {
-//            if (!banned.contains(Direction.LEFT)) {
-//                x = helper(Direction.LEFT, x, 1);
-//            }
-//        }
-//        if (x > destX && path.size() == 0) {
-//            if (!banned.contains(Direction.RIGHT)) {
-//                x = helper(Direction.RIGHT, x, -1);
-//            }
-//
-//        }
-//        if (y < destY && path.size() == 0) {
-//            if (!banned.contains(Direction.UP)) {
-//                y = helper(Direction.UP, y, 1);
-//            }
-//        }
+        if (x < destX && path.size() == 0) {
+            if (!banned.contains(Direction.LEFT)) {
+                x = helper(Direction.LEFT, x, 1);
+            }
+        }
+        if (x > destX && path.size() == 0) {
+            if (!banned.contains(Direction.RIGHT)) {
+                x = helper(Direction.RIGHT, x, -1);
+            }
+
+        }
+        if (y < destY && path.size() == 0) {
+            if (!banned.contains(Direction.UP)) {
+                y = helper(Direction.UP, y, 1);
+            }
+        }
 
 
         direction = firstDirection;
@@ -322,34 +322,94 @@ public abstract class AbstractTank implements Tank {
 //            }
             direction = Direction.DOWN;
             bannedDirection = Direction.UP;
-            path.add(direction);
-            banned.add(bannedDirection);
-            this.direction = direction;
-            if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction) && !banned.contains(Direction.DOWN)) {
-                path.add(Action.FIRE);
-            } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
+            if (!banned.contains(direction)) {
+                path.add(direction);
+                banned.add(bannedDirection);
+                this.direction = direction;
+                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
+                    path.add(Action.FIRE);
+                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
+                        (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
+                    Direction direction1;
+                    Direction bannedDirection1;
+                    if (initDirection == Direction.LEFT) {
+                        direction1 = Direction.RIGHT;
+                        bannedDirection1 = Direction.LEFT;
+                    } else {
+                        direction1 = Direction.LEFT;
+                        bannedDirection1 = Direction.RIGHT;
+                    }
+                    if (!banned.contains(direction1)) {
+                        path.add(direction1);
+                        banned.add(bannedDirection1);
+                        this.direction = direction1;
+                        if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
+
+                            path.add(Action.FIRE);
+                        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                                (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
+
+                        }
+                    }
+
+                }
+            } else if (!banned.contains(Direction.UP)) {
+                direction = Direction.UP;
+                bannedDirection = Direction.DOWN;
+                path.add(direction);
+                banned.add(bannedDirection);
+                this.direction = direction;
+                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
+                    path.add(Action.FIRE);
+                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
+                        (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
+                    Direction direction1;
+                    Direction bannedDirection1;
+                    if (initDirection == Direction.LEFT) {
+                        direction1 = Direction.RIGHT;
+                        bannedDirection1 = Direction.LEFT;
+                    } else {
+                        direction1 = Direction.LEFT;
+                        bannedDirection1 = Direction.RIGHT;
+                    }
+                    if (!banned.contains(direction1)) {
+                        path.add(direction1);
+                        banned.add(bannedDirection1);
+                        this.direction = direction1;
+                        if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
+
+                            path.add(Action.FIRE);
+                        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                                (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
+
+                        }
+                    }
+
+                }
+            } else {
                 Direction direction1;
                 Direction bannedDirection1;
                 if (initDirection == Direction.LEFT) {
-                        direction1 = Direction.RIGHT;
-                        bannedDirection1 = Direction.LEFT;
+                    direction1 = Direction.RIGHT;
+                    bannedDirection1 = Direction.LEFT;
                 } else {
-                        direction1 = Direction.LEFT;
-                        bannedDirection1 = Direction.RIGHT;
+                    direction1 = Direction.LEFT;
+                    bannedDirection1 = Direction.RIGHT;
                 }
+                if (!banned.contains(direction1)) {
+                    path.add(direction1);
+                    banned.add(bannedDirection1);
+                    this.direction = direction1;
+                    if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
 
-
-                this.direction = direction1;
-                if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1) && !banned.contains(direction1)) {
-                        path.add(direction1);
-                        banned.add(bannedDirection1);
                         path.add(Action.FIRE);
-                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                    } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
                             (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
 
+                    }
                 }
             }
+
 
 
         } else {
@@ -368,13 +428,73 @@ public abstract class AbstractTank implements Tank {
 
                 direction = Direction.LEFT;
                 bannedDirection = Direction.RIGHT;
-            path.add(direction);
-            banned.add(bannedDirection);
-            this.direction = direction;
-            if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction) && !banned.contains(direction)) {
-                path.add(Action.FIRE);
-            } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
+
+            if (!banned.contains(direction)) {
+                path.add(direction);
+                banned.add(bannedDirection);
+                this.direction = direction;
+                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction) && !banned.contains(direction)) {
+                    path.add(Action.FIRE);
+                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
+                        (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
+                    Direction direction1;
+                    Direction bannedDirection1;
+                    if (initDirection == Direction.UP) {
+                        direction1 = Direction.DOWN;
+                        bannedDirection1 = Direction.UP;
+                    } else {
+                        direction1 = Direction.UP;
+                        bannedDirection1 = Direction.DOWN;
+                    }
+                    if (!banned.contains(direction1)) {
+                        path.add(direction1);
+                        banned.add(bannedDirection1);
+                        this.direction = direction1;
+                        if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
+                            path.add(Action.FIRE);
+                        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                                (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
+
+                        }
+                    }
+
+
+                }
+            } else if (!banned.contains(Direction.RIGHT)) {
+
+                direction = Direction.RIGHT;
+                bannedDirection = Direction.LEFT;
+                path.add(direction);
+                banned.add(bannedDirection);
+                this.direction = direction;
+                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
+                    path.add(Action.FIRE);
+                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
+                        (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
+                    Direction direction1;
+                    Direction bannedDirection1;
+                    if (initDirection == Direction.UP) {
+                        direction1 = Direction.DOWN;
+                        bannedDirection1 = Direction.UP;
+                    } else {
+                        direction1 = Direction.UP;
+                        bannedDirection1 = Direction.DOWN;
+                    }
+                    if (!banned.contains(direction1)) {
+                        path.add(direction1);
+                        banned.add(bannedDirection1);
+                        this.direction = direction1;
+                        if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
+                            path.add(Action.FIRE);
+                        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                                (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
+
+                        }
+                    }
+
+
+                }
+            } else {
                 Direction direction1;
                 Direction bannedDirection1;
                 if (initDirection == Direction.UP) {
@@ -386,16 +506,20 @@ public abstract class AbstractTank implements Tank {
                 }
 
 
-                this.direction = direction1;
-                if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1) && !banned.contains(direction1)) {
+                if (!banned.contains(direction1)) {
                     path.add(direction1);
                     banned.add(bannedDirection1);
-                    path.add(Action.FIRE);
-                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
+                    this.direction = direction1;
+                    if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
+                        path.add(Action.FIRE);
+                    } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                            (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
 
+                    }
                 }
+
             }
+
 
         }
     }
