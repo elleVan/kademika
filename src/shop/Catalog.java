@@ -1,25 +1,22 @@
 package shop;
 
-public class Catalog {
+import java.util.HashSet;
 
-    private Sweet[][] sweets = new Sweet[Category.values().length][];
+public class Catalog {
 
     public Catalog() {
     }
 
-    public void initCatalog(Shop shop) {
-//        Category[] categories = Category.values();
-//        for (int i = 0; i < categories.length; i++) {
-//
-//            Category category = categories[i];
-//            System.out.println(category);
-//
-//            for (Sweet sweet : shop.getSweets()) {
-//                if (sweet != null && sweet.getCategory() == category) {
-//                    System.out.println("\t" + sweet.getName());
-//                    // filling sweets here
-//                }
-//            }
-//        }
+    public void printCatalog(Shop shop) {
+        HashSet<String> categories = shop.getCategories();
+
+        for (String category : categories) {
+            System.out.println(category);
+            for (String[] sweet : shop.getSweets()) {
+                if (sweet != null && Shop.CATEGORY < sweet.length && sweet[Shop.CATEGORY].equals(category)) {
+                    System.out.println("\t" + sweet[Shop.NAME]);
+                }
+            }
+        }
     }
 }

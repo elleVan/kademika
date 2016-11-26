@@ -8,6 +8,8 @@ public class Sweet {
     private int price;
     private int inStock;
 
+    private String category;
+
     public Sweet() {
     }
 
@@ -16,6 +18,14 @@ public class Sweet {
         this.quantity = quantity;
         this.price = price;
         this.inStock = inStock;
+    }
+
+    public Sweet(String name, int quantity, int price, int inStock, String category) {
+        this.name = name;
+        this.quantity = quantity;
+        this.price = price;
+        this.inStock = inStock;
+        this.category = category;
     }
 
     public String getName() {
@@ -44,5 +54,13 @@ public class Sweet {
 
     public void setInStock(int inStock) {
         this.inStock = inStock;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

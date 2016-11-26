@@ -1,6 +1,7 @@
 package shop;
 
 import java.util.Arrays;
+import java.util.HashSet;
 
 public class Shop {
 
@@ -9,11 +10,13 @@ public class Shop {
     public static final int NAME = 0;
     public static final int PRICE = 1;
     public static final int IN_STOCK = 2;
+    public static final int CATEGORY = 3;
 
     private Base base = new Base();
     private int today = 8;
 
     private String[][] sweets = base.getSweets();
+    private HashSet<String> categories = base.getCategories();
     private Customer[] customers = base.getCustomers();
     private Transaction[][] transactions = base.getTransactions();
 
@@ -71,7 +74,7 @@ public class Shop {
     public void printCatalog() {
         System.out.println("=========== CATALOG ============");
         Catalog catalog = new Catalog();
-        catalog.initCatalog(this);
+        catalog.printCatalog(this);
     }
 
     public void printPrices() {
@@ -157,11 +160,12 @@ public class Shop {
 
     public Sweet newSweet(String name, int quantity) {
 
-        int price = getSweetField(name, PRICE);
-        int inStock = getSweetField(name, IN_STOCK);
+        int price = getSweetsNumericField(name, PRICE);
+        int inStock = getSweetsNumericField(name, IN_STOCK);
+        String category = getSweetsStringField(name, CATEGORY);
 
         if (price != FAIL && inStock != FAIL) {
-            return new Sweet(name, quantity, price, inStock);
+            return new Sweet(name, quantity, price, inStock, category);
         }
 
         return null;
@@ -210,15 +214,24 @@ public class Shop {
         return true;
     }
 
-    public int getSweetField(String name, int field) {
+    public int getSweetsNumericField(String name, int field) {
         int idx = findSweet(name);
         int result = FAIL;
-        if (idx != FAIL) {
+        if (idx != FAIL && field < sweets[idx].length) {
             try {
                 result = Integer.parseInt(sweets[idx][field]);
             } catch (NumberFormatException e) {
 
             }
+        }
+        return result;
+    }
+
+    public String getSweetsStringField(String name, int field) {
+        int idx = findSweet(name);
+        String result = null;
+        if (idx != FAIL && field < sweets[idx].length) {
+            result = sweets[idx][field];
         }
         return result;
     }
@@ -291,6 +304,14 @@ public class Shop {
             }
         }
         return FAIL;
+    }
+
+    public String[][] getSweets() {
+        return sweets;
+    }
+
+    public HashSet<String> getCategories() {
+        return new HashSet<>(categories);
     }
 
     public Customer[] getCustomers() {

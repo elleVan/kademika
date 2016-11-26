@@ -1,8 +1,11 @@
 package shop;
 
+import java.util.HashSet;
+
 public class Base {
 
     private String[][] sweets;
+    private HashSet<String> categories = new HashSet<>();
     private Customer[] customers = new Customer[10];
     private Transaction[][] transactions = new Transaction[30][];
 
@@ -12,21 +15,26 @@ public class Base {
 
     public void initDemoBase() {
         initDemoSweets();
+        initCategories();
         initDemoCustomers();
         initDemoOrders();
     }
 
-    public void initDemoSweets() {
+    private void initDemoSweets() {
 
         sweets = new String[][] {
-                //name, price, in stock
-                {"Amour", "5", "10"},
-                {"Belissimo", "23", "5"},
-                {"Konti", "3", "15"},
-                {"MAK", "14", "6"}
+                //name, price, in stock, category
+                {"Amour", "5", "10", "CHOCOLATES"},
+                {"Belissimo", "23", "5", "COMBINED"},
+                {"Konti", "3", "15", "FONDANT"},
+                {"MAK", "14", "6", "PRALINE"}
         };
+    }
 
-
+    private void initCategories() {
+        for (String[] el : sweets) {
+            categories.add(el[Shop.CATEGORY]);
+        }
     }
 
     private void initDemoCustomers() {
@@ -58,6 +66,10 @@ public class Base {
 
     public String[][] getSweets() {
         return sweets;
+    }
+
+    public HashSet<String> getCategories() {
+        return new HashSet<>(categories);
     }
 
     public Customer[] getCustomers() {
