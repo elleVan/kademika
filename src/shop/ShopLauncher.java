@@ -7,5 +7,7 @@ public class ShopLauncher {
         shop.run();
         shop.getOrdersForOneDay(shop.getToday());
         shop.printBase();
+
+        ShopUI ui = new ShopUI(shop);
     }
 }
