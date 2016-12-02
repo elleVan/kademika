@@ -7,6 +7,7 @@ public class Water extends AbstractBFElement {
 
     public Water(int x, int y) {
         super(x, y);
-        color = Color.cyan;
+        setColor(Color.cyan);
+        setImageName("water.jpg");
     }
 }

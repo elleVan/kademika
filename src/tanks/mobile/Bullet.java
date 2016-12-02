@@ -5,12 +5,15 @@ import tanks.helpers.Destroyable;
 import tanks.helpers.Direction;
 import tanks.helpers.Drawable;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 public class Bullet implements Drawable, Destroyable {
 
     public static final int STEP = 1;
-    private final int speed = 1;
+    private final int speed = 5;
 
     private AbstractTank tank;
 
@@ -38,8 +41,14 @@ public class Bullet implements Drawable, Destroyable {
     @Override
     public void draw(Graphics g) {
         if (!destroyed) {
-            g.setColor(new Color(255, 255, 0));
-            g.fillRect(this.x, this.y, 14, 14);
+            Image image;
+
+                try {
+                    image = ImageIO.read(new File("bullet.png"));
+                    g.drawImage(image, this.getX(), this.getY(), 14, 14, null);
+                } catch (IOException e) {
+                    System.err.println("Can't find image");
+                }
         }
     }
 

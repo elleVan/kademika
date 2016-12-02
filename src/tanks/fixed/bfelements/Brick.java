@@ -9,11 +9,12 @@ public class Brick extends AbstractBFElement implements Destroyable{
 
     public Brick(int x, int y) {
         super(x, y);
-        color = Color.blue;
+        setColor(Color.blue);
+        setImageName("brick.jpg");
     }
 
     @Override
     public void destroy() {
-        isDestroyed = true;
+        setDestroyed(true);
     }
 }

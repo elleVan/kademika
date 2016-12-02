@@ -9,11 +9,12 @@ public class Rock extends AbstractBFElement implements Destroyable {
 
     public Rock(int x, int y) {
         super(x, y);
-        color = Color.gray;
+        setColor(Color.gray);
+        setImageName("rock.jpg");
     }
 
     @Override
     public void destroy() {
-        isDestroyed = true;
+        setDestroyed(true);
     }
 }

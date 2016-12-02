@@ -18,6 +18,7 @@ public class BT7 extends AbstractTank {
     public BT7(BattleField bf, int x, int y, Direction direction) {
         super(bf, x, y, direction);
         speed = super.getSpeed() / 2;
+        setImageName("tankBlue");
     }
 
 //    @Override

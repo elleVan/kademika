@@ -14,8 +14,12 @@ import tanks.helpers.Drawable;
 import tanks.mobile.tanks.BT7;
 import tanks.mobile.tanks.Tiger;
 
+import javax.imageio.ImageIO;
 import javax.management.AttributeList;
 import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -23,13 +27,13 @@ public abstract class AbstractTank implements Tank {
 
     public static final int TANK_STEP = 1;
 
-    protected int speed = 10;
+    protected int speed = 30;
     protected int movePath = 1;
 
     private int x;
     private int y;
 
-    private boolean isBranching;
+    private String imageName;
 
     private boolean destroyed;
     protected int step = 0;
@@ -76,7 +80,6 @@ public abstract class AbstractTank implements Tank {
         tank.setPathAll(this.pathAll);
         tank.banned = this.banned;
         ArrayList<Object> list = new ArrayList<>();
-        tank.isBranching = false;
         while (tank.x != destX || tank.y != destY) {
             list.add(tank.buildPathsPart(destX, destY));
             tank.getAf().processAction(tank.transform(list), tank);
@@ -126,7 +129,6 @@ public abstract class AbstractTank implements Tank {
         tank.setAf(this.af);
         tank.setPathAll(this.pathAll);
         ArrayList<Object> list = new ArrayList<>();
-        tank.isBranching = false;
         while (tank.x != destX || tank.y != destY) {
             list.add(tank.buildPathsPart(destX, destY));
             tank.getAf().processAction(tank.transform(list), tank);
@@ -322,38 +324,16 @@ public abstract class AbstractTank implements Tank {
 //            }
             direction = Direction.DOWN;
             bannedDirection = Direction.UP;
-            if (!banned.contains(direction)) {
+            if (!banned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
+                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)))) {
                 path.add(direction);
                 banned.add(bannedDirection);
                 this.direction = direction;
                 if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
                     path.add(Action.FIRE);
-                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                        (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
-                    Direction direction1;
-                    Direction bannedDirection1;
-                    if (initDirection == Direction.LEFT) {
-                        direction1 = Direction.RIGHT;
-                        bannedDirection1 = Direction.LEFT;
-                    } else {
-                        direction1 = Direction.LEFT;
-                        bannedDirection1 = Direction.RIGHT;
-                    }
-                    if (!banned.contains(direction1)) {
-                        path.add(direction1);
-                        banned.add(bannedDirection1);
-                        this.direction = direction1;
-                        if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-
-                            path.add(Action.FIRE);
-                        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                                (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
-
-                        }
-                    }
-
                 }
-            } else if (!banned.contains(Direction.UP)) {
+            } else if (!banned.contains(Direction.UP) && !(!bf.isQuadrantOnTheFieldXY(x, y, Direction.UP) ||
+                    (bf.isOccupied(x, y, Direction.UP) && !isNextQuadrantDestroyable(x, y, Direction.UP)))) {
                 direction = Direction.UP;
                 bannedDirection = Direction.DOWN;
                 path.add(direction);
@@ -361,30 +341,6 @@ public abstract class AbstractTank implements Tank {
                 this.direction = direction;
                 if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
                     path.add(Action.FIRE);
-                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                        (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
-                    Direction direction1;
-                    Direction bannedDirection1;
-                    if (initDirection == Direction.LEFT) {
-                        direction1 = Direction.RIGHT;
-                        bannedDirection1 = Direction.LEFT;
-                    } else {
-                        direction1 = Direction.LEFT;
-                        bannedDirection1 = Direction.RIGHT;
-                    }
-                    if (!banned.contains(direction1)) {
-                        path.add(direction1);
-                        banned.add(bannedDirection1);
-                        this.direction = direction1;
-                        if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-
-                            path.add(Action.FIRE);
-                        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                                (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
-
-                        }
-                    }
-
                 }
             } else {
                 Direction direction1;
@@ -396,16 +352,13 @@ public abstract class AbstractTank implements Tank {
                     direction1 = Direction.LEFT;
                     bannedDirection1 = Direction.RIGHT;
                 }
-                if (!banned.contains(direction1)) {
+                if (!banned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
                     path.add(direction1);
                     banned.add(bannedDirection1);
                     this.direction = direction1;
                     if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-
                         path.add(Action.FIRE);
-                    } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                            (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
-
                     }
                 }
             }
@@ -429,38 +382,16 @@ public abstract class AbstractTank implements Tank {
                 direction = Direction.LEFT;
                 bannedDirection = Direction.RIGHT;
 
-            if (!banned.contains(direction)) {
+            if (!banned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
+                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))))  {
                 path.add(direction);
                 banned.add(bannedDirection);
                 this.direction = direction;
                 if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction) && !banned.contains(direction)) {
                     path.add(Action.FIRE);
-                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                        (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
-                    Direction direction1;
-                    Direction bannedDirection1;
-                    if (initDirection == Direction.UP) {
-                        direction1 = Direction.DOWN;
-                        bannedDirection1 = Direction.UP;
-                    } else {
-                        direction1 = Direction.UP;
-                        bannedDirection1 = Direction.DOWN;
-                    }
-                    if (!banned.contains(direction1)) {
-                        path.add(direction1);
-                        banned.add(bannedDirection1);
-                        this.direction = direction1;
-                        if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-                            path.add(Action.FIRE);
-                        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                                (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
-
-                        }
-                    }
-
-
                 }
-            } else if (!banned.contains(Direction.RIGHT)) {
+            } else if (!banned.contains(Direction.RIGHT) && !(!bf.isQuadrantOnTheFieldXY(x, y, Direction.RIGHT) ||
+                    (bf.isOccupied(x, y, Direction.RIGHT) && !isNextQuadrantDestroyable(x, y, Direction.RIGHT)))) {
 
                 direction = Direction.RIGHT;
                 bannedDirection = Direction.LEFT;
@@ -469,30 +400,6 @@ public abstract class AbstractTank implements Tank {
                 this.direction = direction;
                 if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
                     path.add(Action.FIRE);
-                } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                        (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
-                    Direction direction1;
-                    Direction bannedDirection1;
-                    if (initDirection == Direction.UP) {
-                        direction1 = Direction.DOWN;
-                        bannedDirection1 = Direction.UP;
-                    } else {
-                        direction1 = Direction.UP;
-                        bannedDirection1 = Direction.DOWN;
-                    }
-                    if (!banned.contains(direction1)) {
-                        path.add(direction1);
-                        banned.add(bannedDirection1);
-                        this.direction = direction1;
-                        if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-                            path.add(Action.FIRE);
-                        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                                (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
-
-                        }
-                    }
-
-
                 }
             } else {
                 Direction direction1;
@@ -506,7 +413,8 @@ public abstract class AbstractTank implements Tank {
                 }
 
 
-                if (!banned.contains(direction1)) {
+                if (!banned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
                     path.add(direction1);
                     banned.add(bannedDirection1);
                     this.direction = direction1;
@@ -563,7 +471,15 @@ public abstract class AbstractTank implements Tank {
 
     @Override
     public Bullet fire() {
-        return new Bullet(this, (x + 25), (y + 25), direction);
+        if (direction == Direction.UP) {
+            return new Bullet(this, (x + 25), y, direction);
+        } else if (direction == Direction.DOWN) {
+            return new Bullet(this, (x + 25), (y + 64), direction);
+        } else if (direction == Direction.LEFT) {
+            return new Bullet(this, x, y + 25, direction);
+        } else {
+            return new Bullet(this, x + 64, y + 25, direction);
+        }
     }
 
     @Override
@@ -608,18 +524,31 @@ public abstract class AbstractTank implements Tank {
     @Override
     public void draw(Graphics g) {
         if (!destroyed) {
-            g.setColor(colorTank);
-            g.fillRect(x, y, 64, 64);
-            g.setColor(colorTower);
-            if (direction == Direction.UP) {
-                g.fillRect(x + 20, y, 24, 34);
-            } else if (direction == Direction.DOWN) {
-                g.fillRect(x + 20, y + 30, 24, 34);
-            } else if (direction == Direction.LEFT) {
-                g.fillRect(x, y + 20, 34, 24);
-            } else {
-                g.fillRect(x + 30, y + 20, 34, 24);
+            Image image;
+
+            if (this.imageName != null) {
+                try {
+
+
+                    if (direction == Direction.UP) {
+                        image = ImageIO.read(new File(this.imageName + "-U.png"));
+                        g.drawImage(image, this.getX(), this.getY(), 64, 64, null);
+                    } else if (direction == Direction.DOWN) {
+                        image = ImageIO.read(new File(this.imageName + "-D.png"));
+                        g.drawImage(image, this.getX(), this.getY(), 64, 64, null);
+                    } else if (direction == Direction.LEFT) {
+                        image = ImageIO.read(new File(this.imageName + "-L.png"));
+                        g.drawImage(image, this.getX(), this.getY(), 64, 64, null);
+                    } else {
+                        image = ImageIO.read(new File(this.imageName + "-R.png"));
+                        g.drawImage(image, this.getX(), this.getY(), 64, 64, null);
+                    }
+
+                } catch (IOException e) {
+                    System.err.println("Can't find image");
+                }
             }
+
         }
     }
 
@@ -681,5 +610,13 @@ public abstract class AbstractTank implements Tank {
 
     public int getStep() {
         return step;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 }

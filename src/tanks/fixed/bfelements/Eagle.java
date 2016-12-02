@@ -9,11 +9,12 @@ public class Eagle extends AbstractBFElement implements Destroyable{
 
     public Eagle(int x, int y) {
         super(x, y);
-        color = Color.orange;
+        setColor(Color.orange);
+        setImageName("eagle.png");
     }
 
     @Override
     public void destroy() {
-        isDestroyed = true;
+        setDestroyed(true);
     }
 }
