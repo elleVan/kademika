@@ -27,19 +27,18 @@ public abstract class AbstractTank implements Tank {
 
     public static final int TANK_STEP = 1;
 
-    protected int speed = 30;
+    protected int speed = 10;
     protected int movePath = 1;
 
     private int x;
     private int y;
 
-    private String imageName;
+    private Image[] images;
 
     private boolean destroyed;
     protected int step = 0;
 
     private Set<Object> banned = new HashSet<>();
-    private Set<Object> bannedTurn = new HashSet<>();
 
     private List<Object> path;
     private List<Object> pathAll = new ArrayList<>();
@@ -524,31 +523,7 @@ public abstract class AbstractTank implements Tank {
     @Override
     public void draw(Graphics g) {
         if (!destroyed) {
-            Image image;
-
-            if (this.imageName != null) {
-                try {
-
-
-                    if (direction == Direction.UP) {
-                        image = ImageIO.read(new File(this.imageName + "-U.png"));
-                        g.drawImage(image, this.getX(), this.getY(), 64, 64, null);
-                    } else if (direction == Direction.DOWN) {
-                        image = ImageIO.read(new File(this.imageName + "-D.png"));
-                        g.drawImage(image, this.getX(), this.getY(), 64, 64, null);
-                    } else if (direction == Direction.LEFT) {
-                        image = ImageIO.read(new File(this.imageName + "-L.png"));
-                        g.drawImage(image, this.getX(), this.getY(), 64, 64, null);
-                    } else {
-                        image = ImageIO.read(new File(this.imageName + "-R.png"));
-                        g.drawImage(image, this.getX(), this.getY(), 64, 64, null);
-                    }
-
-                } catch (IOException e) {
-                    System.err.println("Can't find image");
-                }
-            }
-
+            g.drawImage(images[direction.ordinal()], this.getX(), this.getY(), 64, 64, null);
         }
     }
 
@@ -612,11 +587,11 @@ public abstract class AbstractTank implements Tank {
         return step;
     }
 
-    public String getImageName() {
-        return imageName;
+    public Image[] getImages() {
+        return images;
     }
 
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
+    public void setImages(Image[] images) {
+        this.images = images;
     }
 }

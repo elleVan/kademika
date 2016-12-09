@@ -16,46 +16,36 @@ public class AbstractBFElement implements Drawable {
     private Color color;
     private boolean isDestroyed = false;
 
-    private String imageName;
+    private Image image;
+    private Image imageBlank;
 
     public AbstractBFElement(int x, int y) {
         this.x = x;
         this.y = y;
+        try {
+            imageBlank = ImageIO.read(new File("blank.jpg"));
+        } catch (IOException e) {
+            System.err.println("Can't find imageName");
+        }
     }
 
     @Override
     public void draw(Graphics g) {
 
-        Image image;
-
-            try {
-                image = ImageIO.read(new File("blank.jpg"));
-
-                g.drawImage(image, this.getX(), this.getY(), new ImageObserver() {
-                    @Override
-                    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-                        return false;
-                    }
-                });
-            } catch (IOException e) {
-                System.err.println("Can't find imageName");
+        g.drawImage(imageBlank, this.getX(), this.getY(), new ImageObserver() {
+            @Override
+            public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+                return false;
             }
+        });
 
-        if (!isDestroyed) {
-            if (this.imageName != null) {
-                try {
-                    image = ImageIO.read(new File(this.imageName));
-
-                    g.drawImage(image, this.getX(), this.getY(), new ImageObserver() {
-                        @Override
-                        public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-                            return false;
-                        }
-                    });
-                } catch (IOException e) {
-                    System.err.println("Can't find imageName");
+        if (!isDestroyed && image != null) {
+            g.drawImage(image, this.getX(), this.getY(), new ImageObserver() {
+                @Override
+                public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+                    return false;
                 }
-            }
+            });
         }
     }
 
@@ -83,11 +73,11 @@ public class AbstractBFElement implements Drawable {
         this.color = color;
     }
 
-    public String getImageName() {
-        return imageName;
+    public Image getImage() {
+        return image;
     }
 
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
+    public void setImage(Image image) {
+        this.image = image;
     }
 }

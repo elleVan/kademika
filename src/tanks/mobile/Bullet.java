@@ -13,7 +13,7 @@ import java.io.IOException;
 public class Bullet implements Drawable, Destroyable {
 
     public static final int STEP = 1;
-    private final int speed = 5;
+    private final int speed = 1;
 
     private AbstractTank tank;
 
@@ -22,12 +22,19 @@ public class Bullet implements Drawable, Destroyable {
     private Direction direction;
     private boolean destroyed;
 
+    private Image image;
+
     public Bullet(AbstractTank tank, int x, int y, Direction direction) {
         this.tank = tank;
         this.x = x;
         this.y = y;
         this.direction = direction;
         this.destroyed = false;
+        try {
+            image = ImageIO.read(new File("bullet.png"));
+        } catch (IOException e) {
+            System.err.println("Can't find image");
+        }
     }
 
     public void updateX(int i) {
@@ -41,14 +48,7 @@ public class Bullet implements Drawable, Destroyable {
     @Override
     public void draw(Graphics g) {
         if (!destroyed) {
-            Image image;
-
-                try {
-                    image = ImageIO.read(new File("bullet.png"));
-                    g.drawImage(image, this.getX(), this.getY(), 14, 14, null);
-                } catch (IOException e) {
-                    System.err.println("Can't find image");
-                }
+            g.drawImage(image, this.getX(), this.getY(), 14, 14, null);
         }
     }
 

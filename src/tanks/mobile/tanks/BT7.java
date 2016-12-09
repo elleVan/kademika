@@ -6,6 +6,10 @@ import tanks.helpers.Direction;
 import tanks.fixed.BattleField;
 import tanks.mobile.AbstractTank;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class BT7 extends AbstractTank {
@@ -13,24 +17,14 @@ public class BT7 extends AbstractTank {
     public BT7(BattleField bf) {
         super(bf);
         speed = super.getSpeed() / 2;
+        setImages(createImages());
     }
 
     public BT7(BattleField bf, int x, int y, Direction direction) {
         super(bf, x, y, direction);
         speed = super.getSpeed() / 2;
-        setImageName("tankBlue");
+        setImages(createImages());
     }
-
-//    @Override
-//    public Action setUp() {
-//        Object action = buildPathsPart(4 * 64, 8 * 64);
-//        while (!(action instanceof Action)) {
-//            turn((Direction) action);
-//            action = buildPathsPart(4 * 64, 8 * 64);
-//        }
-//
-//        return (Action) action;
-//    }
 
     @Override
     public Action setUp() {
@@ -44,5 +38,18 @@ public class BT7 extends AbstractTank {
             step = 0;
         }
         return (Action) getPathAll().get(step++);
+    }
+
+    public Image[] createImages() {
+        Image[] array = new Image[5];
+        try {
+            array[1] = ImageIO.read(new File("tankBlue-U.png"));
+            array[2] = ImageIO.read(new File("tankBlue-D.png"));
+            array[3] = ImageIO.read(new File("tankBlue-L.png"));
+            array[4] = ImageIO.read(new File("tankBlue-R.png"));
+        } catch (IOException e) {
+            System.err.println("Can't find imageName");
+        }
+        return array;
     }
 }
