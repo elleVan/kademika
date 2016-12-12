@@ -4,6 +4,7 @@ import tanks.fixed.AbstractBFElement;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 
@@ -17,5 +18,20 @@ public class Water extends AbstractBFElement {
         } catch (IOException e) {
             System.err.println("Can't find image");
         }
+    }
+
+    @Override
+    public void draw(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        Composite before = g2.getComposite();
+        Composite trans = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f);
+        g2.setComposite(trans);
+        g2.drawImage(getImage(), this.getX(), this.getY(), new ImageObserver() {
+            @Override
+            public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+                return false;
+            }
+        });
+        g2.setComposite(before);
     }
 }
