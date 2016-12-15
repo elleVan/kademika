@@ -13,11 +13,6 @@ public class Water extends AbstractBFElement {
     public Water(int x, int y) {
         super(x, y);
         setColor(Color.cyan);
-        try {
-            setImage(ImageIO.read(new File("water.jpg")));
-        } catch (IOException e) {
-            System.err.println("Can't find image");
-        }
     }
 
     @Override
@@ -33,5 +28,15 @@ public class Water extends AbstractBFElement {
             }
         });
         g2.setComposite(before);
+    }
+
+    @Override
+    public void addImage() {
+        super.addImage();
+        try {
+            setImage(ImageIO.read(new File("water.jpg")));
+        } catch (IOException e) {
+            System.err.println("Can't find image");
+        }
     }
 }

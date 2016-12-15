@@ -17,14 +17,12 @@ public class T34 extends AbstractTank {
         super(bf);
         colorTank = new Color(0, 210, 0);
         colorTower = new Color(255, 220, 0);
-        setImages(createImages());
     }
 
     public T34(BattleField bf, int x, int y, Direction direction) {
         super(bf, x, y, direction);
         colorTank = new Color(0, 210, 0);
         colorTower = new Color(255, 220, 0);
-        setImages(createImages());
     }
 
     private Object[] actions = new Object[] {
@@ -59,5 +57,10 @@ public class T34 extends AbstractTank {
             System.err.println("Can't find imageName");
         }
         return array;
+    }
+
+    @Override
+    public void addImages() {
+        setImages(createImages());
     }
 }

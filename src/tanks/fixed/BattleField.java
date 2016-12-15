@@ -58,14 +58,19 @@ public class BattleField implements Drawable {
 
                 if (battleField[i][j].trim().isEmpty()) {
                     battleFieldObj[i][j] = new Blank(x, y);
+                    battleFieldObj[i][j].addImage();
                 } else if (battleField[i][j].equals("B")) {
                     battleFieldObj[i][j] = new Brick(x, y);
+                    battleFieldObj[i][j].addImage();
                 } else if (battleField[i][j].equals("E")) {
                     battleFieldObj[i][j] = new Eagle(x, y);
+                    battleFieldObj[i][j].addImage();
                 } else if (battleField[i][j].equals("R")) {
                     battleFieldObj[i][j] = new Rock(x, y);
+                    battleFieldObj[i][j].addImage();
                 } else if (battleField[i][j].equals("W")) {
                     battleFieldObj[i][j] = new Water(x, y);
+                    battleFieldObj[i][j].addImage();
                 }
             }
         }

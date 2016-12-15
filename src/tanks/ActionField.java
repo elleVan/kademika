@@ -32,6 +32,7 @@ public class ActionField extends JPanel {
     public ActionField() {
         bf = new BattleField();
         defender = new T34(bf);
+        defender.addImages();
         bullet = new Bullet(defender, -100, -100, Direction.NONE);
 
         newAggressor();
@@ -70,8 +71,9 @@ public class ActionField extends JPanel {
         String aggrCoord = getRandomEmptyQuadrantInTheTopXY();
 //        aggressor = new BT7(bf, Integer.parseInt(aggrCoord.split("_")[0]),
 //                Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
-        aggressor = new BT7(bf, 0, 64, Direction.DOWN);
+        aggressor = new BT7(bf, 512, 0, Direction.DOWN);
         aggressor.setAf(this);
+        aggressor.addImages();
     }
 
     private String getCoordinatesAggressor() {
@@ -179,8 +181,7 @@ public class ActionField extends JPanel {
     }
 
     public void processFire(Bullet bullet) throws InterruptedException {
-            this.bullet = bullet;
-
+        this.bullet = bullet;
 
         int step = Bullet.STEP;
         Direction direction = bullet.getDirection();

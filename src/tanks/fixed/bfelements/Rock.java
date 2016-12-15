@@ -13,15 +13,20 @@ public class Rock extends AbstractBFElement implements Destroyable {
     public Rock(int x, int y) {
         super(x, y);
         setColor(Color.gray);
-        try {
-            setImage(ImageIO.read(new File("rock.jpg")));
-        } catch (IOException e) {
-            System.err.println("Can't find image");
-        }
     }
 
     @Override
     public void destroy() {
         setDestroyed(true);
+    }
+
+    @Override
+    public void addImage() {
+        super.addImage();
+        try {
+            setImage(ImageIO.read(new File("rock.jpg")));
+        } catch (IOException e) {
+            System.err.println("Can't find image");
+        }
     }
 }

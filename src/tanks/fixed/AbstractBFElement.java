@@ -22,11 +22,6 @@ public class AbstractBFElement implements Drawable {
     public AbstractBFElement(int x, int y) {
         this.x = x;
         this.y = y;
-        try {
-            imageBlank = ImageIO.read(new File("blank.jpg"));
-        } catch (IOException e) {
-            System.err.println("Can't find imageName");
-        }
     }
 
     @Override
@@ -46,6 +41,14 @@ public class AbstractBFElement implements Drawable {
                     return false;
                 }
             });
+        }
+    }
+
+    public void addImage() {
+        try {
+            imageBlank = ImageIO.read(new File("blank.jpg"));
+        } catch (IOException e) {
+            System.err.println("Can't find imageName");
         }
     }
 

@@ -1,6 +1,5 @@
 package tanks.mobile;
 
-import lessonsJD.lesson1.Tank;
 import tanks.helpers.Destroyable;
 import tanks.helpers.Direction;
 import tanks.helpers.Drawable;

@@ -13,15 +13,20 @@ public class Eagle extends AbstractBFElement implements Destroyable{
     public Eagle(int x, int y) {
         super(x, y);
         setColor(Color.orange);
-        try {
-            setImage(ImageIO.read(new File("eagle.png")));
-        } catch (IOException e) {
-            System.err.println("Can't find image");
-        }
     }
 
     @Override
     public void destroy() {
         setDestroyed(true);
+    }
+
+    @Override
+    public void addImage() {
+        super.addImage();
+        try {
+            setImage(ImageIO.read(new File("eagle.png")));
+        } catch (IOException e) {
+            System.err.println("Can't find image");
+        }
     }
 }

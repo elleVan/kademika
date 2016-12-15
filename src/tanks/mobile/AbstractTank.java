@@ -41,7 +41,9 @@ public abstract class AbstractTank implements Tank {
     private Set<Object> banned = new HashSet<>();
 
     private List<Object> path;
+    private List<Object> coordinates;
     private List<Object> pathAll = new ArrayList<>();
+    private List<Object> coordinatesAll = new ArrayList<>();
     private List<Object> unfinished = new ArrayList<>();
     private List<Object> paths = new ArrayList<>();
 
@@ -87,6 +89,7 @@ public abstract class AbstractTank implements Tank {
             tank.pathAll.add(Action.NONE);
         }
         result.put("pathAll", tank.pathAll);
+        result.put("coordinatesAll", tank.coordinatesAll);
         result.put("unfinished", tank.unfinished);
 
         return result;
@@ -147,6 +150,7 @@ public abstract class AbstractTank implements Tank {
         Direction firstDirection = direction;
 
         path = new ArrayList<>();
+        coordinates = new ArrayList<>();
 
         if (x < destX && path.size() == 0) {
             if (!banned.contains(Direction.RIGHT)) {
@@ -188,17 +192,19 @@ public abstract class AbstractTank implements Tank {
             turn((Direction) path.get(0));
             pathAll.add(path.get(0));
             path.remove(0);
+            coordinatesAll.add(coordinates.get(0));
+            coordinates.remove(0);
         }
 
         if (path.size() == 0) {
             path.add(Action.NONE);
-            pathAll.add(Action.NONE);
+            coordinates.add(this.x + "_" + this.y);
         }
 
         x = firstX;
         y = firstY;
 
-        if ((path.get(0) instanceof Action) && (Action) path.get(0) == Action.MOVE) {
+        if ((path.get(0) instanceof Action) && path.get(0) == Action.MOVE) {
             if (direction == Direction.UP || direction == Direction.DOWN) {
                 banned.remove(Direction.LEFT);
                 banned.remove(Direction.RIGHT);
@@ -208,12 +214,14 @@ public abstract class AbstractTank implements Tank {
             }
         }
         pathAll.add(path.get(0));
+        coordinatesAll.add(coordinates.get(0));
         return path.get(0);
     }
 
     public int helper(Direction direction, int a, int sign) {
         if (this.direction != direction) {
             path.add(direction);
+            coordinates.add(this.x + "_" + this.y);
             this.direction = direction;
         }
         Direction firstDirection;
@@ -266,6 +274,7 @@ public abstract class AbstractTank implements Tank {
 
         if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction) ) {
             path.add(Action.FIRE);
+            coordinates.add(this.x + "_" + this.y);
         } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
                 (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
             loop();
@@ -274,12 +283,13 @@ public abstract class AbstractTank implements Tank {
         if (possible.size() == 1) {
             banned = new HashSet<>();
             path.add(possible.first());
-
+            coordinates.add(this.x + "_" + this.y);
             this.direction = possible.first();
             bf.setDeadEnd(x, y, this);
         }
 
-            path.add(Action.MOVE);
+        path.add(Action.MOVE);
+        coordinates.add(this.x + "_" + this.y);
 
         return a + BattleField.Q_SIZE * sign;
     }
@@ -298,12 +308,63 @@ public abstract class AbstractTank implements Tank {
         map.put("path", new ArrayList<>(pathAll));
         map.put("banned", new HashSet<>(banned));
         if (this.direction == Direction.LEFT || this.direction == Direction.RIGHT) {
-//            ((List) map.get("path")).add(Direction.UP);
-//            ((List) map.get("path")).add(Action.NONE);
-//            ((Set) map.get("banned")).add(Direction.DOWN);
-//            unfinished.add(map);
+
+            List<Object> mapPath = ((List) map.get("path"));
+            Set<Object> mapBanned = ((Set) map.get("banned"));
+
+            direction = Direction.UP;
+            bannedDirection = Direction.DOWN;
+            mapPath.add(direction);
+//            mapPath.add(Action.NONE);
+            mapBanned.add(bannedDirection);
 
 
+            if (!mapBanned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
+                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)))) {
+                mapPath.add(direction);
+//                coordinates.add(this.x + "_" + this.y);
+                mapBanned.add(bannedDirection);
+                this.direction = direction;
+                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
+                    mapPath.add(Action.FIRE);
+//                    coordinates.add(this.x + "_" + this.y);
+                }
+            } else if (!mapBanned.contains(bannedDirection) && !(!bf.isQuadrantOnTheFieldXY(x, y, bannedDirection) ||
+                    (bf.isOccupied(x, y, bannedDirection) && !isNextQuadrantDestroyable(x, y, bannedDirection)))) {
+                direction = Direction.DOWN;
+                bannedDirection = Direction.UP;
+                mapPath.add(direction);
+//                coordinates.add(this.x + "_" + this.y);
+                mapBanned.add(bannedDirection);
+                this.direction = direction;
+                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
+                    mapPath.add(Action.FIRE);
+//                    coordinates.add(this.x + "_" + this.y);
+                }
+            } else {
+                Direction direction1;
+                Direction bannedDirection1;
+                if (initDirection == Direction.LEFT) {
+                    direction1 = Direction.RIGHT;
+                    bannedDirection1 = Direction.LEFT;
+                } else {
+                    direction1 = Direction.LEFT;
+                    bannedDirection1 = Direction.RIGHT;
+                }
+                if (!mapBanned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
+                    mapPath.add(direction1);
+//                    coordinates.add(this.x + "_" + this.y);
+                    mapBanned.add(bannedDirection1);
+                    this.direction = direction1;
+                    if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
+                        mapPath.add(Action.FIRE);
+//                        coordinates.add(this.x + "_" + this.y);
+                    }
+                }
+            }
+            mapPath.add(Action.MOVE);
+            unfinished.add(map);
 // if (!bannedTurn.contains(Direction.UP)) {
 //                ((List) map.get("path")).add(Direction.UP);
 //                ((List) map.get("path")).add(Action.NONE);
@@ -326,20 +387,24 @@ public abstract class AbstractTank implements Tank {
             if (!banned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
                     (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)))) {
                 path.add(direction);
+                coordinates.add(this.x + "_" + this.y);
                 banned.add(bannedDirection);
                 this.direction = direction;
                 if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
                     path.add(Action.FIRE);
+                    coordinates.add(this.x + "_" + this.y);
                 }
             } else if (!banned.contains(Direction.UP) && !(!bf.isQuadrantOnTheFieldXY(x, y, Direction.UP) ||
                     (bf.isOccupied(x, y, Direction.UP) && !isNextQuadrantDestroyable(x, y, Direction.UP)))) {
                 direction = Direction.UP;
                 bannedDirection = Direction.DOWN;
                 path.add(direction);
+                coordinates.add(this.x + "_" + this.y);
                 banned.add(bannedDirection);
                 this.direction = direction;
                 if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
                     path.add(Action.FIRE);
+                    coordinates.add(this.x + "_" + this.y);
                 }
             } else {
                 Direction direction1;
@@ -354,10 +419,12 @@ public abstract class AbstractTank implements Tank {
                 if (!banned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
                         (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
                     path.add(direction1);
+                    coordinates.add(this.x + "_" + this.y);
                     banned.add(bannedDirection1);
                     this.direction = direction1;
                     if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
                         path.add(Action.FIRE);
+                        coordinates.add(this.x + "_" + this.y);
                     }
                 }
             }
@@ -365,10 +432,62 @@ public abstract class AbstractTank implements Tank {
 
 
         } else {
-//                ((List) map.get("path")).add(Direction.RIGHT);
-//                ((List) map.get("path")).add(Action.NONE);
-//                ((Set) map.get("banned")).add(Direction.LEFT);
-//                unfinished.add(map);
+            List<Object> mapPath = ((List) map.get("path"));
+            Set<Object> mapBanned = ((Set) map.get("banned"));
+
+            direction = Direction.RIGHT;
+            bannedDirection = Direction.LEFT;
+            mapPath.add(direction);
+//            mapPath.add(Action.NONE);
+            mapBanned.add(bannedDirection);
+
+
+            if (!mapBanned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
+                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)))) {
+                mapPath.add(direction);
+//                coordinates.add(this.x + "_" + this.y);
+                mapBanned.add(bannedDirection);
+                this.direction = direction;
+                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
+                    mapPath.add(Action.FIRE);
+//                    coordinates.add(this.x + "_" + this.y);
+                }
+            } else if (!mapBanned.contains(bannedDirection) && !(!bf.isQuadrantOnTheFieldXY(x, y, bannedDirection) ||
+                    (bf.isOccupied(x, y, bannedDirection) && !isNextQuadrantDestroyable(x, y, bannedDirection)))) {
+                direction = Direction.LEFT;
+                bannedDirection = Direction.RIGHT;
+                mapPath.add(direction);
+//                coordinates.add(this.x + "_" + this.y);
+                mapBanned.add(bannedDirection);
+                this.direction = direction;
+                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
+                    mapPath.add(Action.FIRE);
+//                    coordinates.add(this.x + "_" + this.y);
+                }
+            } else {
+                Direction direction1;
+                Direction bannedDirection1;
+                if (initDirection == Direction.UP) {
+                    direction1 = Direction.DOWN;
+                    bannedDirection1 = Direction.UP;
+                } else {
+                    direction1 = Direction.UP;
+                    bannedDirection1 = Direction.DOWN;
+                }
+                if (!mapBanned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
+                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
+                    mapPath.add(direction1);
+//                    coordinates.add(this.x + "_" + this.y);
+                    mapBanned.add(bannedDirection1);
+                    this.direction = direction1;
+                    if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
+                        mapPath.add(Action.FIRE);
+//                        coordinates.add(this.x + "_" + this.y);
+                    }
+                }
+            }
+            mapPath.add(Action.MOVE);
+            unfinished.add(map);
 
 //            if (bf.isOccupied(x, y, Direction.RIGHT) && isNextQuadrantDestroyable(x, y, Direction.RIGHT)) {
 //                ((List) map.get("path")).add(Action.FIRE);
@@ -384,10 +503,12 @@ public abstract class AbstractTank implements Tank {
             if (!banned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
                     (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))))  {
                 path.add(direction);
+                coordinates.add(this.x + "_" + this.y);
                 banned.add(bannedDirection);
                 this.direction = direction;
                 if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction) && !banned.contains(direction)) {
                     path.add(Action.FIRE);
+                    coordinates.add(this.x + "_" + this.y);
                 }
             } else if (!banned.contains(Direction.RIGHT) && !(!bf.isQuadrantOnTheFieldXY(x, y, Direction.RIGHT) ||
                     (bf.isOccupied(x, y, Direction.RIGHT) && !isNextQuadrantDestroyable(x, y, Direction.RIGHT)))) {
@@ -395,10 +516,12 @@ public abstract class AbstractTank implements Tank {
                 direction = Direction.RIGHT;
                 bannedDirection = Direction.LEFT;
                 path.add(direction);
+                coordinates.add(this.x + "_" + this.y);
                 banned.add(bannedDirection);
                 this.direction = direction;
                 if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
                     path.add(Action.FIRE);
+                    coordinates.add(this.x + "_" + this.y);
                 }
             } else {
                 Direction direction1;
@@ -415,10 +538,12 @@ public abstract class AbstractTank implements Tank {
                 if (!banned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
                         (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
                     path.add(direction1);
+                    coordinates.add(this.x + "_" + this.y);
                     banned.add(bannedDirection1);
                     this.direction = direction1;
                     if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
                         path.add(Action.FIRE);
+                        coordinates.add(this.x + "_" + this.y);
                     } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
                             (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
 
@@ -433,6 +558,45 @@ public abstract class AbstractTank implements Tank {
 
     public List<Object> manager(int destX, int destY) throws InterruptedException {
         HashMap<String, List<Object>> map = buildPath(destX, destY);
+        List<Object> coord = map.get("coordinatesAll");
+        List<Object> coordSort = new ArrayList<>();
+        int first = map.get("pathAll").size();
+
+//        int l = 0;
+//        coordSort.add(new ArrayList<>());
+//        ((ArrayList) coordSort.get(0)).add(coord.get(0));
+//        for (int i = 1; i < coord.size(); i++) {
+//            if (!coord.get(i).equals(coord.get(i - 1))) {
+//                l++;
+//                coordSort.add(new ArrayList<>());
+//            }
+//            ((ArrayList) coordSort.get(l)).add(coord.get(i));
+//        }
+//
+//        for (int i = 0; i < coordSort.size() - 1; i++) {
+//            for (int j = i + 1; j < coordSort.size(); j++) {
+//                if (((ArrayList) coordSort.get(i)).get(0).equals(((ArrayList) coordSort.get(j)).get(0))) {
+//                    int init = 0;
+//                    for (int y = 0; y < i; y++) {
+//                        init += ((ArrayList)coordSort.get(y)).size();
+//                    }
+//                    int size = 0;
+//                    for (int k = i; k < j; k++) {
+//
+//                        for (int h = 0; h < ((ArrayList) coordSort.get(k)).size(); h++) {
+//                            size++;
+//                        }
+//
+//                    }
+//                    for (int u = 0; u < size; u++) {
+//                        map.get("coordinatesAll").remove(init);
+//                        map.get("pathAll").remove(init);
+//                    }
+//                    i = j;
+//                    break;
+//                }
+//            }
+//        }
         paths.add(map.get("pathAll"));
         while (!onlyNulls(map.get("unfinished"))) {
             for (int i = 0; i < map.get("unfinished").size(); i++) {
@@ -441,13 +605,24 @@ public abstract class AbstractTank implements Tank {
                     HashMap<String, List<Object>> mapTank = tank.buildPath(destX, destY);
                     paths.add(mapTank.get("pathAll"));
                     for (Object el : mapTank.get("unfinished")) {
-                        map.get("unfinished").add(el);
+                        if (map.get("unfinished").size() < 50) {
+                            map.get("unfinished").add(el);
+                        }
                     }
                     map.get("unfinished").set(i, null);
                 }
             }
         }
-        return (List<Object>) paths.get(0);
+
+        int minIdx = 0;
+        for (int i = 0; i < paths.size(); i++) {
+            if (((ArrayList) paths.get(i)).size() < first) {
+                first = ((ArrayList) paths.get(i)).size();
+                minIdx = i;
+            }
+        }
+
+        return (List<Object>) paths.get(minIdx);
     }
 
     public boolean onlyNulls(Collection collection) {
@@ -525,6 +700,10 @@ public abstract class AbstractTank implements Tank {
         if (!destroyed) {
             g.drawImage(images[direction.ordinal()], this.getX(), this.getY(), 64, 64, null);
         }
+    }
+
+    public void addImages() {
+
     }
 
     @Override

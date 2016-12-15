@@ -17,13 +17,11 @@ public class BT7 extends AbstractTank {
     public BT7(BattleField bf) {
         super(bf);
         speed = super.getSpeed() / 2;
-        setImages(createImages());
     }
 
     public BT7(BattleField bf, int x, int y, Direction direction) {
         super(bf, x, y, direction);
         speed = super.getSpeed() / 2;
-        setImages(createImages());
     }
 
     @Override
@@ -51,5 +49,10 @@ public class BT7 extends AbstractTank {
             System.err.println("Can't find imageName");
         }
         return array;
+    }
+
+    @Override
+    public void addImages() {
+        setImages(createImages());
     }
 }
