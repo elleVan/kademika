@@ -3,10 +3,7 @@ package tanks.mobile;
 import tanks.*;
 import tanks.fixed.AbstractBFElement;
 import tanks.fixed.BattleField;
-import tanks.fixed.bfelements.Blank;
-import tanks.fixed.bfelements.DeadEnd;
-import tanks.fixed.bfelements.Rock;
-import tanks.fixed.bfelements.Water;
+import tanks.fixed.bfelements.*;
 import tanks.helpers.Action;
 import tanks.helpers.Destroyable;
 import tanks.helpers.Direction;
@@ -40,6 +37,11 @@ public abstract class AbstractTank implements Tank {
 
     private Set<Object> banned = new HashSet<>();
 
+    private List<Object> bfElements;
+    private int[] bfIds;
+    private List<Object> pathNew;
+    List<Object> nexts;
+
     private List<Object> path;
     private List<Object> coordinates;
     private List<Object> pathAll = new ArrayList<>();
@@ -66,572 +68,134 @@ public abstract class AbstractTank implements Tank {
         this.direction = direction;
     }
 
-//    public List<Object> choosePath(int destX, int destY) {
-//        ArrayList<Object> variants = new ArrayList<>();
-//
-//
-//    }
+    public List<Object> findPath(int a, int b) {
+        pathNew = new ArrayList<>();
+        nexts = new ArrayList<>();
+        bfElements = new ArrayList<>();
+        bfIds = new int[81];
+        String quadrant = bf.getQuadrant(x, y);
+        int destX = Integer.parseInt(quadrant.split("_")[0]);
+        int destY = Integer.parseInt(quadrant.split("_")[1]);
+        bfElements.add(bf.scanQuadrant(destX, destY));
+        bfIds[0] = 0;
+        AbstractBFElement destination = bf.scanQuadrant(a, b);
 
-    public HashMap<String, List<Object>> buildPath(int destX, int destY) throws InterruptedException {
-        HashMap<String, List<Object>> result = new HashMap<>();
 
+        int finish = 0;
+        int distance = 1;
+        AbstractBFElement current = bf.scanQuadrant(destX, destY);
+        nexts = findNext(current);
 
-        AbstractTank tank = new BT7(new BattleField(bf.getBattleFieldObj()), x, y, direction);
-        tank.setAf(this.af);
-        tank.setPathAll(this.pathAll);
-        tank.banned = this.banned;
-        ArrayList<Object> list = new ArrayList<>();
-        while (tank.x != destX || tank.y != destY) {
-            list.add(tank.buildPathsPart(destX, destY));
-            tank.getAf().processAction(tank.transform(list), tank);
+        for (int i = 1; i < 81 && finish == 0; i++) {
+
+            for (Object el : nexts) {
+                bfElements.add(el);
+                bfIds[bfElements.size() - 1] = distance;
+
+                if (destination.equals(el)) {
+                    finish = 1;
+                }
+            }
+
+            if (bfIds[i - 1] != bfIds[i]) {
+                distance++;
+            }
+
+            nexts = findNext((AbstractBFElement) bfElements.get(i));
         }
-        if (tank.pathAll.size() == 0) {
-            tank.pathAll.add(Action.NONE);
-        }
-        result.put("pathAll", tank.pathAll);
-        result.put("coordinatesAll", tank.coordinatesAll);
-        result.put("unfinished", tank.unfinished);
 
+        if (bfElements.contains(destination)) {
+
+            List<Object> nextsBack = findNextBack(destination);
+            int last = bfIds[bfElements.indexOf(destination)];
+            for (int k = 0; k <= last; k++) {
+                pathNew.add(null);
+            }
+            pathNew.set(last, destination);
+            pathNew.set(0, bf.scanQuadrant(destX, destY));
+            for (int j = last - 1; j > 0; j--) {
+                for (Object el : nextsBack) {
+                    if (bfIds[bfElements.indexOf(el)] == j) {
+                        pathNew.set(j, el);
+                        break;
+                    }
+                }
+
+                nextsBack = findNextBack((AbstractBFElement) pathNew.get(j));
+            }
+        }
+
+        return pathNew;
+    }
+
+    public List<Object> findNext(AbstractBFElement bfElement) {
+        List<Object> result = new ArrayList<>();
+        AbstractBFElement next;
+        for (Direction dir : Direction.values()) {
+            if (isNextQuadrantPassable(bfElement.getX(), bfElement.getY(), dir)) {
+                next = getNext(bfElement.getX(), bfElement.getY(), dir);
+                if (!bfElements.contains(next)) {
+                    result.add(next);
+                    nexts.add(next);
+                }
+            }
+        }
         return result;
     }
 
-    public AbstractTank createVirtualTank(HashMap<String, Object> mapTank) throws InterruptedException {
-        List<Object> pathTank = (List) mapTank.get("path");
-        AbstractTank tank = new BT7(new BattleField(bf.getBattleFieldObj()), x, y, direction);
-        tank.setAf(this.af);
-        tank.pathAll = pathTank;
-        do {
-            tank.getAf().processAction(tank.transform(pathTank), tank);
-        } while (tank.getStep() < pathTank.size());
-        tank.banned = (Set) mapTank.get("banned");
-        return tank;
-    }
-
-    public Action transform(List<Object> list) {
-
-        if (step >= list.size()) {
-            step = 0;
+    public List<Object> findNextBack(AbstractBFElement bfElement) {
+        List<Object> result = new ArrayList<>();
+        AbstractBFElement next;
+        for (Direction dir : Direction.values()) {
+            if (isNextQuadrantPassable(bfElement.getX(), bfElement.getY(), dir)) {
+                next = getNext(bfElement.getX(), bfElement.getY(), dir);
+                result.add(next);
+            }
         }
-
-        while (!(list.get(step) instanceof Action)) {
-            turn((Direction) list.get(step++));
-        }
-
-        if (step >= list.size()) {
-            step = 0;
-        }
-        return (Action) list.get(step++);
-    }
-
-    public HashMap<String, List<Object>> createFirstUnfinished(int destX, int destY) throws InterruptedException {
-        HashMap<String, List<Object>> result = new HashMap<>();
-
-
-        AbstractTank tank = new BT7(new BattleField(bf.getBattleFieldObj()), x, y, direction);
-        tank.setAf(this.af);
-        tank.setPathAll(this.pathAll);
-        ArrayList<Object> list = new ArrayList<>();
-        while (tank.x != destX || tank.y != destY) {
-            list.add(tank.buildPathsPart(destX, destY));
-            tank.getAf().processAction(tank.transform(list), tank);
-        }
-        if (tank.pathAll.size() == 0) {
-            tank.pathAll.add(Action.NONE);
-        }
-        result.put("pathAll", tank.pathAll);
-        result.put("unfinished", tank.unfinished);
-
         return result;
     }
 
-    public Object buildPathsPart(int destX, int destY) {
-        int firstX = x;
-        int firstY = y;
-        Direction firstDirection = direction;
-
-        path = new ArrayList<>();
-        coordinates = new ArrayList<>();
-
-        if (x < destX && path.size() == 0) {
-            if (!banned.contains(Direction.RIGHT)) {
-                x = helper(Direction.RIGHT, x, 1);
-            }
-        }
-        if (x > destX && path.size() == 0) {
-            if (!banned.contains(Direction.LEFT)) {
-                x = helper(Direction.LEFT, x, -1);
-            }
-
-        }
-        if (y < destY && path.size() == 0) {
-            if (!banned.contains(Direction.DOWN)) {
-                y = helper(Direction.DOWN, y, 1);
-            }
-        }
-        if (x < destX && path.size() == 0) {
-            if (!banned.contains(Direction.LEFT)) {
-                x = helper(Direction.LEFT, x, 1);
-            }
-        }
-        if (x > destX && path.size() == 0) {
-            if (!banned.contains(Direction.RIGHT)) {
-                x = helper(Direction.RIGHT, x, -1);
-            }
-
-        }
-        if (y < destY && path.size() == 0) {
-            if (!banned.contains(Direction.UP)) {
-                y = helper(Direction.UP, y, 1);
-            }
-        }
-
-
-        direction = firstDirection;
-
-        while (!path.isEmpty() && path.get(0) instanceof Direction) {
-            turn((Direction) path.get(0));
-            pathAll.add(path.get(0));
-            path.remove(0);
-            coordinatesAll.add(coordinates.get(0));
-            coordinates.remove(0);
-        }
-
-        if (path.size() == 0) {
-            path.add(Action.NONE);
-            coordinates.add(this.x + "_" + this.y);
-        }
-
-        x = firstX;
-        y = firstY;
-
-        if ((path.get(0) instanceof Action) && path.get(0) == Action.MOVE) {
-            if (direction == Direction.UP || direction == Direction.DOWN) {
-                banned.remove(Direction.LEFT);
-                banned.remove(Direction.RIGHT);
-            } else {
-                banned.remove(Direction.UP);
-                banned.remove(Direction.DOWN);
-            }
-        }
-        pathAll.add(path.get(0));
-        coordinatesAll.add(coordinates.get(0));
-        return path.get(0);
-    }
-
-    public int helper(Direction direction, int a, int sign) {
-        if (this.direction != direction) {
-            path.add(direction);
-            coordinates.add(this.x + "_" + this.y);
-            this.direction = direction;
-        }
-        Direction firstDirection;
-        Direction firstBannedDirection;
-
-        TreeSet<Direction> possible = new TreeSet<>();
-        possible.add(Direction.UP);
-        possible.add(Direction.DOWN);
-        possible.add(Direction.LEFT);
-        possible.add(Direction.RIGHT);
-
-        if (!bf.isQuadrantOnTheFieldXY(x, y, Direction.UP) ||
-                (bf.isOccupied(x, y, Direction.UP) && !isNextQuadrantDestroyable(x, y, Direction.UP))) {
-            possible.remove(Direction.UP);
-        }
-        if (!bf.isQuadrantOnTheFieldXY(x, y, Direction.DOWN) ||
-                (bf.isOccupied(x, y, Direction.DOWN) && !isNextQuadrantDestroyable(x, y, Direction.DOWN))) {
-            possible.remove(Direction.DOWN);
-        }
-        if (!bf.isQuadrantOnTheFieldXY(x, y, Direction.LEFT) ||
-                (bf.isOccupied(x, y, Direction.LEFT) && !isNextQuadrantDestroyable(x, y, Direction.LEFT))) {
-            possible.remove(Direction.LEFT);
-        }
-        if (!bf.isQuadrantOnTheFieldXY(x, y, Direction.RIGHT) ||
-                (bf.isOccupied(x, y, Direction.RIGHT) && !isNextQuadrantDestroyable(x, y, Direction.RIGHT))) {
-            possible.remove(Direction.RIGHT);
-        }
-
-
-
-        int i = pathAll.size();
-        if (i != 0) {
-            for (; pathAll.get(i - 1) instanceof Action; i--) {
-            }
-            firstDirection = (Direction) pathAll.get(i - 1);
+    public AbstractBFElement getNext(int initX, int initY, Direction dir) {
+        if (dir == Direction.UP) {
+            initY -= BattleField.Q_SIZE;
+        } else if (dir == Direction.DOWN) {
+            initY += BattleField.Q_SIZE;
+        } else if (dir == Direction.LEFT) {
+            initX -= BattleField.Q_SIZE;
         } else {
-            firstDirection = possible.first();
+            initX += BattleField.Q_SIZE;
         }
 
-        if (firstDirection == Direction.UP) {
-            firstBannedDirection = Direction.DOWN;
-        } else if (firstDirection == Direction.DOWN) {
-            firstBannedDirection = Direction.UP;
-        } else if (firstDirection == Direction.LEFT) {
-            firstBannedDirection = Direction.RIGHT;
-        } else {
-            firstBannedDirection = Direction.LEFT;
-        }
-        banned.add(firstBannedDirection);
-
-        if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction) ) {
-            path.add(Action.FIRE);
-            coordinates.add(this.x + "_" + this.y);
-        } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))) {
-            loop();
-        }
-
-        if (possible.size() == 1) {
-            banned = new HashSet<>();
-            path.add(possible.first());
-            coordinates.add(this.x + "_" + this.y);
-            this.direction = possible.first();
-            bf.setDeadEnd(x, y, this);
-        }
-
-        path.add(Action.MOVE);
-        coordinates.add(this.x + "_" + this.y);
-
-        return a + BattleField.Q_SIZE * sign;
+        return bf.scanQuadrant(initX / BattleField.Q_SIZE, initY / BattleField.Q_SIZE);
     }
 
-    public void loop() {
-        Direction direction;
-        Direction bannedDirection;
-
-        Direction initDirection = this.direction;
-
-
-
-
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("path", new ArrayList<>(pathAll));
-        map.put("banned", new HashSet<>(banned));
-        if (this.direction == Direction.LEFT || this.direction == Direction.RIGHT) {
-
-            List<Object> mapPath = ((List) map.get("path"));
-            Set<Object> mapBanned = ((Set) map.get("banned"));
-
-            direction = Direction.UP;
-            bannedDirection = Direction.DOWN;
-            mapPath.add(direction);
-//            mapPath.add(Action.NONE);
-            mapBanned.add(bannedDirection);
-
-
-            if (!mapBanned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)))) {
-                mapPath.add(direction);
-//                coordinates.add(this.x + "_" + this.y);
-                mapBanned.add(bannedDirection);
-                this.direction = direction;
-                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
-                    mapPath.add(Action.FIRE);
-//                    coordinates.add(this.x + "_" + this.y);
-                }
-            } else if (!mapBanned.contains(bannedDirection) && !(!bf.isQuadrantOnTheFieldXY(x, y, bannedDirection) ||
-                    (bf.isOccupied(x, y, bannedDirection) && !isNextQuadrantDestroyable(x, y, bannedDirection)))) {
-                direction = Direction.DOWN;
-                bannedDirection = Direction.UP;
-                mapPath.add(direction);
-//                coordinates.add(this.x + "_" + this.y);
-                mapBanned.add(bannedDirection);
-                this.direction = direction;
-                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
-                    mapPath.add(Action.FIRE);
-//                    coordinates.add(this.x + "_" + this.y);
-                }
+    public List<Object> generatePathAll() {
+        List<Object> result = new ArrayList<>();
+        for (int i = 1; i < pathNew.size(); i++) {
+            AbstractBFElement destination = (AbstractBFElement) pathNew.get(i);
+            if (destination.getX() < ((AbstractBFElement) pathNew.get(i - 1)).getX()) {
+                result.add(Direction.LEFT);
+            } else if (destination.getX() > ((AbstractBFElement) pathNew.get(i - 1)).getX()) {
+                result.add(Direction.RIGHT);
+            } else if (destination.getY() < ((AbstractBFElement) pathNew.get(i - 1)).getY()) {
+                result.add(Direction.UP);
             } else {
-                Direction direction1;
-                Direction bannedDirection1;
-                if (initDirection == Direction.LEFT) {
-                    direction1 = Direction.RIGHT;
-                    bannedDirection1 = Direction.LEFT;
-                } else {
-                    direction1 = Direction.LEFT;
-                    bannedDirection1 = Direction.RIGHT;
-                }
-                if (!mapBanned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
-                    mapPath.add(direction1);
-//                    coordinates.add(this.x + "_" + this.y);
-                    mapBanned.add(bannedDirection1);
-                    this.direction = direction1;
-                    if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-                        mapPath.add(Action.FIRE);
-//                        coordinates.add(this.x + "_" + this.y);
-                    }
-                }
+                result.add(Direction.DOWN);
             }
-            mapPath.add(Action.MOVE);
-            unfinished.add(map);
-// if (!bannedTurn.contains(Direction.UP)) {
-//                ((List) map.get("path")).add(Direction.UP);
-//                ((List) map.get("path")).add(Action.NONE);
-//                ((Set) map.get("banned")).add(Direction.DOWN);
-//                bannedTurn.add(this.direction);
-//                bannedTurn.add(Direction.UP);
-//                bannedTurn.add(Direction.DOWN);
-//                unfinished.add(map);
-//            }
 
-//            if (bf.isOccupied(x, y, Direction.UP) && isNextQuadrantDestroyable(x, y, Direction.UP)) {
-//                ((List) map.get("path")).add(Action.FIRE);
-//            } else if (!(bf.isOccupied(x, y, Direction.UP) && !isNextQuadrantDestroyable(x, y, Direction.UP))) {
-//                ((List) map.get("path")).add(Action.MOVE);
-//            } else {
-//                ((List) map.get("path")).add(Action.NONE);
-//            }
-            direction = Direction.DOWN;
-            bannedDirection = Direction.UP;
-            if (!banned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)))) {
-                path.add(direction);
-                coordinates.add(this.x + "_" + this.y);
-                banned.add(bannedDirection);
-                this.direction = direction;
-                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
-                    path.add(Action.FIRE);
-                    coordinates.add(this.x + "_" + this.y);
-                }
-            } else if (!banned.contains(Direction.UP) && !(!bf.isQuadrantOnTheFieldXY(x, y, Direction.UP) ||
-                    (bf.isOccupied(x, y, Direction.UP) && !isNextQuadrantDestroyable(x, y, Direction.UP)))) {
-                direction = Direction.UP;
-                bannedDirection = Direction.DOWN;
-                path.add(direction);
-                coordinates.add(this.x + "_" + this.y);
-                banned.add(bannedDirection);
-                this.direction = direction;
-                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
-                    path.add(Action.FIRE);
-                    coordinates.add(this.x + "_" + this.y);
-                }
-            } else {
-                Direction direction1;
-                Direction bannedDirection1;
-                if (initDirection == Direction.LEFT) {
-                    direction1 = Direction.RIGHT;
-                    bannedDirection1 = Direction.LEFT;
-                } else {
-                    direction1 = Direction.LEFT;
-                    bannedDirection1 = Direction.RIGHT;
-                }
-                if (!banned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
-                    path.add(direction1);
-                    coordinates.add(this.x + "_" + this.y);
-                    banned.add(bannedDirection1);
-                    this.direction = direction1;
-                    if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-                        path.add(Action.FIRE);
-                        coordinates.add(this.x + "_" + this.y);
-                    }
+            if (bf.isOccupied(destination.getX(), destination.getY(), (Direction) result.get(0))) {
+                result.add(Action.FIRE);
+                if (destination instanceof Rock) {
+                    result.add(Action.FIRE);
                 }
             }
 
-
-
-        } else {
-            List<Object> mapPath = ((List) map.get("path"));
-            Set<Object> mapBanned = ((Set) map.get("banned"));
-
-            direction = Direction.RIGHT;
-            bannedDirection = Direction.LEFT;
-            mapPath.add(direction);
-//            mapPath.add(Action.NONE);
-            mapBanned.add(bannedDirection);
-
-
-            if (!mapBanned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction)))) {
-                mapPath.add(direction);
-//                coordinates.add(this.x + "_" + this.y);
-                mapBanned.add(bannedDirection);
-                this.direction = direction;
-                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
-                    mapPath.add(Action.FIRE);
-//                    coordinates.add(this.x + "_" + this.y);
-                }
-            } else if (!mapBanned.contains(bannedDirection) && !(!bf.isQuadrantOnTheFieldXY(x, y, bannedDirection) ||
-                    (bf.isOccupied(x, y, bannedDirection) && !isNextQuadrantDestroyable(x, y, bannedDirection)))) {
-                direction = Direction.LEFT;
-                bannedDirection = Direction.RIGHT;
-                mapPath.add(direction);
-//                coordinates.add(this.x + "_" + this.y);
-                mapBanned.add(bannedDirection);
-                this.direction = direction;
-                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
-                    mapPath.add(Action.FIRE);
-//                    coordinates.add(this.x + "_" + this.y);
-                }
-            } else {
-                Direction direction1;
-                Direction bannedDirection1;
-                if (initDirection == Direction.UP) {
-                    direction1 = Direction.DOWN;
-                    bannedDirection1 = Direction.UP;
-                } else {
-                    direction1 = Direction.UP;
-                    bannedDirection1 = Direction.DOWN;
-                }
-                if (!mapBanned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
-                    mapPath.add(direction1);
-//                    coordinates.add(this.x + "_" + this.y);
-                    mapBanned.add(bannedDirection1);
-                    this.direction = direction1;
-                    if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-                        mapPath.add(Action.FIRE);
-//                        coordinates.add(this.x + "_" + this.y);
-                    }
-                }
-            }
-            mapPath.add(Action.MOVE);
-            unfinished.add(map);
-
-//            if (bf.isOccupied(x, y, Direction.RIGHT) && isNextQuadrantDestroyable(x, y, Direction.RIGHT)) {
-//                ((List) map.get("path")).add(Action.FIRE);
-//            } else if (!(bf.isOccupied(x, y, Direction.RIGHT) && !isNextQuadrantDestroyable(x, y, Direction.RIGHT))) {
-//                ((List) map.get("path")).add(Action.MOVE);
-//            } else {
-//                ((List) map.get("path")).add(Action.NONE);
-//            }
-
-                direction = Direction.LEFT;
-                bannedDirection = Direction.RIGHT;
-
-            if (!banned.contains(direction) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction) ||
-                    (bf.isOccupied(x, y, direction) && !isNextQuadrantDestroyable(x, y, direction))))  {
-                path.add(direction);
-                coordinates.add(this.x + "_" + this.y);
-                banned.add(bannedDirection);
-                this.direction = direction;
-                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction) && !banned.contains(direction)) {
-                    path.add(Action.FIRE);
-                    coordinates.add(this.x + "_" + this.y);
-                }
-            } else if (!banned.contains(Direction.RIGHT) && !(!bf.isQuadrantOnTheFieldXY(x, y, Direction.RIGHT) ||
-                    (bf.isOccupied(x, y, Direction.RIGHT) && !isNextQuadrantDestroyable(x, y, Direction.RIGHT)))) {
-
-                direction = Direction.RIGHT;
-                bannedDirection = Direction.LEFT;
-                path.add(direction);
-                coordinates.add(this.x + "_" + this.y);
-                banned.add(bannedDirection);
-                this.direction = direction;
-                if (bf.isOccupied(x, y, direction) && isNextQuadrantDestroyable(x, y, direction)) {
-                    path.add(Action.FIRE);
-                    coordinates.add(this.x + "_" + this.y);
-                }
-            } else {
-                Direction direction1;
-                Direction bannedDirection1;
-                if (initDirection == Direction.UP) {
-                    direction1 = Direction.DOWN;
-                    bannedDirection1 = Direction.UP;
-                } else {
-                    direction1 = Direction.UP;
-                    bannedDirection1 = Direction.DOWN;
-                }
-
-
-                if (!banned.contains(direction1) && !(!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                        (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1)))) {
-                    path.add(direction1);
-                    coordinates.add(this.x + "_" + this.y);
-                    banned.add(bannedDirection1);
-                    this.direction = direction1;
-                    if (bf.isOccupied(x, y, direction1) && isNextQuadrantDestroyable(x, y, direction1)) {
-                        path.add(Action.FIRE);
-                        coordinates.add(this.x + "_" + this.y);
-                    } else if (!bf.isQuadrantOnTheFieldXY(x, y, direction1) ||
-                            (bf.isOccupied(x, y, direction1) && !isNextQuadrantDestroyable(x, y, direction1))) {
-
-                    }
-                }
-
-            }
-
-
-        }
-    }
-
-    public List<Object> manager(int destX, int destY) throws InterruptedException {
-        HashMap<String, List<Object>> map = buildPath(destX, destY);
-        List<Object> coord = map.get("coordinatesAll");
-        List<Object> coordSort = new ArrayList<>();
-        int first = map.get("pathAll").size();
-
-//        int l = 0;
-//        coordSort.add(new ArrayList<>());
-//        ((ArrayList) coordSort.get(0)).add(coord.get(0));
-//        for (int i = 1; i < coord.size(); i++) {
-//            if (!coord.get(i).equals(coord.get(i - 1))) {
-//                l++;
-//                coordSort.add(new ArrayList<>());
-//            }
-//            ((ArrayList) coordSort.get(l)).add(coord.get(i));
-//        }
-//
-//        for (int i = 0; i < coordSort.size() - 1; i++) {
-//            for (int j = i + 1; j < coordSort.size(); j++) {
-//                if (((ArrayList) coordSort.get(i)).get(0).equals(((ArrayList) coordSort.get(j)).get(0))) {
-//                    int init = 0;
-//                    for (int y = 0; y < i; y++) {
-//                        init += ((ArrayList)coordSort.get(y)).size();
-//                    }
-//                    int size = 0;
-//                    for (int k = i; k < j; k++) {
-//
-//                        for (int h = 0; h < ((ArrayList) coordSort.get(k)).size(); h++) {
-//                            size++;
-//                        }
-//
-//                    }
-//                    for (int u = 0; u < size; u++) {
-//                        map.get("coordinatesAll").remove(init);
-//                        map.get("pathAll").remove(init);
-//                    }
-//                    i = j;
-//                    break;
-//                }
-//            }
-//        }
-        paths.add(map.get("pathAll"));
-        while (!onlyNulls(map.get("unfinished"))) {
-            for (int i = 0; i < map.get("unfinished").size(); i++) {
-                if (map.get("unfinished").get(i) instanceof HashMap) {
-                    AbstractTank tank = createVirtualTank((HashMap<String, Object>) map.get("unfinished").get(i));
-                    HashMap<String, List<Object>> mapTank = tank.buildPath(destX, destY);
-                    paths.add(mapTank.get("pathAll"));
-                    for (Object el : mapTank.get("unfinished")) {
-                        if (map.get("unfinished").size() < 50) {
-                            map.get("unfinished").add(el);
-                        }
-                    }
-                    map.get("unfinished").set(i, null);
-                }
-            }
+            result.add(Action.MOVE);
         }
 
-        int minIdx = 0;
-        for (int i = 0; i < paths.size(); i++) {
-            if (((ArrayList) paths.get(i)).size() < first) {
-                first = ((ArrayList) paths.get(i)).size();
-                minIdx = i;
-            }
-        }
+        pathAll = result;
+        return result;
 
-        return (List<Object>) paths.get(minIdx);
-    }
-
-    public boolean onlyNulls(Collection collection) {
-        for (Object el : collection) {
-            if (el != null) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
@@ -666,33 +230,23 @@ public abstract class AbstractTank implements Tank {
         return destroyed;
     }
 
-    public boolean isNextQuadrantDestroyable(int x, int y, Direction direction) {
+    public boolean isNextQuadrantPassable(int initX, int initY, Direction dir) {
 
-        String quadrant = bf.getQuadrant(x, y);
+        String quadrant = bf.getQuadrant(initX, initY);
         int destX = Integer.parseInt(quadrant.split("_")[0]);
         int destY = Integer.parseInt(quadrant.split("_")[1]);
 
-        if (direction == Direction.UP) {
+        if (dir == Direction.UP) {
             destY -= 1;
-        } else if (direction == Direction.DOWN) {
+        } else if (dir == Direction.DOWN) {
             destY += 1;
-        } else if (direction == Direction.LEFT) {
+        } else if (dir == Direction.LEFT) {
             destX -= 1;
         } else {
             destX += 1;
         }
 
-        if (bf.isOccupied(x, y, direction)) {
-            if (((bf.scanQuadrant(destX, destY) instanceof Rock) && !(this instanceof Tiger)) ||
-                    ((bf.scanQuadrant(destX, destY) instanceof DeadEnd) &&
-                            ((DeadEnd) bf.scanQuadrant(destX, destY)).getTank() == this)) {
-                return false;
-            }
-            return true;
-        }
-
-        return false;
-
+        return bf.isQuadrantOnTheField(destX, destY) && !(bf.scanQuadrant(destX, destY) instanceof Rock);
     }
 
     @Override

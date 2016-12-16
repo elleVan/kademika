@@ -33,7 +33,7 @@ public class ActionField extends JPanel {
         bf = new BattleField();
         defender = new T34(bf);
         defender.addImages();
-        bullet = new Bullet(defender, -100, -100, Direction.NONE);
+        bullet = new Bullet(defender, -100, -100, Direction.DOWN);
 
         newAggressor();
 
@@ -52,12 +52,14 @@ public class ActionField extends JPanel {
         while (true) {
             if (!aggressor.isDestroyed() && !defender.isDestroyed()) {
                 if (aggressor.getPathAll().size() == aggressor.getStep()) {
-                    aggressor.setPathAll(aggressor.manager(4 * 64, 8 * 64));
+                    aggressor.findPath(4, 8);
+                    aggressor.setPathAll(aggressor.generatePathAll());
                 }
 
                 for (Object el : aggressor.getPathAll()) {
                     System.out.println(el);
                 }
+                System.out.println("--------------------------------------");
 //                Thread.sleep(5000);
                 processAction(aggressor.setUp(), aggressor);
             }
@@ -251,100 +253,6 @@ public class ActionField extends JPanel {
 
         return false;
     }
-
-    private boolean checkInterception(String object, String quadrant) {
-        int ox = Integer.parseInt(object.split("_")[0]);
-        int oy = Integer.parseInt(object.split("_")[1]);
-
-        int qx = Integer.parseInt(quadrant.split("_")[0]);
-        int qy = Integer.parseInt(quadrant.split("_")[1]);
-
-        if (ox >= 0 && ox < 9 && oy >= 0 && oy < 9) {
-            if (ox == qx && oy == qy) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-//    public String findDirections() throws InterruptedException {
-//
-//        String quadrant = getQuadrant(defender.getX(), defender.getY());
-//        int x = Integer.parseInt(quadrant.split("_")[0]);
-//        int y = Integer.parseInt(quadrant.split("_")[1]);
-//
-//        String borders = findExtremeFilledQuadrants();
-//
-//        int upBorder = Integer.parseInt(borders.split("_")[0]);
-//        int downBorder = Integer.parseInt(borders.split("_")[1]);
-//        int leftBorder = Integer.parseInt(borders.split("_")[2]);
-//        int rightBorder = Integer.parseInt(borders.split("_")[3]);
-//
-//        int moveTo1;
-//        int moveTo2;
-//
-//        if (rightBorder - leftBorder > downBorder - upBorder) {
-//
-//            if (checkBordersToFindDirections(x, leftBorder, rightBorder)) {
-//                moveTo1 = leftBorder;
-//                moveTo2 = rightBorder;
-//            } else {
-//                moveTo1 = rightBorder;
-//                moveTo2 = leftBorder;
-//            }
-//            return Integer.toString(moveTo1) + "_" + Integer.toString(moveTo2) + "_horizontal move";
-//
-//        } else {
-//
-//            if (checkBordersToFindDirections(y, upBorder, downBorder)) {
-//                moveTo1 = upBorder;
-//                moveTo2 = downBorder;
-//            } else {
-//                moveTo1 = downBorder;
-//                moveTo2 = upBorder;
-//            }
-//            return Integer.toString(moveTo1) + "_" + Integer.toString(moveTo2) + "_vertical move";
-//        }
-//
-//    }
-//
-//    private boolean checkBordersToFindDirections(int x, int border_1, int border_2) {
-//        return (border_2 < x || (border_1 < x && x - border_1 < border_2 - x));
-//    }
-//
-//    private String findExtremeFilledQuadrants() {
-//
-//        String quadrant = getQuadrant(defender.getX(), defender.getY());
-//        int x = Integer.parseInt(quadrant.split("_")[0]);
-//        int y = Integer.parseInt(quadrant.split("_")[1]);
-//
-//        int upBorder = y;
-//        int downBorder = y;
-//        int leftBorder = x;
-//        int rightBorder = x;
-//
-//        for (int i = BattleField.Q_MIN; i <= BattleField.Q_MAX; i++) {
-//            for (int j = BattleField.Q_MIN; j <= BattleField.Q_MAX; j++) {
-//                if (!isCellArrayBFEmpty(j, i)) {
-//                    if (j < leftBorder) {
-//                        leftBorder = j;
-//                    }
-//                    if (j > rightBorder) {
-//                        rightBorder = j;
-//                    }
-//                    if (i < upBorder) {
-//                        upBorder = i;
-//                    }
-//                    if (i > downBorder) {
-//                        downBorder = i;
-//                    }
-//                }
-//            }
-//        }
-//
-//        return Integer.toString(upBorder) + "_" + Integer.toString(downBorder) + "_" +
-//                Integer.toString(leftBorder) + "_" + Integer.toString(rightBorder);
-//    }
 
     private boolean isQuadrantOnTheField(int x, int y) {
         return (y >= BattleField.Q_MIN && y <= BattleField.Q_MAX && x >= BattleField.Q_MIN && x <= BattleField.Q_MAX);
