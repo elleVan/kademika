@@ -5,18 +5,13 @@ import tanks.fixed.AbstractBFElement;
 import tanks.fixed.BattleField;
 import tanks.fixed.bfelements.*;
 import tanks.helpers.Action;
-import tanks.helpers.Destroyable;
 import tanks.helpers.Direction;
-import tanks.helpers.Drawable;
 import tanks.mobile.tanks.BT7;
+import tanks.mobile.tanks.T34;
 import tanks.mobile.tanks.Tiger;
 
-import javax.imageio.ImageIO;
 import javax.management.AttributeList;
 import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -35,19 +30,12 @@ public abstract class AbstractTank implements Tank {
     private boolean destroyed;
     protected int step = 0;
 
-    private Set<Object> banned = new HashSet<>();
-
     private List<Object> bfElements;
     private int[] bfIds;
     private List<Object> pathNew;
     List<Object> nexts;
 
-    private List<Object> path;
-    private List<Object> coordinates;
-    private List<Object> pathAll = new ArrayList<>();
-    private List<Object> coordinatesAll = new ArrayList<>();
-    private List<Object> unfinished = new ArrayList<>();
-    private List<Object> paths = new ArrayList<>();
+    private List<Object> pathAll;
 
     protected Color colorTank = new Color(255, 0, 0);
     protected Color colorTower = new Color(0, 255, 0);
@@ -55,7 +43,6 @@ public abstract class AbstractTank implements Tank {
     private Direction direction;
 
     private BattleField bf;
-    private ActionField af;
 
     public AbstractTank(BattleField bf) {
         this(bf, 320, 384, Direction.DOWN);
@@ -66,6 +53,103 @@ public abstract class AbstractTank implements Tank {
         this.x = x;
         this.y = y;
         this.direction = direction;
+        pathAll = new ArrayList<>();
+    }
+
+    public List<Object> detectEnemy() {
+        List<Object> result = new ArrayList<>();
+        if (this instanceof T34) {
+            for (Object el : bf.getTanks()) {
+                if (el instanceof BT7 || el instanceof Tiger) {
+                    result.add(el);
+                }
+            }
+        } else {
+            for (Object el : bf.getTanks()) {
+                if (el instanceof T34) {
+                    result.add(el);
+                }
+            }
+        }
+        return result;
+    }
+
+    public List<Object> turnToEnemy(List<Object> enemies) {
+        List<Object> result = new ArrayList<>();
+        for (Object el : enemies) {
+            AbstractTank enemy = (AbstractTank) el;
+            if (x == enemy.getX() && isQuadrantVisible(enemy.getX(), enemy.getY())) {
+                if (y < enemy.getY()) {
+                    result.add(Direction.DOWN);
+                    return result;
+                } else {
+                    result.add(Direction.UP);
+                    return result;
+                }
+            } else if (y == enemy.getY() && isQuadrantVisible(enemy.getX(), enemy.getY())) {
+                if (x < enemy.getX()) {
+                    result.add(Direction.RIGHT);
+                    return result;
+                } else {
+                    result.add(Direction.LEFT);
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+
+    public boolean isQuadrantVisible(int destX, int destY) {
+        int possibleX = x;
+        int possibleY = y;
+
+        if (x == destX) {
+            if (y < destY) {
+                while (!bf.isOccupied(possibleX, possibleY, Direction.DOWN) && !(possibleY == destY)) {
+                    possibleY += BattleField.Q_SIZE;
+                }
+                if (possibleY == destY) {
+                    return true;
+                }
+            } else {
+                while (!bf.isOccupied(possibleX, possibleY, Direction.UP) && !(possibleY == destY)) {
+                    possibleY -= BattleField.Q_SIZE;
+                }
+                if (possibleY == destY) {
+                    return true;
+                }
+            }
+        } else if (y == destY) {
+            if (x < destX) {
+                while (!bf.isOccupied(possibleX, possibleY, Direction.RIGHT) && !(possibleX == destX)) {
+                    possibleX += BattleField.Q_SIZE;
+                }
+                if (possibleX == destX) {
+                    return true;
+                }
+            } else {
+                while (!bf.isOccupied(possibleX, possibleY, Direction.LEFT) && !(possibleX == destX)) {
+                    possibleX -= BattleField.Q_SIZE;
+                }
+                if (possibleX == destX) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public List<Object> getRandomPath() {
+        bfElements = new ArrayList<>();
+        nexts = new ArrayList<>();
+        List<Object> result = new ArrayList<>();
+        result.add(bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE));
+        List<Object> variants = findNext(bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE));
+        Random random = new Random();
+        int idx = random.nextInt(variants.size());
+        result.add(variants.get(idx));
+        pathNew = result;
+        return result;
     }
 
     public List<Object> findPath(int a, int b) {
@@ -183,7 +267,7 @@ public abstract class AbstractTank implements Tank {
                 result.add(Direction.DOWN);
             }
 
-            if (bf.isOccupied(destination.getX(), destination.getY(), (Direction) result.get(0))) {
+            if (bf.isOccupied(destination)) {
                 result.add(Action.FIRE);
                 if (destination instanceof Rock) {
                     result.add(Action.FIRE);
@@ -299,25 +383,16 @@ public abstract class AbstractTank implements Tank {
         return bf;
     }
 
-    public ActionField getAf() {
-        return af;
-    }
-
-    public void setAf(ActionField af) {
-        this.af = af;
-    }
-
     public List<Object> getPathAll() {
         return pathAll;
     }
 
+    public int getStep() {
+        return step;
+    }
 
     public void setPathAll(List<Object> pathAll) {
         this.pathAll = pathAll;
-    }
-
-    public int getStep() {
-        return step;
     }
 
     public Image[] getImages() {

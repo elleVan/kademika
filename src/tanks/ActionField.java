@@ -17,6 +17,7 @@ import tanks.mobile.tanks.Tiger;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class ActionField extends JPanel {
 
@@ -24,7 +25,7 @@ public class ActionField extends JPanel {
 
     private BattleField bf;
     private AbstractTank defender;
-    private AbstractTank aggressor;
+    private List<Object> aggressors;
     private Bullet bullet;
 
 
@@ -33,9 +34,13 @@ public class ActionField extends JPanel {
         bf = new BattleField();
         defender = new T34(bf);
         defender.addImages();
+        bf.addTank(defender);
         bullet = new Bullet(defender, -100, -100, Direction.DOWN);
 
-        newAggressor();
+        aggressors = new ArrayList<>();
+        newBT7();
+        newTiger();
+
 
         JFrame frame = new JFrame("BATTLE FIELD");
         frame.setLocation(750, 150);
@@ -50,32 +55,47 @@ public class ActionField extends JPanel {
 
 
         while (true) {
-            if (!aggressor.isDestroyed() && !defender.isDestroyed()) {
-                if (aggressor.getPathAll().size() == aggressor.getStep()) {
-                    aggressor.findPath(4, 8);
-                    aggressor.setPathAll(aggressor.generatePathAll());
+            if (!defender.isDestroyed()) {
+
+                for (Object el : aggressors) {
+                    AbstractTank aggressor = (AbstractTank) el;
+                    if (aggressor instanceof BT7 && (aggressor.getPathAll().size() == aggressor.getStep())) {
+                        aggressor.findPath(4, 8);
+                        aggressor.setPathAll(aggressor.generatePathAll());
+                    } else if (aggressor instanceof Tiger) {
+                        aggressor.findPath(defender.getX() / BattleField.Q_SIZE, defender.getY() / BattleField.Q_SIZE);
+                        aggressor.setPathAll(aggressor.generatePathAll());
+                    }
+
+                    processAction(aggressor.setUp(), aggressor);
                 }
 
-                for (Object el : aggressor.getPathAll()) {
-                    System.out.println(el);
-                }
-                System.out.println("--------------------------------------");
-//                Thread.sleep(5000);
-                processAction(aggressor.setUp(), aggressor);
             }
-            if (!aggressor.isDestroyed() && !defender.isDestroyed()) {
+            if (!defender.isDestroyed()) {
+                if (defender.getPathAll().size() == defender.getStep()) {
+                    defender.getRandomPath();
+                    defender.setPathAll(defender.generatePathAll());
+                }
                 processAction(defender.setUp(), defender);
             }
         }
     }
 
-    public void newAggressor() {
+    public void newBT7() {
         String aggrCoord = getRandomEmptyQuadrantInTheTopXY();
 //        aggressor = new BT7(bf, Integer.parseInt(aggrCoord.split("_")[0]),
 //                Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
-        aggressor = new BT7(bf, 512, 0, Direction.DOWN);
-        aggressor.setAf(this);
+        AbstractTank aggressor = new BT7(bf, 0, 64, Direction.DOWN);
+        aggressors.add(aggressor);
         aggressor.addImages();
+        bf.addTank(aggressor);
+    }
+
+    public void newTiger() {
+        AbstractTank aggressor = new Tiger(bf, 512, 64, Direction.DOWN);
+        aggressors.add(aggressor);
+        aggressor.addImages();
+        bf.addTank(aggressor);
     }
 
     private String getCoordinatesAggressor() {
@@ -103,8 +123,6 @@ public class ActionField extends JPanel {
     public void processAction(Action a, AbstractTank t) throws InterruptedException {
         if (a == Action.MOVE) {
             processMove(t);
-        } else if (a == Action.TURN){
-            processTurn(t);
         } else if (a == Action.FIRE) {
                 processTurn(t);
                 processFire(t.fire());
@@ -233,24 +251,48 @@ public class ActionField extends JPanel {
                 return true;
             }
 
-//            if (bullet.getTank() != aggressor && !aggressor.isDestroyed() &&
-//                    checkInterception(getQuadrant(aggressor.getX(), aggressor.getY()), quadrant)) {
-//                aggressor.destroy();
-//                if (aggressor.isDestroyed()) {
-//                    Thread.sleep(1000);
-//                    newAggressor();
-//                }
-//                return true;
-//            }
-//
-//            if (bullet.getTank() != defender && !defender.isDestroyed() &&
-//                    checkInterception(getQuadrant(defender.getX(), defender.getY()), quadrant)) {
-//                defender.destroy();
-//                return true;
-//            }
+            for (Object el : aggressors) {
+                AbstractTank aggressor = (AbstractTank) el;
+                if (bullet.getTank() != aggressor &&
+                        checkInterception(getQuadrant(aggressor.getX(), aggressor.getY()), quadrant)) {
+                    aggressor.destroy();
+                    if (aggressor.isDestroyed()) {
+                        aggressors.remove(aggressor);
+                        bf.removeTank(aggressor);
+                        Thread.sleep(1000);
+                        if (aggressor instanceof BT7) {
+                            newBT7();
+                        } else {
+                            newTiger();
+                        }
+                    }
+                    return true;
+                }
+            }
+
+            if (bullet.getTank() != defender &&
+                    checkInterception(getQuadrant(defender.getX(), defender.getY()), quadrant)) {
+                defender.destroy();
+                return true;
+            }
 
         }
 
+        return false;
+    }
+
+    private boolean checkInterception(String object, String quadrant) {
+        int ox = Integer.parseInt(object.split("_")[0]);
+        int oy = Integer.parseInt(object.split("_")[1]);
+
+        int qx = Integer.parseInt(quadrant.split("_")[0]);
+        int qy = Integer.parseInt(quadrant.split("_")[1]);
+
+        if (ox >= 0 && ox < 9 && oy >= 0 && oy < 9) {
+            if (ox == qx && oy == qy) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -292,7 +334,12 @@ public class ActionField extends JPanel {
         bf.draw(g);
 
         defender.draw(g);
-        aggressor.draw(g);
+        for (Object el : aggressors) {
+            AbstractTank aggressor = (AbstractTank) el;
+            if (!aggressor.isDestroyed()) {
+                aggressor.draw(g);
+            }
+        }
 
         bullet.draw(g);
     }

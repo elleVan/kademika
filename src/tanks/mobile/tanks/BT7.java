@@ -1,6 +1,5 @@
 package tanks.mobile.tanks;
 
-import tanks.fixed.AbstractBFElement;
 import tanks.helpers.Action;
 import tanks.helpers.Direction;
 import tanks.fixed.BattleField;
@@ -10,7 +9,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class BT7 extends AbstractTank {
 
@@ -29,6 +27,11 @@ public class BT7 extends AbstractTank {
         if (step >= getPathAll().size()) {
             step = 0;
         }
+        for (Object el : turnToEnemy(detectEnemy())) {
+            turn((Direction) el);
+            return Action.FIRE;
+        }
+
         while (!(getPathAll().get(step) instanceof Action)) {
             turn((Direction) getPathAll().get(step++));
         }

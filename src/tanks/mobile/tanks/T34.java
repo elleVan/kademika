@@ -25,25 +25,27 @@ public class T34 extends AbstractTank {
         colorTower = new Color(255, 220, 0);
     }
 
-    private Object[] actions = new Object[] {
-            Direction.RIGHT,
-            Action.FIRE,
-    };
-
-    private int step = 0;
-
     @Override
     public Action setUp() {
-        if (step >= actions.length) {
+        if (step >= getPathAll().size()) {
             step = 0;
         }
-        if (!(actions[step] instanceof Action)) {
-            turn((Direction) actions[step++]);
+        for (Object el : turnToEnemy(detectEnemy())) {
+            turn((Direction) el);
+            return Action.FIRE;
         }
-        if (step >= actions.length) {
+
+        while (!getPathAll().isEmpty() && !(getPathAll().get(step) instanceof Action)) {
+            turn((Direction) getPathAll().get(step++));
+        }
+        if (step >= getPathAll().size()) {
             step = 0;
         }
-        return (Action) actions[step++];
+
+        if (getPathAll().isEmpty()) {
+            return Action.NONE;
+        }
+        return (Action) getPathAll().get(step++);
     }
 
     public Image[] createImages() {
