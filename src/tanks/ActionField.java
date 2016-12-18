@@ -33,7 +33,6 @@ public class ActionField extends JPanel {
     public ActionField() {
         bf = new BattleField();
         defender = new T34(bf);
-        defender.addImages();
         bf.addTank(defender);
         bullet = new Bullet(defender, -100, -100, Direction.DOWN);
 
@@ -82,42 +81,15 @@ public class ActionField extends JPanel {
     }
 
     public void newBT7() {
-        String aggrCoord = getRandomEmptyQuadrantInTheTopXY();
-//        aggressor = new BT7(bf, Integer.parseInt(aggrCoord.split("_")[0]),
-//                Integer.parseInt(aggrCoord.split("_")[1]), Direction.DOWN);
         AbstractTank aggressor = new BT7(bf, 0, 64, Direction.DOWN);
         aggressors.add(aggressor);
-        aggressor.addImages();
         bf.addTank(aggressor);
     }
 
     public void newTiger() {
-        AbstractTank aggressor = new Tiger(bf, 512, 64, Direction.DOWN);
+        AbstractTank aggressor = new Tiger(bf, 0, 0, Direction.DOWN);
         aggressors.add(aggressor);
-        aggressor.addImages();
         bf.addTank(aggressor);
-    }
-
-    private String getCoordinatesAggressor() {
-        Random random = new Random();
-        String aggrCoord = bf.getCoordinatesAggressor()[random.nextInt(bf.getCoordinatesAggressor().length)];
-        aggrCoord = getQuadrantXY(Integer.parseInt(aggrCoord.split("_")[0]), Integer.parseInt(aggrCoord.split("_")[1]));
-        return aggrCoord;
-    }
-
-    private String getRandomEmptyQuadrantInTheTopXY() {
-        Random random = new Random();
-        int x = random.nextInt(8);
-        int y = random.nextInt(4);
-
-        AbstractBFElement bfElement = bf.scanQuadrant(x, y);
-        while (!(bfElement instanceof Blank) && !bfElement.isDestroyed()) {
-            x = random.nextInt(8);
-            y = random.nextInt(4);
-            bfElement = bf.scanQuadrant(x, y);
-        }
-
-        return getQuadrantXY(x + 1, y + 1);
     }
 
     public void processAction(Action a, AbstractTank t) throws InterruptedException {
@@ -158,7 +130,7 @@ public class ActionField extends JPanel {
             x--;
         }
 
-        AbstractBFElement bfElement = tank.getBf().scanQuadrant(x, y);
+        AbstractBFElement bfElement = bf.scanQuadrant(x, y);
         if (!(bfElement instanceof Blank) && !bfElement.isDestroyed() && !(bfElement instanceof Water)) {
             System.out.println("[illegal move] direction: " + direction + " tankX: " + tank.getX() + ", tankY: " +
                     tank.getY());
@@ -245,7 +217,7 @@ public class ActionField extends JPanel {
 
             if (!bfElement.isDestroyed() && (bfElement instanceof Destroyable)) {
                 if (!((bfElement instanceof Rock) && !(bullet.getTank() instanceof Tiger))) {
-                    bullet.getTank().getBf().destroyObject(x, y);
+                    bf.destroyObject(x, y);
                     return true;
                 }
                 return true;

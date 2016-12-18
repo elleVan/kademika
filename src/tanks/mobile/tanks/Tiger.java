@@ -1,7 +1,5 @@
 package tanks.mobile.tanks;
 
-import tanks.ActionField;
-import tanks.helpers.Action;
 import tanks.helpers.Direction;
 import tanks.fixed.BattleField;
 import tanks.mobile.AbstractTank;
@@ -35,25 +33,6 @@ public class Tiger extends AbstractTank {
 
     }
 
-    @Override
-    public Action setUp() {
-        if (step >= getPathAll().size()) {
-            step = 0;
-        }
-        for (Object el : turnToEnemy(detectEnemy())) {
-            turn((Direction) el);
-            return Action.FIRE;
-        }
-
-        while (!(getPathAll().get(step) instanceof Action)) {
-            turn((Direction) getPathAll().get(step++));
-        }
-        if (step >= getPathAll().size()) {
-            step = 0;
-        }
-        return (Action) getPathAll().get(step++);
-    }
-
     public Image[] createImages() {
         Image[] array = new Image[4];
         try {
@@ -65,10 +44,5 @@ public class Tiger extends AbstractTank {
             System.err.println("Can't find imageName");
         }
         return array;
-    }
-
-    @Override
-    public void addImages() {
-        setImages(createImages());
     }
 }

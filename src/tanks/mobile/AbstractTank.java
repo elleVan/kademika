@@ -1,6 +1,5 @@
 package tanks.mobile;
 
-import tanks.*;
 import tanks.fixed.AbstractBFElement;
 import tanks.fixed.BattleField;
 import tanks.fixed.bfelements.*;
@@ -10,7 +9,6 @@ import tanks.mobile.tanks.BT7;
 import tanks.mobile.tanks.T34;
 import tanks.mobile.tanks.Tiger;
 
-import javax.management.AttributeList;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -28,7 +26,7 @@ public abstract class AbstractTank implements Tank {
     private Image[] images;
 
     private boolean destroyed;
-    protected int step = 0;
+    private int step = 0;
 
     private List<Object> bfElements;
     private int[] bfIds;
@@ -45,7 +43,7 @@ public abstract class AbstractTank implements Tank {
     private BattleField bf;
 
     public AbstractTank(BattleField bf) {
-        this(bf, 320, 384, Direction.DOWN);
+        this(bf, 64, 384, Direction.DOWN);
     }
 
     public AbstractTank(BattleField bf, int x, int y, Direction direction) {
@@ -54,6 +52,7 @@ public abstract class AbstractTank implements Tank {
         this.y = y;
         this.direction = direction;
         pathAll = new ArrayList<>();
+        setImages(createImages());
     }
 
     public List<Object> detectEnemy() {
@@ -140,6 +139,7 @@ public abstract class AbstractTank implements Tank {
     }
 
     public List<Object> getRandomPath() {
+        step = 0;
         bfElements = new ArrayList<>();
         nexts = new ArrayList<>();
         List<Object> result = new ArrayList<>();
@@ -153,22 +153,32 @@ public abstract class AbstractTank implements Tank {
     }
 
     public List<Object> findPath(int a, int b) {
+        step = 0;
         pathNew = new ArrayList<>();
         nexts = new ArrayList<>();
         bfElements = new ArrayList<>();
         bfIds = new int[81];
         String quadrant = bf.getQuadrant(x, y);
-        int destX = Integer.parseInt(quadrant.split("_")[0]);
-        int destY = Integer.parseInt(quadrant.split("_")[1]);
-        bfElements.add(bf.scanQuadrant(destX, destY));
+        int initX = Integer.parseInt(quadrant.split("_")[0]);
+        int initY = Integer.parseInt(quadrant.split("_")[1]);
+        bfElements.add(bf.scanQuadrant(initX, initY));
         bfIds[0] = 0;
         AbstractBFElement destination = bf.scanQuadrant(a, b);
 
 
         int finish = 0;
         int distance = 1;
-        AbstractBFElement current = bf.scanQuadrant(destX, destY);
+        AbstractBFElement current = bf.scanQuadrant(initX, initY);
         nexts = findNext(current);
+        for (int i = 0; i < nexts.size(); i++) {
+            if (isTankInNextQuadrant((AbstractBFElement) nexts.get(i))) {
+                nexts.remove(i);
+            }
+        }
+        if (nexts.isEmpty()) {
+            pathNew.add(current);
+            return pathNew;
+        }
 
         for (int i = 1; i < 81 && finish == 0; i++) {
 
@@ -196,10 +206,10 @@ public abstract class AbstractTank implements Tank {
                 pathNew.add(null);
             }
             pathNew.set(last, destination);
-            pathNew.set(0, bf.scanQuadrant(destX, destY));
+            pathNew.set(0, bf.scanQuadrant(initX, initY));
             for (int j = last - 1; j > 0; j--) {
                 for (Object el : nextsBack) {
-                    if (bfIds[bfElements.indexOf(el)] == j) {
+                    if (bfElements.contains(el) && bfIds[bfElements.indexOf(el)] == j) {
                         pathNew.set(j, el);
                         break;
                     }
@@ -255,6 +265,11 @@ public abstract class AbstractTank implements Tank {
 
     public List<Object> generatePathAll() {
         List<Object> result = new ArrayList<>();
+
+        if (pathNew.size() == 1) {
+            result.add(Action.NONE);
+        }
+
         for (int i = 1; i < pathNew.size(); i++) {
             AbstractBFElement destination = (AbstractBFElement) pathNew.get(i);
             if (destination.getX() < ((AbstractBFElement) pathNew.get(i - 1)).getX()) {
@@ -330,7 +345,85 @@ public abstract class AbstractTank implements Tank {
             destX += 1;
         }
 
+        if (bf.isQuadrantOnTheField(destX, destY) && (bf.scanQuadrant(destX, destY) instanceof Rock) && (this instanceof Tiger)) {
+            return true;
+        } else if (bf.isQuadrantOnTheField(destX, destY) && (bf.scanQuadrant(destX, destY) instanceof Eagle) && (this instanceof T34)) {
+            return false;
+        }
+
         return bf.isQuadrantOnTheField(destX, destY) && !(bf.scanQuadrant(destX, destY) instanceof Rock);
+    }
+
+    public boolean isTankInNextQuadrant() {
+        String quadrant = bf.getQuadrant(x, y);
+        int destX = Integer.parseInt(quadrant.split("_")[0]);
+        int destY = Integer.parseInt(quadrant.split("_")[1]);
+
+        if (direction == Direction.UP) {
+            destY -= 1;
+        } else if (direction == Direction.DOWN) {
+            destY += 1;
+        } else if (direction == Direction.LEFT) {
+            destX -= 1;
+        } else {
+            destX += 1;
+        }
+
+        for (Object el : bf.getTanks()) {
+            AbstractTank tank = (AbstractTank) el;
+            if (!this.equals(tank) && (tank.getX() == (destX * BattleField.Q_SIZE)) && (tank.getY() == destY * BattleField.Q_SIZE)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isTankInNextQuadrant(AbstractBFElement bfElement) {
+
+        for (Object el : bf.getTanks()) {
+            AbstractTank tank = (AbstractTank) el;
+            if (!this.equals(tank) && tank.getX() == bfElement.getX() && tank.getY() == bfElement.getY()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Action setUp() {
+        if (step >= getPathAll().size()) {
+            step = 0;
+        }
+        for (Object el : turnToEnemy(detectEnemy())) {
+            turn((Direction) el);
+            return Action.FIRE;
+        }
+
+        while (!(getPathAll().get(step) instanceof Action)) {
+            turn((Direction) getPathAll().get(step++));
+        }
+
+        if (isTankInNextQuadrant()) {
+            if (this instanceof BT7) {
+                findPath(4, 8);
+                setPathAll(generatePathAll());
+            } else if (this instanceof Tiger) {
+                for (Object el : bf.getTanks()) {
+                    if (el instanceof T34) {
+                        AbstractTank enemy = (AbstractTank) el;
+                        findPath(enemy.getX() / BattleField.Q_SIZE, enemy.getY() / BattleField.Q_SIZE);
+                        setPathAll(generatePathAll());
+                    }
+                }
+            }
+            while (!(getPathAll().get(step) instanceof Action)) {
+                turn((Direction) getPathAll().get(step++));
+            }
+        }
+
+        if (step >= getPathAll().size()) {
+            step = 0;
+        }
+        return (Action) getPathAll().get(step++);
     }
 
     @Override
@@ -401,5 +494,9 @@ public abstract class AbstractTank implements Tank {
 
     public void setImages(Image[] images) {
         this.images = images;
+    }
+
+    public Image[] createImages() {
+        return images;
     }
 }
