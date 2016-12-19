@@ -13,13 +13,14 @@ public class Water extends AbstractBFElement {
     public Water(int x, int y) {
         super(x, y);
         setColor(Color.cyan);
+        addImage();
     }
 
     @Override
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         Composite before = g2.getComposite();
-        Composite trans = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f);
+        Composite trans = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
         g2.setComposite(trans);
         g2.drawImage(getImage(), this.getX(), this.getY(), new ImageObserver() {
             @Override
@@ -32,9 +33,9 @@ public class Water extends AbstractBFElement {
 
     @Override
     public void addImage() {
-        super.addImage();
         try {
             setImage(ImageIO.read(new File("water.jpg")));
+            setImageBlank(ImageIO.read(new File("blank.jpg")));
         } catch (IOException e) {
             System.err.println("Can't find image");
         }

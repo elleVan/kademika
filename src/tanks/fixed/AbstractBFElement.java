@@ -27,13 +27,6 @@ public class AbstractBFElement implements Drawable {
     @Override
     public void draw(Graphics g) {
 
-        g.drawImage(imageBlank, this.getX(), this.getY(), new ImageObserver() {
-            @Override
-            public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-                return false;
-            }
-        });
-
         if (!isDestroyed && image != null) {
             g.drawImage(image, this.getX(), this.getY(), new ImageObserver() {
                 @Override
@@ -45,11 +38,6 @@ public class AbstractBFElement implements Drawable {
     }
 
     public void addImage() {
-        try {
-            imageBlank = ImageIO.read(new File("blank.jpg"));
-        } catch (IOException e) {
-            System.err.println("Can't find imageName");
-        }
     }
 
     public boolean isDestroyed() {
@@ -82,5 +70,13 @@ public class AbstractBFElement implements Drawable {
 
     public void setImage(Image image) {
         this.image = image;
+    }
+
+    public Image getImageBlank() {
+        return imageBlank;
+    }
+
+    public void setImageBlank(Image imageBlank) {
+        this.imageBlank = imageBlank;
     }
 }

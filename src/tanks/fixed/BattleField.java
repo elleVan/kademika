@@ -7,7 +7,6 @@ import tanks.helpers.Drawable;
 import tanks.mobile.AbstractTank;
 
 import java.awt.*;
-import java.security.PublicKey;
 import java.util.List;
 import java.util.*;
 
@@ -30,11 +29,11 @@ public class BattleField implements Drawable {
     private String[][] battleField = {
             { " ", " ", " ", " ", " ", " ", " ", " ", " " },
             { " ", "B", "B", "R", "R", "R", "B", "B", " " },
-            { " ", " ", " ", " ", " ", " ", " ", " ", " " },
+            { " ", " ", "B", " ", " ", " ", "B", " ", " " },
             { " ", "B", "B", "B", "W", "B", "B", "B", " " },
             { " ", " ", " ", "W", "W", "W", " ", " ", " " },
             { " ", "B", "B", "B", "W", "B", "B", "B", " " },
-            { " ", " ", " ", " ", " ", " ", " ", " ", " " },
+            { " ", " ", "B", " ", " ", " ", "B", " ", " " },
             { " ", "R", "R", "B", "R", "B", "R", "R", " " },
             { " ", " ", " ", "R", "E", "B", " ", " ", " " } };
 
@@ -50,10 +49,6 @@ public class BattleField implements Drawable {
         tanks = new ArrayList<>();
     }
 
-    public BattleField(AbstractBFElement[][] battleFieldObj) {
-        copyBFObj(battleFieldObj);
-    }
-
     private void generateBFObj() {
         battleFieldObj = new AbstractBFElement[battleField.length][battleField.length];
         for (int i = 0; i < battleField.length; i++) {
@@ -64,41 +59,13 @@ public class BattleField implements Drawable {
 
                 if (battleField[i][j].trim().isEmpty()) {
                     battleFieldObj[i][j] = new Blank(x, y);
-                    battleFieldObj[i][j].addImage();
                 } else if (battleField[i][j].equals("B")) {
                     battleFieldObj[i][j] = new Brick(x, y);
-                    battleFieldObj[i][j].addImage();
                 } else if (battleField[i][j].equals("E")) {
                     battleFieldObj[i][j] = new Eagle(x, y);
-                    battleFieldObj[i][j].addImage();
                 } else if (battleField[i][j].equals("R")) {
                     battleFieldObj[i][j] = new Rock(x, y);
-                    battleFieldObj[i][j].addImage();
                 } else if (battleField[i][j].equals("W")) {
-                    battleFieldObj[i][j] = new Water(x, y);
-                    battleFieldObj[i][j].addImage();
-                }
-            }
-        }
-    }
-
-    private void copyBFObj(AbstractBFElement[][] array) {
-        battleFieldObj = new AbstractBFElement[array.length][array.length];
-        for (int i = 0; i < array.length; i++) {
-            for (int j = 0; j < array[i].length; j++) {
-                String coordinates = getQuadrantXY(j + 1, i + 1);
-                int x = Integer.parseInt(coordinates.split("_")[0]);
-                int y = Integer.parseInt(coordinates.split("_")[1]);
-
-                if (array[i][j] instanceof Blank) {
-                    battleFieldObj[i][j] = new Blank(x, y);
-                } else if (array[i][j] instanceof Brick) {
-                    battleFieldObj[i][j] = new Brick(x, y);
-                } else if (array[i][j] instanceof Eagle) {
-                    battleFieldObj[i][j] = new Eagle(x, y);
-                } else if (array[i][j] instanceof Rock) {
-                    battleFieldObj[i][j] = new Rock(x, y);
-                } else if (array[i][j] instanceof Water) {
                     battleFieldObj[i][j] = new Water(x, y);
                 }
             }
@@ -186,18 +153,6 @@ public class BattleField implements Drawable {
 
     public int getBfHeight() {
         return bfHeight;
-    }
-
-    public String[] getCoordinatesAggressor() {
-        return coordinatesAggressor;
-    }
-
-    public String[][] getBattleField() {
-        return battleField;
-    }
-
-    public AbstractBFElement[][] getBattleFieldObj() {
-        return battleFieldObj;
     }
 
     public List<Object> getTanks() {

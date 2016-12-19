@@ -13,6 +13,7 @@ public class Brick extends AbstractBFElement implements Destroyable{
     public Brick(int x, int y) {
         super(x, y);
         setColor(Color.blue);
+        addImage();
     }
 
     @Override
@@ -22,7 +23,6 @@ public class Brick extends AbstractBFElement implements Destroyable{
 
     @Override
     public void addImage() {
-        super.addImage();
         try {
             setImage(ImageIO.read(new File("brick.jpg")));
         } catch (IOException e) {

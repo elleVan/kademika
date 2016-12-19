@@ -27,6 +27,4 @@ public interface Tank extends Drawable, Destroyable {
 
     int getSpeed();
 
-    int getMovePath();
-
 }

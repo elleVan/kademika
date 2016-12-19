@@ -10,6 +10,7 @@ import tanks.mobile.tanks.T34;
 import tanks.mobile.tanks.Tiger;
 
 import java.awt.*;
+import java.awt.image.ImageObserver;
 import java.util.*;
 import java.util.List;
 
@@ -18,7 +19,6 @@ public abstract class AbstractTank implements Tank {
     public static final int TANK_STEP = 1;
 
     protected int speed = 10;
-    protected int movePath = 1;
 
     private int x;
     private int y;
@@ -43,7 +43,7 @@ public abstract class AbstractTank implements Tank {
     private BattleField bf;
 
     public AbstractTank(BattleField bf) {
-        this(bf, 64, 384, Direction.DOWN);
+        this(bf, 256, 256, Direction.DOWN);
     }
 
     public AbstractTank(BattleField bf, int x, int y, Direction direction) {
@@ -428,13 +428,37 @@ public abstract class AbstractTank implements Tank {
 
     @Override
     public void draw(Graphics g) {
-        if (!destroyed) {
+        List<Object> possible = new ArrayList<>();
+        possible.add(bf.scanQuadrant(getX() / BattleField.Q_SIZE, getY() / BattleField.Q_SIZE));
+        if ((getDirection() == Direction.UP || getDirection() == Direction.DOWN) && getY() / BattleField.Q_SIZE + 1 < 9) {
+            possible.add(bf.scanQuadrant(getX() / BattleField.Q_SIZE, getY() / BattleField.Q_SIZE + 1));
+        } else if ((getDirection() == Direction.LEFT || getDirection() == Direction.RIGHT) && getX() / BattleField.Q_SIZE + 1 < 9){
+            possible.add(bf.scanQuadrant(getX() / BattleField.Q_SIZE + 1, getY() / BattleField.Q_SIZE));
+        }
+
+        for (Object quadrant : possible) {
+            if (quadrant instanceof Water) {
+                Water water = (Water) quadrant;
+                g.fillRect(water.getX(), water.getY(), 64, 64);
+                g.drawImage(water.getImageBlank(), water.getX(), water.getY(), new ImageObserver() {
+                    @Override
+                    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+                        return false;
+                    }
+                });
+            }
+        }
+
+        if (!isDestroyed()) {
             g.drawImage(images[direction.ordinal()], this.getX(), this.getY(), 64, 64, null);
         }
-    }
 
-    public void addImages() {
-
+        for (Object quadrant : possible) {
+            if (quadrant instanceof Water) {
+                Water water = (Water) quadrant;
+                water.draw(g);
+            }
+        }
     }
 
     @Override
@@ -465,11 +489,6 @@ public abstract class AbstractTank implements Tank {
     @Override
     public Direction getDirection() {
         return direction;
-    }
-
-    @Override
-    public int getMovePath() {
-        return movePath;
     }
 
     public BattleField getBf() {

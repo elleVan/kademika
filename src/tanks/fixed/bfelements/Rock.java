@@ -13,6 +13,7 @@ public class Rock extends AbstractBFElement implements Destroyable {
     public Rock(int x, int y) {
         super(x, y);
         setColor(Color.gray);
+        addImage();
     }
 
     @Override
@@ -22,7 +23,6 @@ public class Rock extends AbstractBFElement implements Destroyable {
 
     @Override
     public void addImage() {
-        super.addImage();
         try {
             setImage(ImageIO.read(new File("rock.jpg")));
         } catch (IOException e) {

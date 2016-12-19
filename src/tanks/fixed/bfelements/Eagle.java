@@ -13,6 +13,7 @@ public class Eagle extends AbstractBFElement implements Destroyable{
     public Eagle(int x, int y) {
         super(x, y);
         setColor(Color.orange);
+        addImage();
     }
 
     @Override
@@ -22,7 +23,6 @@ public class Eagle extends AbstractBFElement implements Destroyable{
 
     @Override
     public void addImage() {
-        super.addImage();
         try {
             setImage(ImageIO.read(new File("eagle.png")));
         } catch (IOException e) {

@@ -11,17 +11,23 @@ import tanks.mobile.Tank;
 import tanks.mobile.tanks.BT7;
 import tanks.mobile.tanks.T34;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import tanks.helpers.Action;
 import tanks.mobile.tanks.Tiger;
 
 import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
 public class ActionField extends JPanel {
 
     public static final boolean COLORED_MODE = false;
+
+    private Image imageBlank;
 
     private BattleField bf;
     private AbstractTank defender;
@@ -40,6 +46,11 @@ public class ActionField extends JPanel {
         newBT7();
         newTiger();
 
+        try {
+            imageBlank = ImageIO.read(new File("blank.jpg"));
+        } catch (IOException e) {
+            System.err.println("Can't find imageName");
+        }
 
         JFrame frame = new JFrame("BATTLE FIELD");
         frame.setLocation(750, 150);
@@ -87,7 +98,7 @@ public class ActionField extends JPanel {
     }
 
     public void newTiger() {
-        AbstractTank aggressor = new Tiger(bf, 0, 0, Direction.DOWN);
+        AbstractTank aggressor = new Tiger(bf, 512, 64, Direction.DOWN);
         aggressors.add(aggressor);
         bf.addTank(aggressor);
     }
@@ -301,6 +312,12 @@ public class ActionField extends JPanel {
                 i++;
                 g.setColor(cc);
                 g.fillRect(h * 64, v * 64, 64, 64);
+                g.drawImage(imageBlank, h * BattleField.Q_SIZE, v * BattleField.Q_SIZE, new ImageObserver() {
+                    @Override
+                    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+                        return false;
+                    }
+                });
             }
         }
         bf.draw(g);
