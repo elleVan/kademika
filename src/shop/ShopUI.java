@@ -13,13 +13,17 @@ public class ShopUI {
 
     public ShopUI(Shop shop) {
         this.shop = shop;
+        sweetName = shop.getSweets()[0][Shop.NAME];
 
         JFrame f = new JFrame();
         f.setLocation(300, 100);
         f.setMinimumSize(new Dimension(800, 600));
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        f.getContentPane().add(createPanel());
+        TransactionsModel model = new TransactionsModel(shop.getTransactions());
+        TransactionsView view = new TransactionsView(model);
+
+        f.getContentPane().add(view);
 
         f.pack();
         f.setVisible(true);
@@ -37,14 +41,23 @@ public class ShopUI {
         JLabel lButtons = new JLabel("Sweets:");
         JPanel buttons = new JPanel(new GridLayout(0, 1));
         ButtonGroup group = new ButtonGroup();
+        ActionListener rbListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sweetName = e.getActionCommand();
+            }
+        };
+
+        int i = 0;
         for (String[] el : shop.getSweets()) {
             JRadioButton button = new JRadioButton(el[Shop.NAME]);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    sweetName = e.getActionCommand();
-                }
-            });
+            button.addActionListener(rbListener);
+
+            if (i == 0) {
+                button.setSelected(true);
+                i++;
+            }
+
             buttons.add(button);
             group.add(button);
         }
