@@ -88,8 +88,10 @@ public class ShopUI {
                         shop.newSweet(sweetName, Integer.parseInt(tfQuantity.getText())),
                 });
                 shop.printBase();
-                f.getContentPane().remove(0);
+                f.getContentPane().removeAll();
                 f.getContentPane().add(new TransactionsView(new TransactionsModel(shop.getTransactions())));
+
+                f.pack();
                 f.repaint();
             }
         });
@@ -110,8 +112,10 @@ public class ShopUI {
         menuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                f.getContentPane().remove(0);
+                f.getContentPane().removeAll();
                 f.getContentPane().add(createBuyingPanel());
+
+                f.pack();
                 f.repaint();
             }
         });
