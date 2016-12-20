@@ -1,7 +1,9 @@
 package shop;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 
 public class Shop {
 
@@ -12,16 +14,21 @@ public class Shop {
     public static final int IN_STOCK = 2;
     public static final int CATEGORY = 3;
 
-    private Base base = new Base();
-    private int today = 8;
-
-    private String[][] sweets = base.getSweets();
-    private HashSet<String> categories = base.getCategories();
-    private Customer[] customers = base.getCustomers();
-    private Transaction[][] transactions = base.getTransactions();
+    private String[][] sweets;
+    private HashSet<String> categories;
+    private List<Customer> customers;
+    private List<Transaction> transactions;
 
     public Shop() {
+        initShop();
+    }
 
+    private void initShop() {
+        Base base = new Base();
+        sweets = base.getSweets();
+        categories = base.getCategories();
+        customers = base.getCustomers();
+        transactions = base.getTransactions();
     }
 
     public void run() {
@@ -33,16 +40,9 @@ public class Shop {
                 newSweet("Amour", 5),
         });
 
-        newTransaction(customers[1], new Sweet[] {
+        newTransaction(customers.get(1), new Sweet[] {
                 newSweet("Konti", 10)
         });
-    }
-
-    public void newDay() {
-        today++;
-        if (today >= transactions.length) {
-            extendTransactions();
-        }
     }
 
     public void printBase() {
@@ -68,7 +68,6 @@ public class Shop {
                 }
             }
         }
-
     }
 
     public void printCatalog() {
@@ -97,17 +96,7 @@ public class Shop {
         System.out.println();
     }
 
-    public void getNumberOfOrdersForTheLastWeek() {
-
-        System.out.println("=== ORDERS FOR THE LAST WEEK ===");
-        String result = "";
-        for (int i = 6; today - 2 - i >= 0 && i >= 0; i--) {
-            result += transactions[today - 2 - i].length + ", ";
-        }
-        System.out.println(Arrays.toString(result.substring(0, result.length() - 1).split(",")) + "\n");
-    }
-
-    public void getOrdersForOneDay(int day) {
+    public void getOrdersForOneDay(Date date) {
         String customer;
         int j = 1;
 
@@ -115,40 +104,37 @@ public class Shop {
         System.out.printf("%-4s%-12s%-10s%-5s%7s%n", "#", "Customer", "Sweet", "Price", "kg");
         System.out.println("--------------------------------------");
 
-        if (day >= 0 && day < transactions.length) {
-            for (Transaction transaction : transactions[day]) {
-                if (transaction != null && transaction.getCustomer() != null) {
-                    customer = transaction.getCustomer().getName();
-                    for (Sweet sweet : transaction.getSweets()) {
-                        if (sweet != null) {
-                            System.out.printf("%-4d%-12s%-10s%-5d%7d%n", j++, customer, sweet.getName(), sweet.getPrice(),
-                                    sweet.getQuantity());
-                        }
+        for (Transaction transaction : transactions) {
+            if (transaction != null && isOneDay(date, transaction.getDate())) {
+                customer = transaction.getCustomer().getName();
+                for (Sweet sweet : transaction.getSweets()) {
+                    if (sweet != null) {
+                        System.out.printf("%-4d%-12s%-10s%-5d%7d%n", j++, customer, sweet.getName(), sweet.getPrice(),
+                                sweet.getQuantity());
                     }
                 }
             }
         }
+
         System.out.println("--------------------------------------");
-        getTotalForOneDay(day);
+        getTotalForOneDay(date);
         System.out.println();
     }
 
-    public void getTotalForOneDay(int day) {
+    public void getTotalForOneDay(Date date) {
 
         int ordersNum = 0;
         double sum = 0;
         int quantity = 0;
 
-        if (day >= 0 && day < transactions.length) {
-            for (Transaction transaction : transactions[day]) {
-                if (transaction != null) {
-                    ordersNum++;
-                    if (transaction.getSweets() != null) {
-                        for (Sweet sweet : transaction.getSweets()) {
-                            if (sweet != null) {
-                                sum += sweet.getPrice() * sweet.getQuantity();
-                                quantity += sweet.getQuantity();
-                            }
+        for (Transaction transaction : transactions) {
+            if (transaction != null && isOneDay(date, transaction.getDate())) {
+                ordersNum++;
+                if (transaction.getSweets() != null) {
+                    for (Sweet sweet : transaction.getSweets()) {
+                        if (sweet != null) {
+                            sum += sweet.getPrice() * sweet.getQuantity();
+                            quantity += sweet.getQuantity();
                         }
                     }
                 }
@@ -174,10 +160,10 @@ public class Shop {
     public Customer newCustomer(String name) {
         int idx = findCustomer(name);
         if (idx == FAIL) {
-            idx = findEmptyInCustomers();
-            customers[idx] = new Customer(name);
+            customers.add(new Customer(name));
+            idx = customers.size() - 1;
         }
-        return customers[idx];
+        return customers.get(idx);
     }
 
     public boolean newTransaction(Customer customer, Sweet[] sweets) {
@@ -202,16 +188,20 @@ public class Shop {
             }
         }
 
-        int idx = findEmptyInTransactionsToday();
-        transactions[today][idx] = new Transaction(customer, sweets);
+        transactions.add(new Transaction(customer, sweets));
 
-        customer.addTransaction(transactions[today][idx]);
+        customer.addTransaction(transactions.get(transactions.size() - 1));
 
         if (findCustomer(customer.getName()) == FAIL) {
-            customers[findEmptyInCustomers()] = customer;
+            customers.add(customer);
         }
 
         return true;
+    }
+
+    public boolean isOneDay(Date date1, Date date2) {
+
+        return date1.getYear() == date2.getYear() && date1.getMonth() == date2.getMonth() && date1.getDay() == date2.getDay();
     }
 
     public int getSweetsNumericField(String name, int field) {
@@ -236,58 +226,6 @@ public class Shop {
         return result;
     }
 
-    public int findEmptyInCustomers() {
-        for (int i = 0; i < customers.length; i++) {
-            if (customers[i] == null) {
-                return i;
-            }
-        }
-        return extendCustomers();
-    }
-
-    public int extendCustomers() {
-        int length = customers.length;
-        Customer[] newArray = new Customer[length + length / 4 + 1];
-        System.arraycopy(customers, 0, newArray, 0, length);
-        customers = newArray;
-        return length;
-    }
-
-    public int findEmptyInTransactionsToday() {
-        if (transactions[today] == null) {
-            transactions[today] = new Transaction[5];
-            return 0;
-        }
-
-        for (int i = 0; i < transactions[today].length; i++) {
-            if (transactions[today][i] == null) {
-                return i;
-            }
-        }
-
-        return extendTransactionsToday();
-    }
-
-    public int extendTransactionsToday() {
-        int length = 0;
-        if (transactions[today] != null) {
-            length = transactions[today].length;
-        }
-
-        Transaction[] newArray = new Transaction[length + length / 4 + 1];
-        System.arraycopy(transactions[today], 0, newArray, 0, length);
-        transactions[today] = newArray;
-        return length;
-    }
-
-    public int extendTransactions() {
-        int length = transactions.length;
-        Transaction[][] newArray = new Transaction[length + length / 4 + 1][];
-        System.arraycopy(transactions, 0, newArray, 0, length);
-        transactions = newArray;
-        return length;
-    }
-
     private int findSweet(String name) {
         for (int i = 0; i < sweets.length; i++) {
             if (sweets[i] != null && sweets[i][0].equals(name)) {
@@ -298,8 +236,8 @@ public class Shop {
     }
 
     private int findCustomer(String name) {
-        for (int i = 0; i < customers.length; i++) {
-            if (customers[i] != null && customers[i].getName().equals(name)) {
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers.get(i) != null && customers.get(i).getName().equals(name)) {
                 return i;
             }
         }
@@ -314,15 +252,11 @@ public class Shop {
         return new HashSet<>(categories);
     }
 
-    public Customer[] getCustomers() {
+    public List<Customer> getCustomers() {
         return customers;
     }
 
-    public Transaction[][] getTransactions() {
+    public List<Transaction> getTransactions() {
         return transactions;
-    }
-
-    public int getToday() {
-        return today;
     }
 }

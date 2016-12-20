@@ -11,7 +11,7 @@ public class TransactionsView extends JPanel {
         setLayout(new GridLayout(1, 0));
         model = m;
 
-        String[] columnNames = {"#", "Name", "Sweets", "Total count", "Sum"};
+        String[] columnNames = {"#", "Name", "Sweets", "Total count", "Sum", "Date"};
 
         JTable table = new JTable(model.getData(), columnNames);
 

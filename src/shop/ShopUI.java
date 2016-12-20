@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.NumberFormat;
 
 public class ShopUI {
@@ -11,11 +13,13 @@ public class ShopUI {
     private Shop shop;
     private String sweetName;
 
+    private JFrame f;
+
     public ShopUI(Shop shop) {
         this.shop = shop;
         sweetName = shop.getSweets()[0][Shop.NAME];
 
-        JFrame f = new JFrame();
+        f = new JFrame();
         f.setLocation(300, 100);
         f.setMinimumSize(new Dimension(800, 600));
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -23,13 +27,14 @@ public class ShopUI {
         TransactionsModel model = new TransactionsModel(shop.getTransactions());
         TransactionsView view = new TransactionsView(model);
 
+        f.setJMenuBar(createMenuBar());
         f.getContentPane().add(view);
 
         f.pack();
         f.setVisible(true);
     }
 
-    private JPanel createPanel() {
+    private JPanel createBuyingPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
 
@@ -83,9 +88,37 @@ public class ShopUI {
                         shop.newSweet(sweetName, Integer.parseInt(tfQuantity.getText())),
                 });
                 shop.printBase();
+                f.getContentPane().remove(0);
+                f.getContentPane().add(new TransactionsView(new TransactionsModel(shop.getTransactions())));
+                f.repaint();
             }
         });
 
         return panel;
+    }
+
+    public JMenuBar createMenuBar() {
+        JMenuBar menuBar;
+        JMenu menu;
+        JMenuItem menuItem;
+
+        menuBar = new JMenuBar();
+
+        menu = new JMenu("File");
+
+        menuItem = new JMenuItem("Buy Sweets");
+        menuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.getContentPane().remove(0);
+                f.getContentPane().add(createBuyingPanel());
+                f.repaint();
+            }
+        });
+        menu.add(menuItem);
+
+        menuBar.add(menu);
+
+        return menuBar;
     }
 }

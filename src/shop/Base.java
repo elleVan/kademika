@@ -1,13 +1,15 @@
 package shop;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class Base {
 
     private String[][] sweets;
     private HashSet<String> categories = new HashSet<>();
-    private Customer[] customers = new Customer[10];
-    private Transaction[][] transactions = new Transaction[30][];
+    private List<Customer> customers = new ArrayList<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
     public Base() {
         initDemoBase();
@@ -38,29 +40,14 @@ public class Base {
     }
 
     private void initDemoCustomers() {
-        customers[0] = new Customer("Nick");
-        customers[1] = new Customer("Ben");
-        customers[2] = new Customer("Anna");
-        customers[3] = new Customer("John");
+        customers.add(new Customer("Nick"));
+        customers.add(new Customer("Ben"));
+        customers.add(new Customer("Anna"));
+        customers.add(new Customer("John"));
 
     }
 
     private void initDemoOrders() {
-        transactions[0] = new Transaction[3];
-        transactions[1] = new Transaction[2];
-        transactions[2] = new Transaction[0];
-        transactions[3] = new Transaction[5];
-        transactions[4] = new Transaction[1];
-        transactions[5] = new Transaction[0];
-        transactions[6] = new Transaction[4];
-        transactions[7] = new Transaction[3];
-        transactions[8] = new Transaction[2];
-
-        for (int i = 0; i < transactions.length; i++) {
-            for (int j = 0; transactions[i] != null && j < transactions[i].length; j++) {
-                transactions[i][j] = new Transaction();
-            }
-        }
 
     }
 
@@ -72,11 +59,11 @@ public class Base {
         return new HashSet<>(categories);
     }
 
-    public Customer[] getCustomers() {
-        return customers;
+    public List<Customer> getCustomers() {
+        return new ArrayList<>(customers);
     }
 
-    public Transaction[][] getTransactions() {
+    public List<Transaction> getTransactions() {
         return transactions;
     }
 }

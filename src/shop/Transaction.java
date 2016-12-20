@@ -1,8 +1,10 @@
 package shop;
 
+import java.util.Date;
+
 public class Transaction {
 
-    private String date;
+    private Date date;
     private Customer customer;
 
     private Sweet[] sweets;
@@ -13,6 +15,7 @@ public class Transaction {
     public Transaction(Customer customer, Sweet[] sweets) {
         this.customer = customer;
         this.sweets = sweets;
+        date = new Date();
     }
 
     public Sweet[] getSweets() {
@@ -23,11 +26,11 @@ public class Transaction {
         this.sweets = sweets;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
