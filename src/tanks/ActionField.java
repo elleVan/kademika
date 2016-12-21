@@ -7,7 +7,6 @@ import tanks.fixed.bfelements.Water;
 import tanks.helpers.*;
 import tanks.mobile.AbstractTank;
 import tanks.mobile.Bullet;
-import tanks.mobile.Tank;
 import tanks.mobile.tanks.BT7;
 import tanks.mobile.tanks.T34;
 
@@ -17,10 +16,11 @@ import tanks.helpers.Action;
 import tanks.mobile.tanks.Tiger;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 import java.util.List;
 
 public class ActionField extends JPanel {
@@ -31,88 +31,125 @@ public class ActionField extends JPanel {
 
     private BattleField bf;
     private AbstractTank defender;
-    private List<Object> aggressors;
     private Bullet bullet;
 
+    private Mission missionT34 = Mission.DEFENDER;
+    private Mission missionBT7 = Mission.KILL_EAGLE;
+    private Mission missionTiger = Mission.KILL_DEFENDER;
 
+    private int defenderX = 256; //256
+    private int defenderY = 384; //384
+
+    private int killEagleX = 0;
+    private int killEagleY = 64;
+
+    private int killDefenderX = 512;
+    private int killDefenderY = 64;
+
+    private int chosen = 0;
+
+    JFrame loadingFrame;
+    JFrame gameFrame;
 
     public ActionField() {
-        bf = new BattleField();
-        defender = new T34(bf);
-        bf.addTank(defender);
-        bullet = new Bullet(defender, -100, -100, Direction.DOWN);
-
-        aggressors = new ArrayList<>();
-        newBT7();
-        newTiger();
-
-        try {
-            imageBlank = ImageIO.read(new File("blank.jpg"));
-        } catch (IOException e) {
-            System.err.println("Can't find imageName");
-        }
-
-        JFrame frame = new JFrame("BATTLE FIELD");
-        frame.setLocation(750, 150);
-        frame.setMinimumSize(new Dimension(bf.getBfWidth() + 16, bf.getBfHeight() + 38));
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.getContentPane().add(this);
-        frame.pack();
-        frame.setVisible(true);
+        loadingFrame = createLoadingFrame();
+        gameFrame = createGameFrame();
+        createEndFrame();
+        gameFrame.setVisible(false);
     }
 
     public void runTheGame() throws InterruptedException {
 
+here:   while (true) {
 
-        while (true) {
-            if (!defender.isDestroyed()) {
-
-                for (Object el : aggressors) {
-                    AbstractTank aggressor = (AbstractTank) el;
-                    if (aggressor instanceof BT7 && (aggressor.getPathAll().size() == aggressor.getStep())) {
-                        aggressor.findPath(4, 8);
-                        aggressor.setPathAll(aggressor.generatePathAll());
-                    } else if (aggressor instanceof Tiger) {
-                        aggressor.findPath(defender.getX() / BattleField.Q_SIZE, defender.getY() / BattleField.Q_SIZE);
-                        aggressor.setPathAll(aggressor.generatePathAll());
+            List<Object> tanks = bf.getTanks();
+            for (int i = 0; i < tanks.size(); i++) {
+                AbstractTank tank = (AbstractTank) tanks.get(i);
+                if (!defender.isDestroyed() && !tank.isDestroyed()) {
+                    if (tank.getMission() == Mission.KILL_EAGLE && (tank.getPathAll().size() == tank.getStep())) {
+                        tank.findPath(4, 8);
+                        tank.setPathAll(tank.generatePathAll());
+                    } else if (tank.getMission() == Mission.KILL_DEFENDER) {
+                        tank.findPath(defender.getX() / BattleField.Q_SIZE, defender.getY() / BattleField.Q_SIZE);
+                        tank.setPathAll(tank.generatePathAll());
+                    } else if (tank.getMission() == Mission.DEFENDER && tank.getPathAll().size() == tank.getStep()) {
+                        tank.getRandomPath();
+                        tank.setPathAll(tank.generatePathAll());
                     }
 
-                    processAction(aggressor.setUp(), aggressor);
+                    processAction(tank.setUp(), tank);
                 }
 
-            }
-            if (!defender.isDestroyed()) {
-                if (defender.getPathAll().size() == defender.getStep()) {
-                    defender.getRandomPath();
-                    defender.setPathAll(defender.generatePathAll());
+                if (defender.isDestroyed() || bf.getEagle().isDestroyed()) {
+                    break here;
                 }
-                processAction(defender.setUp(), defender);
             }
         }
     }
 
+    public void newT34() {
+        int x;
+        int y;
+        if (missionT34 == Mission.DEFENDER) {
+            x = defenderX;
+            y = defenderY;
+        } else if (missionT34 == Mission.KILL_EAGLE) {
+            x = killEagleX;
+            y = killEagleY;
+        } else {
+            x = killDefenderX;
+            y = killDefenderY;
+        }
+
+        AbstractTank tank = new T34(bf, x, y, Direction.DOWN, missionT34);
+        bf.addTank(tank);
+    }
+
     public void newBT7() {
-        AbstractTank aggressor = new BT7(bf, 0, 64, Direction.DOWN);
-        aggressors.add(aggressor);
-        bf.addTank(aggressor);
+        int x;
+        int y;
+        if (missionBT7 == Mission.DEFENDER) {
+            x = defenderX;
+            y = defenderY;
+        } else if (missionBT7 == Mission.KILL_EAGLE) {
+            x = killEagleX;
+            y = killEagleY;
+        } else {
+            x = killDefenderX;
+            y = killDefenderY;
+        }
+
+        AbstractTank tank = new BT7(bf, x, y, Direction.DOWN, missionBT7);
+        bf.addTank(tank);
     }
 
     public void newTiger() {
-        AbstractTank aggressor = new Tiger(bf, 512, 64, Direction.DOWN);
-        aggressors.add(aggressor);
-        bf.addTank(aggressor);
+        int x;
+        int y;
+        if (missionTiger == Mission.DEFENDER) {
+            x = defenderX;
+            y = defenderY;
+        } else if (missionTiger == Mission.KILL_EAGLE) {
+            x = killEagleX;
+            y = killEagleY;
+        } else {
+            x = killDefenderX;
+            y = killDefenderY;
+        }
+        AbstractTank tank = new Tiger(bf, x, y, Direction.DOWN, missionTiger);
+        bf.addTank(tank);
     }
 
     public void processAction(Action a, AbstractTank t) throws InterruptedException {
         if (a == Action.MOVE) {
             processMove(t);
         } else if (a == Action.FIRE) {
-                processTurn(t);
+                processTurn();
                 processFire(t.fire());
             }
     }
 
-    public void processTurn(Tank tank) throws InterruptedException {
+    public void processTurn() throws InterruptedException {
         repaint();
     }
 
@@ -127,9 +164,8 @@ public class ActionField extends JPanel {
             return;
         }
 
-        String tankQuadrant = getQuadrant(tank.getX(), tank.getY());
-        int x = Integer.parseInt(tankQuadrant.split("_")[0]);
-        int y = Integer.parseInt(tankQuadrant.split("_")[1]);
+        int x = tank.getX() / BattleField.Q_SIZE;
+        int y = tank.getY() / BattleField.Q_SIZE;
 
         if (direction == Direction.DOWN && y < 8) {
             y++;
@@ -219,9 +255,8 @@ public class ActionField extends JPanel {
 
     private boolean processInterception() throws InterruptedException {
 
-        String quadrant = getQuadrant(bullet.getX(), bullet.getY());
-        int x = Integer.parseInt(quadrant.split("_")[0]);
-        int y = Integer.parseInt(quadrant.split("_")[1]);
+        int x = bullet.getX() / BattleField.Q_SIZE;
+        int y = bullet.getY() / BattleField.Q_SIZE;
 
         if (isQuadrantOnTheField(x, y)) {
             AbstractBFElement bfElement = bullet.getTank().getBf().scanQuadrant(x, y);
@@ -234,45 +269,35 @@ public class ActionField extends JPanel {
                 return true;
             }
 
-            for (Object el : aggressors) {
-                AbstractTank aggressor = (AbstractTank) el;
-                if (bullet.getTank() != aggressor &&
-                        checkInterception(getQuadrant(aggressor.getX(), aggressor.getY()), quadrant)) {
-                    aggressor.destroy();
-                    if (aggressor.isDestroyed()) {
-                        aggressors.remove(aggressor);
-                        bf.removeTank(aggressor);
+            List<Object> tanks = bf.getTanks();
+            for (int i = 0; i < tanks.size(); i++) {
+                AbstractTank tank = (AbstractTank) tanks.get(i);
+                if (!tank.isDestroyed() && bullet.getTank() != tank &&
+                        checkInterception(tank.getX() / BattleField.Q_SIZE, tank.getY() / BattleField.Q_SIZE, x, y)) {
+                    tank.destroy();
+                    if (tank.isDestroyed() && tank.getMission() != Mission.DEFENDER) {
+                        tanks.remove(tank);
                         Thread.sleep(1000);
-                        if (aggressor instanceof BT7) {
+                        if (tank instanceof BT7) {
                             newBT7();
-                        } else {
+                        } else if (tank instanceof Tiger) {
                             newTiger();
+                        } else {
+                            newT34();
                         }
                     }
                     return true;
                 }
             }
-
-            if (bullet.getTank() != defender &&
-                    checkInterception(getQuadrant(defender.getX(), defender.getY()), quadrant)) {
-                defender.destroy();
-                return true;
-            }
-
         }
 
         return false;
     }
 
-    private boolean checkInterception(String object, String quadrant) {
-        int ox = Integer.parseInt(object.split("_")[0]);
-        int oy = Integer.parseInt(object.split("_")[1]);
+    private boolean checkInterception(int x1, int y1, int x2, int y2) {
 
-        int qx = Integer.parseInt(quadrant.split("_")[0]);
-        int qy = Integer.parseInt(quadrant.split("_")[1]);
-
-        if (ox >= 0 && ox < 9 && oy >= 0 && oy < 9) {
-            if (ox == qx && oy == qy) {
+        if (x1 >= 0 && x1 < 9 && y1 >= 0 && y1 < 9) {
+            if (x1 == x2 && y1 == y2) {
                 return true;
             }
         }
@@ -283,13 +308,136 @@ public class ActionField extends JPanel {
         return (y >= BattleField.Q_MIN && y <= BattleField.Q_MAX && x >= BattleField.Q_MIN && x <= BattleField.Q_MAX);
     }
 
-    public String getQuadrant(int x, int y) {
-        return x / BattleField.Q_SIZE + "_" + y / BattleField.Q_SIZE;
+    private void chooseTanksMissions(int def) {
+        if (def == 0) {
+            missionT34 = Mission.DEFENDER;
+            missionBT7 = Mission.KILL_EAGLE;
+            missionTiger = Mission.KILL_DEFENDER;
+        } else if (def == 1) {
+            missionBT7 = Mission.DEFENDER;
+            missionT34 = Mission.KILL_EAGLE;
+            missionTiger = Mission.KILL_DEFENDER;
+        } else {
+            missionTiger = Mission.DEFENDER;
+            missionBT7 = Mission.KILL_EAGLE;
+            missionT34 = Mission.KILL_DEFENDER;
+        }
     }
 
-    // if input from the program, remember +1 to arguments
-    public String getQuadrantXY(int x, int y) {
-        return (x - 1) * BattleField.Q_SIZE + "_" + (y - 1) * BattleField.Q_SIZE;
+    public void startTheGame() {
+        bf = new BattleField();
+        bullet = new Bullet(defender, -100, -100, Direction.DOWN);
+
+        newT34();
+        newBT7();
+        newTiger();
+
+        for (Object el : bf.getTanks()) {
+            AbstractTank tank = (AbstractTank) el;
+            if (tank.getMission() == Mission.DEFENDER) {
+                defender = tank;
+                break;
+            }
+        }
+
+        try {
+            imageBlank = ImageIO.read(new File("blank.jpg"));
+        } catch (IOException e) {
+            System.err.println("Can't find imageName");
+        }
+    }
+
+    public JFrame createGameFrame() {
+        startTheGame();
+        JFrame frame = new JFrame("BATTLE FIELD");
+        frame.setLocation(750, 150);
+        frame.setMinimumSize(new Dimension(592, 614));
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.getContentPane().add(this);
+        frame.pack();
+        frame.setVisible(true);
+
+        try {
+            runTheGame();
+        } catch (InterruptedException e) {
+
+        }
+        return frame;
+    }
+
+    public JFrame createLoadingFrame() {
+        JFrame frame = new JFrame("BATTLE FIELD");
+        frame.setLocation(750, 150);
+        frame.setMinimumSize(new Dimension(592, 614));
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.getContentPane().add(createLoadingPanel());
+        frame.pack();
+        frame.setVisible(true);
+        frame.setAlwaysOnTop(true);
+        return frame;
+    }
+
+    public JFrame createEndFrame() {
+        JFrame frame = new JFrame("BATTLE FIELD");
+        frame.setLocation(750, 150);
+        frame.setMinimumSize(new Dimension(592, 614));
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        JLabel label = new JLabel("GAME OVER", SwingConstants.CENTER);
+        label.setFont(new Font("Arial", Font.PLAIN, 46));
+        frame.getContentPane().add(label);
+        frame.pack();
+        frame.setVisible(true);
+        return frame;
+    }
+
+    private JPanel createLoadingPanel() {
+        JPanel panel = new JPanel();
+
+        JLabel lButtons = new JLabel("Choose the tank:");
+        JPanel buttons = new JPanel(new GridLayout(0, 1));
+        ButtonGroup group = new ButtonGroup();
+        ActionListener rbListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chosen = Integer.parseInt(e.getActionCommand());
+            }
+        };
+
+        JRadioButton button1 = new JRadioButton("T34");
+        button1.addActionListener(rbListener);
+        button1.setActionCommand("0");
+        button1.setSelected(true);
+        buttons.add(button1);
+        group.add(button1);
+
+        JRadioButton button2 = new JRadioButton("BT7");
+        button2.addActionListener(rbListener);
+        button2.setActionCommand("1");
+        buttons.add(button2);
+        group.add(button2);
+
+        JRadioButton button3 = new JRadioButton("Tiger");
+        button3.addActionListener(rbListener);
+        button3.setActionCommand("2");
+        buttons.add(button3);
+        group.add(button3);
+
+        panel.add(lButtons);
+        panel.add(buttons);
+
+        JButton button = new JButton("Start");
+        panel.add(button);
+
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chooseTanksMissions(chosen);
+                startTheGame();
+                loadingFrame.setVisible(false);
+            }
+        });
+
+        return panel;
     }
 
     @Override
@@ -322,18 +470,13 @@ public class ActionField extends JPanel {
         }
         bf.draw(g);
 
-        defender.draw(g);
-        for (Object el : aggressors) {
-            AbstractTank aggressor = (AbstractTank) el;
-            if (!aggressor.isDestroyed()) {
-                aggressor.draw(g);
+        for (Object el : bf.getTanks()) {
+            AbstractTank tank = (AbstractTank) el;
+            if (!tank.isDestroyed()) {
+                tank.draw(g);
             }
         }
 
         bullet.draw(g);
-    }
-
-    public Bullet getBullet() {
-        return bullet;
     }
 }

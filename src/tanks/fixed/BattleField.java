@@ -21,8 +21,7 @@ public class BattleField implements Drawable {
     private int bfHeight = 576;
 
     private List<Object> tanks;
-
-    private String[] coordinatesAggressor = {"1_1", "5_1", "9_1"};
+    private AbstractBFElement eagle;
 
     private AbstractBFElement[][] battleFieldObj;
 
@@ -63,6 +62,7 @@ public class BattleField implements Drawable {
                     battleFieldObj[i][j] = new Brick(x, y);
                 } else if (battleField[i][j].equals("E")) {
                     battleFieldObj[i][j] = new Eagle(x, y);
+                    eagle = battleFieldObj[i][j];
                 } else if (battleField[i][j].equals("R")) {
                     battleFieldObj[i][j] = new Rock(x, y);
                 } else if (battleField[i][j].equals("W")) {
@@ -165,5 +165,9 @@ public class BattleField implements Drawable {
 
     public void removeTank(AbstractTank tank) {
         tanks.remove(tank);
+    }
+
+    public AbstractBFElement getEagle() {
+        return eagle;
     }
 }

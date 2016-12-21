@@ -2,6 +2,7 @@ package tanks.mobile.tanks;
 
 import tanks.helpers.Direction;
 import tanks.fixed.BattleField;
+import tanks.helpers.Mission;
 import tanks.mobile.AbstractTank;
 
 import javax.imageio.ImageIO;
@@ -16,8 +17,8 @@ public class BT7 extends AbstractTank {
         speed = super.getSpeed() / 2;
     }
 
-    public BT7(BattleField bf, int x, int y, Direction direction) {
-        super(bf, x, y, direction);
+    public BT7(BattleField bf, int x, int y, Direction direction, Mission mission) {
+        super(bf, x, y, direction, mission);
         speed = super.getSpeed() / 2;
     }
 

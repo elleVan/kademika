@@ -5,6 +5,7 @@ import tanks.fixed.BattleField;
 import tanks.fixed.bfelements.*;
 import tanks.helpers.Action;
 import tanks.helpers.Direction;
+import tanks.helpers.Mission;
 import tanks.mobile.tanks.BT7;
 import tanks.mobile.tanks.T34;
 import tanks.mobile.tanks.Tiger;
@@ -19,6 +20,7 @@ public abstract class AbstractTank implements Tank {
     public static final int TANK_STEP = 1;
 
     protected int speed = 10;
+    private Mission mission;
 
     private int x;
     private int y;
@@ -43,29 +45,30 @@ public abstract class AbstractTank implements Tank {
     private BattleField bf;
 
     public AbstractTank(BattleField bf) {
-        this(bf, 256, 256, Direction.DOWN);
+        this(bf, 256, 256, Direction.DOWN, Mission.KILL_EAGLE);
     }
 
-    public AbstractTank(BattleField bf, int x, int y, Direction direction) {
+    public AbstractTank(BattleField bf, int x, int y, Direction direction, Mission mission) {
         this.bf = bf;
         this.x = x;
         this.y = y;
         this.direction = direction;
+        this.mission = mission;
         pathAll = new ArrayList<>();
         setImages(createImages());
     }
 
     public List<Object> detectEnemy() {
         List<Object> result = new ArrayList<>();
-        if (this instanceof T34) {
+        if (mission == Mission.DEFENDER) {
             for (Object el : bf.getTanks()) {
-                if (el instanceof BT7 || el instanceof Tiger) {
+                if (!((AbstractTank) el).isDestroyed() && el.getClass() != this.getClass()) {
                     result.add(el);
                 }
             }
         } else {
             for (Object el : bf.getTanks()) {
-                if (el instanceof T34) {
+                if (((AbstractTank) el).getMission() == Mission.DEFENDER) {
                     result.add(el);
                 }
             }
@@ -195,6 +198,10 @@ public abstract class AbstractTank implements Tank {
                 distance++;
             }
 
+            if (i == bfElements.size()) {
+                pathNew.add(current);
+                return pathNew;
+            }
             nexts = findNext((AbstractBFElement) bfElements.get(i));
         }
 
@@ -284,9 +291,6 @@ public abstract class AbstractTank implements Tank {
 
             if (bf.isOccupied(destination)) {
                 result.add(Action.FIRE);
-                if (destination instanceof Rock) {
-                    result.add(Action.FIRE);
-                }
             }
 
             result.add(Action.MOVE);
@@ -347,11 +351,11 @@ public abstract class AbstractTank implements Tank {
 
         if (bf.isQuadrantOnTheField(destX, destY) && (bf.scanQuadrant(destX, destY) instanceof Rock) && (this instanceof Tiger)) {
             return true;
-        } else if (bf.isQuadrantOnTheField(destX, destY) && (bf.scanQuadrant(destX, destY) instanceof Eagle) && (this instanceof T34)) {
+        } else if (bf.isQuadrantOnTheField(destX, destY) && (bf.scanQuadrant(destX, destY) instanceof Eagle) && (mission == Mission.DEFENDER)) {
             return false;
         }
 
-        return bf.isQuadrantOnTheField(destX, destY) && !(bf.scanQuadrant(destX, destY) instanceof Rock);
+        return bf.isQuadrantOnTheField(destX, destY) && !(bf.scanQuadrant(destX, destY) instanceof Rock && !bf.scanQuadrant(destX, destY).isDestroyed());
     }
 
     public boolean isTankInNextQuadrant() {
@@ -382,7 +386,7 @@ public abstract class AbstractTank implements Tank {
 
         for (Object el : bf.getTanks()) {
             AbstractTank tank = (AbstractTank) el;
-            if (!this.equals(tank) && tank.getX() == bfElement.getX() && tank.getY() == bfElement.getY()) {
+            if (!tank.isDestroyed() && !this.equals(tank) && tank.getX() == bfElement.getX() && tank.getY() == bfElement.getY()) {
                 return true;
             }
         }
@@ -403,13 +407,13 @@ public abstract class AbstractTank implements Tank {
         }
 
         if (isTankInNextQuadrant()) {
-            if (this instanceof BT7) {
+            if (mission == Mission.KILL_EAGLE) {
                 findPath(4, 8);
                 setPathAll(generatePathAll());
-            } else if (this instanceof Tiger) {
+            } else if (mission == Mission.KILL_DEFENDER) {
                 for (Object el : bf.getTanks()) {
-                    if (el instanceof T34) {
-                        AbstractTank enemy = (AbstractTank) el;
+                    AbstractTank enemy = (AbstractTank) el;
+                    if (enemy.getMission() == Mission.DEFENDER) {
                         findPath(enemy.getX() / BattleField.Q_SIZE, enemy.getY() / BattleField.Q_SIZE);
                         setPathAll(generatePathAll());
                     }
@@ -517,5 +521,13 @@ public abstract class AbstractTank implements Tank {
 
     public Image[] createImages() {
         return images;
+    }
+
+    public Mission getMission() {
+        return mission;
+    }
+
+    public void setMission(Mission mission) {
+        this.mission = mission;
     }
 }
