@@ -53,9 +53,10 @@ public class ActionField extends JPanel {
 
     public ActionField() {
         loadingFrame = createLoadingFrame();
-        gameFrame = createGameFrame();
-        createEndFrame();
-        gameFrame.setVisible(false);
+
+        while (true) {
+            gameFrame = createGameFrame();
+        }
     }
 
     public void runTheGame() throws InterruptedException {
@@ -79,7 +80,6 @@ here:   while (true) {
 
                     processAction(tank.setUp(), tank);
                 }
-
                 if (defender.isDestroyed() || bf.getEagle().isDestroyed()) {
                     break here;
                 }
@@ -362,6 +362,9 @@ here:   while (true) {
         } catch (InterruptedException e) {
 
         }
+
+        loadingFrame.setVisible(true);
+        frame.setVisible(false);
         return frame;
     }
 
@@ -374,19 +377,6 @@ here:   while (true) {
         frame.pack();
         frame.setVisible(true);
         frame.setAlwaysOnTop(true);
-        return frame;
-    }
-
-    public JFrame createEndFrame() {
-        JFrame frame = new JFrame("BATTLE FIELD");
-        frame.setLocation(750, 150);
-        frame.setMinimumSize(new Dimension(592, 614));
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        JLabel label = new JLabel("GAME OVER", SwingConstants.CENTER);
-        label.setFont(new Font("Arial", Font.PLAIN, 46));
-        frame.getContentPane().add(label);
-        frame.pack();
-        frame.setVisible(true);
         return frame;
     }
 
