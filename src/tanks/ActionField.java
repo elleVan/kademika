@@ -63,9 +63,8 @@ public class ActionField extends JPanel {
 
 here:   while (true) {
 
-            List<Object> tanks = bf.getTanks();
-            for (int i = 0; i < tanks.size(); i++) {
-                AbstractTank tank = (AbstractTank) tanks.get(i);
+            for (int i = 0; i < bf.getTanks().size(); i++) {
+                AbstractTank tank = (AbstractTank) bf.getTanks().get(i);
                 if (!defender.isDestroyed() && !tank.isDestroyed()) {
                     if (tank.getMission() == Mission.KILL_EAGLE && (tank.getPathAll().size() == tank.getStep())) {
                         tank.findPath(4, 8);
@@ -73,8 +72,8 @@ here:   while (true) {
                     } else if (tank.getMission() == Mission.KILL_DEFENDER) {
                         tank.findPath(defender.getX() / BattleField.Q_SIZE, defender.getY() / BattleField.Q_SIZE);
                         tank.setPathAll(tank.generatePathAll());
-                    } else if (tank.getMission() == Mission.DEFENDER && tank.getPathAll().size() == tank.getStep()) {
-                        tank.getRandomPath();
+                    } else if (tank.getMission() == Mission.DEFENDER) {
+                        tank.getDefenderPath();
                         tank.setPathAll(tank.generatePathAll());
                     }
 
@@ -103,6 +102,14 @@ here:   while (true) {
 
         AbstractTank tank = new T34(bf, x, y, Direction.DOWN, missionT34);
         bf.addTank(tank);
+
+        if (tank.getMission() == Mission.DEFENDER) {
+            bf.setDefender(tank);
+        } else if (tank.getMission() == Mission.KILL_EAGLE) {
+            bf.setKillEagle(tank);
+        } else {
+            bf.setKillDefender(tank);
+        }
     }
 
     public void newBT7() {
@@ -121,6 +128,14 @@ here:   while (true) {
 
         AbstractTank tank = new BT7(bf, x, y, Direction.DOWN, missionBT7);
         bf.addTank(tank);
+
+        if (tank.getMission() == Mission.DEFENDER) {
+            bf.setDefender(tank);
+        } else if (tank.getMission() == Mission.KILL_EAGLE) {
+            bf.setKillEagle(tank);
+        } else {
+            bf.setKillDefender(tank);
+        }
     }
 
     public void newTiger() {
@@ -138,6 +153,14 @@ here:   while (true) {
         }
         AbstractTank tank = new Tiger(bf, x, y, Direction.DOWN, missionTiger);
         bf.addTank(tank);
+
+        if (tank.getMission() == Mission.DEFENDER) {
+            bf.setDefender(tank);
+        } else if (tank.getMission() == Mission.KILL_EAGLE) {
+            bf.setKillEagle(tank);
+        } else {
+            bf.setKillDefender(tank);
+        }
     }
 
     public void processAction(Action a, AbstractTank t) throws InterruptedException {
@@ -269,14 +292,13 @@ here:   while (true) {
                 return true;
             }
 
-            List<Object> tanks = bf.getTanks();
-            for (int i = 0; i < tanks.size(); i++) {
-                AbstractTank tank = (AbstractTank) tanks.get(i);
+            for (int i = 0; i < bf.getTanks().size(); i++) {
+                AbstractTank tank = (AbstractTank) bf.getTanks().get(i);
                 if (!tank.isDestroyed() && bullet.getTank() != tank &&
                         checkInterception(tank.getX() / BattleField.Q_SIZE, tank.getY() / BattleField.Q_SIZE, x, y)) {
                     tank.destroy();
                     if (tank.isDestroyed() && tank.getMission() != Mission.DEFENDER) {
-                        tanks.remove(tank);
+                        bf.removeTank(tank);
                         Thread.sleep(1000);
                         if (tank instanceof BT7) {
                             newBT7();

@@ -6,6 +6,7 @@ import tanks.helpers.Direction;
 import tanks.helpers.Drawable;
 import tanks.mobile.AbstractTank;
 
+import javax.management.AttributeList;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -23,7 +24,13 @@ public class BattleField implements Drawable {
     private List<Object> tanks;
     private AbstractBFElement eagle;
 
+    private AbstractTank defender;
+    private AbstractTank killEagle;
+    private AbstractTank killDefender;
+
     private AbstractBFElement[][] battleFieldObj;
+
+    private List<Object> nextsEagle;
 
     private String[][] battleField = {
             { " ", " ", " ", " ", " ", " ", " ", " ", " " },
@@ -50,6 +57,8 @@ public class BattleField implements Drawable {
 
     private void generateBFObj() {
         battleFieldObj = new AbstractBFElement[battleField.length][battleField.length];
+        nextsEagle = new ArrayList<>();
+
         for (int i = 0; i < battleField.length; i++) {
             for (int j = 0; j < battleField[i].length; j++) {
                 String coordinates = getQuadrantXY(j + 1, i + 1);
@@ -70,6 +79,13 @@ public class BattleField implements Drawable {
                 }
             }
         }
+
+        nextsEagle.add(battleFieldObj[8][3]);
+        nextsEagle.add(battleFieldObj[8][4]);
+        nextsEagle.add(battleFieldObj[8][5]);
+        nextsEagle.add(battleFieldObj[7][3]);
+        nextsEagle.add(battleFieldObj[7][4]);
+        nextsEagle.add(battleFieldObj[7][5]);
     }
 
     public boolean isOccupied(AbstractBFElement bfElement) {
@@ -156,7 +172,7 @@ public class BattleField implements Drawable {
     }
 
     public List<Object> getTanks() {
-        return tanks;
+        return new ArrayList<>(tanks);
     }
 
     public void addTank(AbstractTank tank) {
@@ -169,5 +185,33 @@ public class BattleField implements Drawable {
 
     public AbstractBFElement getEagle() {
         return eagle;
+    }
+
+    public AbstractTank getDefender() {
+        return defender;
+    }
+
+    public void setDefender(AbstractTank defender) {
+        this.defender = defender;
+    }
+
+    public AbstractTank getKillEagle() {
+        return killEagle;
+    }
+
+    public void setKillEagle(AbstractTank killEagle) {
+        this.killEagle = killEagle;
+    }
+
+    public AbstractTank getKillDefender() {
+        return killDefender;
+    }
+
+    public void setKillDefender(AbstractTank killDefender) {
+        this.killDefender = killDefender;
+    }
+
+    public List<Object> getNextsEagle() {
+        return nextsEagle;
     }
 }
