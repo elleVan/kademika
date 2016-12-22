@@ -20,7 +20,7 @@ public class Water extends AbstractBFElement {
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         Composite before = g2.getComposite();
-        Composite trans = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
+        Composite trans = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
         g2.setComposite(trans);
         g2.drawImage(getImage(), this.getX(), this.getY(), new ImageObserver() {
             @Override

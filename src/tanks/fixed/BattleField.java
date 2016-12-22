@@ -6,7 +6,6 @@ import tanks.helpers.Direction;
 import tanks.helpers.Drawable;
 import tanks.mobile.AbstractTank;
 
-import javax.management.AttributeList;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -31,6 +30,7 @@ public class BattleField implements Drawable {
     private AbstractBFElement[][] battleFieldObj;
 
     private List<Object> nextsEagle;
+    private List<Object> waters;
 
     private String[][] battleField = {
             { " ", " ", " ", " ", " ", " ", " ", " ", " " },
@@ -58,12 +58,12 @@ public class BattleField implements Drawable {
     private void generateBFObj() {
         battleFieldObj = new AbstractBFElement[battleField.length][battleField.length];
         nextsEagle = new ArrayList<>();
+        waters = new ArrayList<>();
 
         for (int i = 0; i < battleField.length; i++) {
             for (int j = 0; j < battleField[i].length; j++) {
-                String coordinates = getQuadrantXY(j + 1, i + 1);
-                int x = Integer.parseInt(coordinates.split("_")[0]);
-                int y = Integer.parseInt(coordinates.split("_")[1]);
+                int x = j * BattleField.Q_SIZE;
+                int y = i * BattleField.Q_SIZE;
 
                 if (battleField[i][j].trim().isEmpty()) {
                     battleFieldObj[i][j] = new Blank(x, y);
@@ -76,6 +76,7 @@ public class BattleField implements Drawable {
                     battleFieldObj[i][j] = new Rock(x, y);
                 } else if (battleField[i][j].equals("W")) {
                     battleFieldObj[i][j] = new Water(x, y);
+                    waters.add(battleFieldObj[i][j]);
                 }
             }
         }
@@ -90,22 +91,15 @@ public class BattleField implements Drawable {
 
     public boolean isOccupied(AbstractBFElement bfElement) {
 
-
-            if (!isQuadrantEmpty(bfElement.getX() / BattleField.Q_SIZE, bfElement.getY() / BattleField.Q_SIZE)
-                    && !(bfElement instanceof Water)) {
-                return true;
-            }
-
-
-        return false;
+        return !isQuadrantEmpty(bfElement.getX() / BattleField.Q_SIZE, bfElement.getY() / BattleField.Q_SIZE)
+                    && !(bfElement instanceof Water);
 
     }
 
     public boolean isOccupied(int x, int y, Direction direction) {
 
-        String quadrant = getQuadrant(x, y);
-        x = Integer.parseInt(quadrant.split("_")[0]);
-        y = Integer.parseInt(quadrant.split("_")[1]);
+        x = x / BattleField.Q_SIZE;
+        y = y / BattleField.Q_SIZE;
 
         if (direction == Direction.UP) {
             y -= 1;
@@ -117,14 +111,7 @@ public class BattleField implements Drawable {
             x += 1;
         }
 
-        if (isQuadrantOnTheField(x, y)) {
-            if (!isQuadrantEmpty(x, y) && !(scanQuadrant(x, y) instanceof Water)) {
-                return true;
-            }
-        }
-
-        return false;
-
+        return isQuadrantOnTheField(x, y) && !isQuadrantEmpty(x, y) && !(scanQuadrant(x, y) instanceof Water);
     }
 
     @Override
@@ -134,14 +121,6 @@ public class BattleField implements Drawable {
                 battleFieldObj[j][k].draw(g);
             }
         }
-    }
-
-    public String getQuadrant(int x, int y) {
-        return x / Q_SIZE + "_" + y / Q_SIZE;
-    }
-
-    public String getQuadrantXY(int x, int y) {
-        return (x - 1) * Q_SIZE + "_" + (y - 1) * Q_SIZE;
     }
 
     public boolean isQuadrantOnTheField(int x, int y) {
@@ -213,5 +192,9 @@ public class BattleField implements Drawable {
 
     public List<Object> getNextsEagle() {
         return nextsEagle;
+    }
+
+    public List<Object> getWaters() {
+        return waters;
     }
 }

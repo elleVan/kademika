@@ -21,7 +21,6 @@ import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 public class ActionField extends JPanel {
 
@@ -487,6 +486,11 @@ here:   while (true) {
             if (!tank.isDestroyed()) {
                 tank.draw(g);
             }
+        }
+
+        for (Object el : bf.getWaters()) {
+            AbstractBFElement water = (AbstractBFElement) el;
+            water.draw(g);
         }
 
         bullet.draw(g);
