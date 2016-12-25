@@ -17,9 +17,6 @@ public class BattleField implements Drawable {
     public static final int Q_MIN = 0;
     public static final int Q_MAX = 8;
 
-    private int bfWidth = 576;
-    private int bfHeight = 576;
-
     private List<Object> tanks;
     private AbstractBFElement eagle;
 
@@ -29,7 +26,7 @@ public class BattleField implements Drawable {
 
     private AbstractBFElement[][] battleFieldObj;
 
-    private List<Object> nextsEagle;
+    private List<Object> aroundEagle;
     private List<Object> waters;
 
     private String[][] battleField = {
@@ -57,7 +54,7 @@ public class BattleField implements Drawable {
 
     private void generateBFObj() {
         battleFieldObj = new AbstractBFElement[battleField.length][battleField.length];
-        nextsEagle = new ArrayList<>();
+        aroundEagle = new ArrayList<>();
         waters = new ArrayList<>();
 
         for (int i = 0; i < battleField.length; i++) {
@@ -81,12 +78,12 @@ public class BattleField implements Drawable {
             }
         }
 
-        nextsEagle.add(battleFieldObj[8][3]);
-        nextsEagle.add(battleFieldObj[8][4]);
-        nextsEagle.add(battleFieldObj[8][5]);
-        nextsEagle.add(battleFieldObj[7][3]);
-        nextsEagle.add(battleFieldObj[7][4]);
-        nextsEagle.add(battleFieldObj[7][5]);
+        aroundEagle.add(battleFieldObj[8][3]);
+        aroundEagle.add(battleFieldObj[8][4]);
+        aroundEagle.add(battleFieldObj[8][5]);
+        aroundEagle.add(battleFieldObj[7][3]);
+        aroundEagle.add(battleFieldObj[7][4]);
+        aroundEagle.add(battleFieldObj[7][5]);
     }
 
     public boolean isOccupied(AbstractBFElement bfElement) {
@@ -116,9 +113,9 @@ public class BattleField implements Drawable {
 
     @Override
     public void draw(Graphics g) {
-        for (int j = 0; j < battleFieldObj.length; j++) {
-            for (int k = 0; k < battleFieldObj.length; k++) {
-                battleFieldObj[j][k].draw(g);
+        for (AbstractBFElement[] arr : battleFieldObj) {
+            for (AbstractBFElement el : arr) {
+                el.draw(g);
             }
         }
     }
@@ -127,7 +124,7 @@ public class BattleField implements Drawable {
         return (y >= Q_MIN && y <= Q_MAX && x >= Q_MIN && x <= Q_MAX);
     }
 
-    public boolean isQuadrantEmpty(int x, int y) {
+    private boolean isQuadrantEmpty(int x, int y) {
         AbstractBFElement bfElement = scanQuadrant(x, y);
         return (bfElement instanceof Blank || bfElement.isDestroyed());
     }
@@ -140,14 +137,6 @@ public class BattleField implements Drawable {
         if (scanQuadrant(x, y) instanceof Destroyable) {
             ((Destroyable) battleFieldObj[y][x]).destroy();
         }
-    }
-
-    public int getBfWidth() {
-        return bfWidth;
-    }
-
-    public int getBfHeight() {
-        return bfHeight;
     }
 
     public List<Object> getTanks() {
@@ -190,8 +179,8 @@ public class BattleField implements Drawable {
         this.killDefender = killDefender;
     }
 
-    public List<Object> getNextsEagle() {
-        return nextsEagle;
+    public List<Object> getAroundEagle() {
+        return aroundEagle;
     }
 
     public List<Object> getWaters() {

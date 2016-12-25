@@ -17,7 +17,6 @@ public class AbstractBFElement implements Drawable {
     private boolean isDestroyed = false;
 
     private Image image;
-    private Image imageBlank;
 
     public AbstractBFElement(int x, int y) {
         this.x = x;
@@ -70,13 +69,5 @@ public class AbstractBFElement implements Drawable {
 
     public void setImage(Image image) {
         this.image = image;
-    }
-
-    public Image getImageBlank() {
-        return imageBlank;
-    }
-
-    public void setImageBlank(Image imageBlank) {
-        this.imageBlank = imageBlank;
     }
 }

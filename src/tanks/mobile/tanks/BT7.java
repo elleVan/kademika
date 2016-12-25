@@ -12,11 +12,6 @@ import java.io.IOException;
 
 public class BT7 extends AbstractTank {
 
-    public BT7(BattleField bf) {
-        super(bf);
-        speed = super.getSpeed() / 2;
-    }
-
     public BT7(BattleField bf, int x, int y, Direction direction, Mission mission) {
         super(bf, x, y, direction, mission);
         speed = super.getSpeed() / 2;

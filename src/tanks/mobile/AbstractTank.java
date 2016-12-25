@@ -29,12 +29,12 @@ public abstract class AbstractTank implements Tank {
 
     private List<Object> bfElements;
     private int[] bfIds;
-    private List<Object> pathNew;
-    private List<Object> nexts;
+    private List<Object> pathQuadrants;
+    private List<Object> next;
 
     private boolean hide;
 
-    private List<Object> pathAll;
+    private List<Object> pathActions;
 
     protected Color colorTank = new Color(255, 0, 0);
     protected Color colorTower = new Color(0, 255, 0);
@@ -53,11 +53,12 @@ public abstract class AbstractTank implements Tank {
         this.y = y;
         this.direction = direction;
         this.mission = mission;
-        pathAll = new ArrayList<>();
-        setImages(createImages());
+        pathActions = new ArrayList<>();
+        images = createImages();
     }
 
-    public List<Object> detectEnemy() {
+    private List<Object> detectEnemy() {
+
         List<Object> result = new ArrayList<>();
         if (mission == Mission.DEFENDER) {
             result.add(bf.getKillEagle());
@@ -68,34 +69,31 @@ public abstract class AbstractTank implements Tank {
         return result;
     }
 
-    public List<Object> turnToEnemy(List<Object> enemies) {
-        List<Object> result = new ArrayList<>();
+    private Direction turnToEnemy(List<Object> enemies) {
+
         for (Object el : enemies) {
             AbstractTank enemy = (AbstractTank) el;
             if (enemy != null) {
                 if (x == enemy.getX() && isQuadrantVisible(x, y, enemy.getX(), enemy.getY()) && !hide) {
                     if (y < enemy.getY()) {
-                        result.add(Direction.DOWN);
-                        return result;
+                        return Direction.DOWN;
                     } else {
-                        result.add(Direction.UP);
-                        return result;
+                        return Direction.UP;
                     }
                 } else if (y == enemy.getY() && isQuadrantVisible(x, y, enemy.getX(), enemy.getY()) && !hide) {
                     if (x < enemy.getX()) {
-                        result.add(Direction.RIGHT);
-                        return result;
+                        return Direction.RIGHT;
                     } else {
-                        result.add(Direction.LEFT);
-                        return result;
+                        return Direction.LEFT;
                     }
                 }
             }
         }
-        return result;
+        return null;
     }
 
-    public boolean isQuadrantVisible(int initX, int initY, int destX, int destY) {
+    private boolean isQuadrantVisible(int initX, int initY, int destX, int destY) {
+
         int possibleX = initX;
         int possibleY = initY;
 
@@ -137,8 +135,6 @@ public abstract class AbstractTank implements Tank {
 
     public List<Object> getDefenderPath() {
 
-        List<Object> result = new ArrayList<>();
-
         AbstractTank killDefender = bf.getKillDefender();
         AbstractTank killEagle = bf.getKillEagle();
 
@@ -167,9 +163,12 @@ public abstract class AbstractTank implements Tank {
             }
         }
 
+        pathQuadrants = new ArrayList<>();
+        next = new ArrayList<>();
         bfElements = new ArrayList<>();
-        nexts = new ArrayList<>();
-        result.add(bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE));
+
+        pathQuadrants.add(bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE));
+
         List<Object> variants = findNext(bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE));
         List<Object> preferable = new ArrayList<>();
 
@@ -180,27 +179,23 @@ public abstract class AbstractTank implements Tank {
                 preferable.add(bfElement);
             }
         }
-        if (preferable.size() != 0) {
-            Random random = new Random();
-            int idx = random.nextInt(preferable.size());
-            result.add(preferable.get(idx));
-        } else {
-            Random random = new Random();
-            int idx = random.nextInt(variants.size());
-            result.add(variants.get(idx));
-        }
 
-        pathNew = result;
-        return result;
+        getRandomQuadrant(variants, preferable, false);
+
+        return pathQuadrants;
     }
 
-    public List<Object> getHidePath() {
+    private List<Object> getHidePath() {
+
+        pathQuadrants = new ArrayList<>();
+        next = new ArrayList<>();
         bfElements = new ArrayList<>();
-        nexts = new ArrayList<>();
-        List<Object> result = new ArrayList<>();
-        result.add(bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE));
+
+        pathQuadrants.add(bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE));
+
         List<Object> variants = findNext(bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE));
         List<Object> hideVars = new ArrayList<>();
+
         for (Object el : variants) {
             AbstractBFElement bfElement = (AbstractBFElement) el;
             if (!isQuadrantVisible(bfElement.getX(), bfElement.getY(), bf.getKillDefender().getX(), bf.getKillDefender().getY())
@@ -209,175 +204,203 @@ public abstract class AbstractTank implements Tank {
                 hideVars.add(el);
             }
         }
-        if (hideVars.size() != 0) {
-            Random random = new Random();
-            int idx = random.nextInt(hideVars.size());
-            result.add(hideVars.get(idx));
-            hide = true;
-        } else {
-            Random random = new Random();
-            int idx = random.nextInt(variants.size());
-            result.add(variants.get(idx));
-        }
 
-        pathNew = result;
-        return result;
+        getRandomQuadrant(variants, hideVars, true);
+
+        return pathQuadrants;
+    }
+
+    private void getRandomQuadrant(List<Object> allVariants, List<Object> preferableVariants, boolean hiding) {
+
+        Random random = new Random();
+        if (preferableVariants.size() != 0) {
+            int idx = random.nextInt(preferableVariants.size());
+            pathQuadrants.add(preferableVariants.get(idx));
+            if (hiding) {
+                hide = true;
+            }
+        } else {
+            int idx = random.nextInt(allVariants.size());
+            pathQuadrants.add(allVariants.get(idx));
+        }
     }
 
     public List<Object> findPath(int a, int b) {
         return findPath(a, b, false);
     }
 
-    public List<Object> findPath(int a, int b, boolean fiction) {
-        pathNew = new ArrayList<>();
-        nexts = new ArrayList<>();
+    private List<Object> findPath(int a, int b, boolean fiction) {
+
+        pathQuadrants = new ArrayList<>();
+        next = new ArrayList<>();
         bfElements = new ArrayList<>();
         bfIds = new int[81];
-        int initX = x / BattleField.Q_SIZE;
-        int initY = y / BattleField.Q_SIZE;
 
-        bfIds[0] = 0;
-        AbstractBFElement current = bf.scanQuadrant(initX, initY);
-
-
-        int finish = 0;
-        int distance = 1;
+        AbstractBFElement current = bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE);
         AbstractBFElement destination = bf.scanQuadrant(a, b);
-        nexts = findNext(destination, fiction);
+
         bfElements.add(destination);
+        bfIds[0] = 0;
 
-        for (int i = 0; i < destination.getX() / BattleField.Q_SIZE; i++) {
-            AbstractBFElement bfElement = bf.scanQuadrant(i, destination.getY() / BattleField.Q_SIZE);
-            if (!bfElements.contains(bfElement) && !nexts.contains(bfElement) && isQuadrantVisible(destination.getX(), destination.getY(), bfElement.getX(), bfElement.getY())) {
-                nexts.add(bfElement);
-            }
-        }
-        for (int i = destination.getX() / BattleField.Q_SIZE + 1; i < 9; i++) {
-            AbstractBFElement bfElement = bf.scanQuadrant(i, destination.getY() / BattleField.Q_SIZE);
-            if (!bfElements.contains(bfElement) && !nexts.contains(bfElement) && isQuadrantVisible(destination.getX(), destination.getY(), bfElement.getX(), bfElement.getY())) {
-                nexts.add(bfElement);
-            }
-        }
-        for (int i = 0; i < destination.getY() / BattleField.Q_SIZE; i++) {
-            AbstractBFElement bfElement = bf.scanQuadrant(destination.getX() / BattleField.Q_SIZE, i);
-            if (!bfElements.contains(bfElement) && !nexts.contains(bfElement) && isQuadrantVisible(destination.getX(), destination.getY(), bfElement.getX(), bfElement.getY())) {
-                nexts.add(bfElement);
-            }
-        }
-        for (int i = destination.getY() / BattleField.Q_SIZE + 1; i < 9; i++) {
-            AbstractBFElement bfElement = bf.scanQuadrant(destination.getX() / BattleField.Q_SIZE, i);
-            if (!bfElements.contains(bfElement) && !nexts.contains(bfElement) && isQuadrantVisible(destination.getX(), destination.getY(), bfElement.getX(), bfElement.getY())) {
-                nexts.add(bfElement);
-            }
-        }
+        next = findNext(destination, fiction);
 
-        if (nexts.isEmpty()) {
-            pathNew.add(current);
-            return pathNew;
-        }
-
-        for (int i = 1; i < 81 && finish == 0; i++) {
-
-            for (Object el : nexts) {
-                bfElements.add(el);
-                bfIds[bfElements.size() - 1] = distance;
-
-                if (current.equals(el)) {
-                    finish = 1;
+        for (int i = 0; i < 9; i++) {
+            if (i != destination.getX() / BattleField.Q_SIZE) {
+                AbstractBFElement bfElement = bf.scanQuadrant(i, destination.getY() / BattleField.Q_SIZE);
+                if (!next.contains(bfElement) && isQuadrantVisible(destination.getX(), destination.getY(), bfElement.getX(), bfElement.getY())) {
+                    next.add(bfElement);
                 }
             }
-
-            if (bfIds[i - 1] != bfIds[i]) {
-                distance++;
-            }
-
-            if (i == bfElements.size()) {
-                pathNew.add(current);
-                return pathNew;
-            }
-
-            if (i < bfElements.size()) {
-                nexts = findNext((AbstractBFElement) bfElements.get(i), fiction);
+        }
+        for (int i = 0; i < 9; i++) {
+            if (i != destination.getY() / BattleField.Q_SIZE) {
+                AbstractBFElement bfElement = bf.scanQuadrant(destination.getX() / BattleField.Q_SIZE, i);
+                if (!next.contains(bfElement) && isQuadrantVisible(destination.getX(), destination.getY(), bfElement.getX(), bfElement.getY())) {
+                    next.add(bfElement);
+                }
             }
         }
+
+        if (next.isEmpty()) {
+            pathQuadrants.add(current);
+            return pathQuadrants;
+        }
+
+        fillBFElements();
 
         if (fiction) {
             return bfElements;
         }
 
         if (bfElements.contains(current)) {
+            fillPathQuadrants(destination, current);
+            Collections.reverse(pathQuadrants);
+        } else {
+            pathQuadrants.add(current);
+        }
 
-            List<Object> nextsBack = findNextBack(current);
-            for (int i = 0; i < nextsBack.size(); i++) {
-                if (isTankInNextQuadrant((AbstractBFElement) nextsBack.get(i))) {
-                    nextsBack.remove(i);
-                }
-            }
+        return pathQuadrants;
+    }
 
-            if (nextsBack.isEmpty()) {
-                pathNew.add(current);
-                return pathNew;
-            }
+    private List<Object> findPathStraight(int a, int b) {
 
-            int last = bfIds[bfElements.indexOf(current)];
-            for (int k = 0; k <= last; k++) {
-                pathNew.add(null);
-            }
-            pathNew.set(last, destination);
-            pathNew.set(0, current);
-            for (int j = last - 1; j > 0; j--) {
-                for (Object el : nextsBack) {
-                    if (bfElements.contains(el) && bfIds[bfElements.indexOf(el)] == j) {
-                        pathNew.set(last - j, el);
-                        break;
-                    }
-                }
+        pathQuadrants = new ArrayList<>();
+        next = new ArrayList<>();
+        bfElements = new ArrayList<>();
+        bfIds = new int[81];
 
-                nextsBack = findNextBack((AbstractBFElement) pathNew.get(last - j));
+        AbstractBFElement current = bf.scanQuadrant(x / BattleField.Q_SIZE, y / BattleField.Q_SIZE);
+        AbstractBFElement destination = bf.scanQuadrant(a, b);
+
+        bfElements.add(destination);
+        bfIds[0] = 0;
+
+        next = findNext(current);
+
+        for (int i = 0; i < next.size(); i++) {
+            if (isTankInNextQuadrant((AbstractBFElement) next.get(i))) {
+                next.remove(i);
             }
         }
 
-        return pathNew;
+        if (next.isEmpty()) {
+            pathQuadrants.add(current);
+            return pathQuadrants;
+        }
+
+        fillBFElements();
+
+        if (bfElements.contains(destination)) {
+            fillPathQuadrants(current, destination);
+        } else {
+            pathQuadrants.add(current);
+        }
+
+        return pathQuadrants;
     }
 
-    public List<Object> findNext(AbstractBFElement bfElement) {
+    private void fillBFElements() {
+
+        int distance = 1;
+
+        for (int i = 1; i < 81; i++) {
+
+            for (Object el : next) {
+                bfElements.add(el);
+                bfIds[bfElements.size() - 1] = distance;
+            }
+
+            if (bfIds[i - 1] != bfIds[i]) {
+                distance++;
+            }
+
+            if (i < bfElements.size()) {
+                next = findNext((AbstractBFElement) bfElements.get(i));
+            }
+        }
+    }
+
+    private void fillPathQuadrants(AbstractBFElement first, AbstractBFElement last) {
+
+        List<Object> back = findBack(last);
+        int lastId = bfIds[bfElements.indexOf(last)];
+        for (int k = 0; k <= lastId; k++) {
+            pathQuadrants.add(null);
+        }
+        pathQuadrants.set(0, first);
+        pathQuadrants.set(lastId, last);
+
+        for (int j = lastId - 1; j > 0; j--) {
+            for (Object el : back) {
+                if (bfElements.contains(el) && bfIds[bfElements.indexOf(el)] == j) {
+                    pathQuadrants.set(j, el);
+                    break;
+                }
+            }
+
+            back = findBack((AbstractBFElement) pathQuadrants.get(j));
+        }
+    }
+
+
+    private List<Object> findNext(AbstractBFElement bfElement) {
         return findNext(bfElement, false);
     }
 
-    public List<Object> findNext(AbstractBFElement bfElement, boolean fiction) {
+    private List<Object> findNext(AbstractBFElement bfElement, boolean fiction) {
+
         List<Object> result = new ArrayList<>();
-        AbstractBFElement next;
+
         for (Direction dir : Direction.values()) {
-            boolean passable;
-            if (fiction) {
-                passable = isNextQuadrantPassable(bfElement.getX(), bfElement.getY(), dir, true);
-            } else {
-                passable = isNextQuadrantPassable(bfElement.getX(), bfElement.getY(), dir);
-            }
+
+            boolean passable = isNextQuadrantPassable(bfElement.getX(), bfElement.getY(), dir, fiction);
+
             if (passable) {
-                next = getNext(bfElement.getX(), bfElement.getY(), dir);
-                if (!bfElements.contains(next) && !nexts.contains(next)) {
-                    result.add(next);
-                    nexts.add(next);
+                AbstractBFElement nextElement = getNext(bfElement.getX(), bfElement.getY(), dir);
+                if (!bfElements.contains(nextElement) && !next.contains(nextElement)) {
+                    result.add(nextElement);
+                    next.add(nextElement);
                 }
             }
         }
         return result;
     }
 
-    public List<Object> findNextBack(AbstractBFElement bfElement) {
+    private List<Object> findBack(AbstractBFElement bfElement) {
+
         List<Object> result = new ArrayList<>();
-        AbstractBFElement next;
+
         for (Direction dir : Direction.values()) {
             if (isNextQuadrantPassable(bfElement.getX(), bfElement.getY(), dir)) {
-                next = getNext(bfElement.getX(), bfElement.getY(), dir);
+                AbstractBFElement next = getNext(bfElement.getX(), bfElement.getY(), dir);
                 result.add(next);
             }
         }
         return result;
     }
 
-    public AbstractBFElement getNext(int initX, int initY, Direction dir) {
+    private AbstractBFElement getNext(int initX, int initY, Direction dir) {
+
         if (dir == Direction.UP) {
             initY -= BattleField.Q_SIZE;
         } else if (dir == Direction.DOWN) {
@@ -391,21 +414,22 @@ public abstract class AbstractTank implements Tank {
         return bf.scanQuadrant(initX / BattleField.Q_SIZE, initY / BattleField.Q_SIZE);
     }
 
-    public List<Object> generatePathAll() {
+    public List<Object> generatePathActions() {
+
         step = 0;
         List<Object> result = new ArrayList<>();
 
-        if (pathNew.size() == 1) {
+        if (pathQuadrants.size() == 1) {
             result.add(Action.NONE);
         }
 
-        for (int i = 1; i < pathNew.size(); i++) {
-            AbstractBFElement destination = (AbstractBFElement) pathNew.get(i);
-            if (destination.getX() < ((AbstractBFElement) pathNew.get(i - 1)).getX()) {
+        for (int i = 1; i < pathQuadrants.size(); i++) {
+            AbstractBFElement destination = (AbstractBFElement) pathQuadrants.get(i);
+            if (destination.getX() < ((AbstractBFElement) pathQuadrants.get(i - 1)).getX()) {
                 result.add(Direction.LEFT);
-            } else if (destination.getX() > ((AbstractBFElement) pathNew.get(i - 1)).getX()) {
+            } else if (destination.getX() > ((AbstractBFElement) pathQuadrants.get(i - 1)).getX()) {
                 result.add(Direction.RIGHT);
-            } else if (destination.getY() < ((AbstractBFElement) pathNew.get(i - 1)).getY()) {
+            } else if (destination.getY() < ((AbstractBFElement) pathQuadrants.get(i - 1)).getY()) {
                 result.add(Direction.UP);
             } else {
                 result.add(Direction.DOWN);
@@ -418,7 +442,7 @@ public abstract class AbstractTank implements Tank {
             result.add(Action.MOVE);
         }
 
-        pathAll = result;
+        pathActions = result;
         return result;
 
     }
@@ -455,11 +479,11 @@ public abstract class AbstractTank implements Tank {
         return destroyed;
     }
 
-    public boolean isNextQuadrantPassable(int initX, int initY, Direction dir) {
+    private boolean isNextQuadrantPassable(int initX, int initY, Direction dir) {
         return isNextQuadrantPassable(initX, initY, dir, false);
     }
 
-    public boolean isNextQuadrantPassable(int initX, int initY, Direction dir, boolean fiction) {
+    private boolean isNextQuadrantPassable(int initX, int initY, Direction dir, boolean fiction) {
 
         int destX = initX / BattleField.Q_SIZE;
         int destY = initY / BattleField.Q_SIZE;
@@ -474,7 +498,7 @@ public abstract class AbstractTank implements Tank {
             destX += 1;
         }
 
-        if (!fiction && bf.isQuadrantOnTheField(destX, destY) && mission == Mission.DEFENDER && bf.getNextsEagle().contains(bf.scanQuadrant(destX, destY)) && !bf.scanQuadrant(destX, destY).isDestroyed()
+        if (!fiction && bf.isQuadrantOnTheField(destX, destY) && mission == Mission.DEFENDER && bf.getAroundEagle().contains(bf.scanQuadrant(destX, destY)) && !bf.scanQuadrant(destX, destY).isDestroyed()
                 && !(bf.scanQuadrant(destX, destY) instanceof Blank)) {
             return false;
         }
@@ -484,7 +508,8 @@ public abstract class AbstractTank implements Tank {
         return bf.isQuadrantOnTheField(destX, destY) && !(bf.scanQuadrant(destX, destY) instanceof Rock && !bf.scanQuadrant(destX, destY).isDestroyed());
     }
 
-    public boolean isTankInNextQuadrant() {
+    private boolean isTankInNextQuadrant() {
+
         int destX = x / BattleField.Q_SIZE;
         int destY = y / BattleField.Q_SIZE;
 
@@ -507,7 +532,7 @@ public abstract class AbstractTank implements Tank {
         return false;
     }
 
-    public boolean isTankInNextQuadrant(AbstractBFElement bfElement) {
+    private boolean isTankInNextQuadrant(AbstractBFElement bfElement) {
 
         for (Object el : bf.getTanks()) {
             AbstractTank tank = (AbstractTank) el;
@@ -519,45 +544,45 @@ public abstract class AbstractTank implements Tank {
     }
 
     public Action setUp() {
-        if (step >= getPathAll().size()) {
+
+        if (step >= getPathActions().size()) {
             step = 0;
         }
-        for (Object el : turnToEnemy(detectEnemy())) {
-            turn((Direction) el);
+
+        Direction toEnemy = turnToEnemy(detectEnemy());
+
+        if (toEnemy != null) {
+            turn(toEnemy);
             return Action.FIRE;
         }
 
-        while (!(getPathAll().get(step) instanceof Action)) {
-            turn((Direction) getPathAll().get(step++));
+        while (!(getPathActions().get(step) instanceof Action)) {
+            turn((Direction) getPathActions().get(step++));
         }
 
         if (isTankInNextQuadrant()) {
             if (mission == Mission.KILL_EAGLE) {
-                findPath(4, 8);
-                setPathAll(generatePathAll());
+                findPathStraight(4, 8);
+                setPathActions(generatePathActions());
             } else if (mission == Mission.KILL_DEFENDER) {
-                for (Object el : bf.getTanks()) {
-                    AbstractTank enemy = (AbstractTank) el;
-                    if (enemy.getMission() == Mission.DEFENDER) {
-                        findPath(enemy.getX() / BattleField.Q_SIZE, enemy.getY() / BattleField.Q_SIZE);
-                        setPathAll(generatePathAll());
-                    }
-                }
+                findPathStraight(bf.getDefender().getX() / BattleField.Q_SIZE, bf.getDefender().getY() / BattleField.Q_SIZE);
+                setPathActions(generatePathActions());
             }
-            while (!(getPathAll().get(step) instanceof Action)) {
-                turn((Direction) getPathAll().get(step++));
+
+            while (!(getPathActions().get(step) instanceof Action)) {
+                turn((Direction) getPathActions().get(step++));
             }
         }
 
-        if (step >= getPathAll().size()) {
+        if (step >= getPathActions().size()) {
             step = 0;
         }
 
-        if (getPathAll().get(step) == Action.MOVE) {
+        if (getPathActions().get(step) == Action.MOVE) {
             hide = false;
         }
 
-        return (Action) getPathAll().get(step++);
+        return (Action) getPathActions().get(step++);
     }
 
     @Override
@@ -597,24 +622,16 @@ public abstract class AbstractTank implements Tank {
         return direction;
     }
 
-    public BattleField getBf() {
-        return bf;
-    }
-
-    public List<Object> getPathAll() {
-        return pathAll;
+    public List<Object> getPathActions() {
+        return pathActions;
     }
 
     public int getStep() {
         return step;
     }
 
-    public void setPathAll(List<Object> pathAll) {
-        this.pathAll = pathAll;
-    }
-
-    public void setImages(Image[] images) {
-        this.images = images;
+    public void setPathActions(List<Object> pathActions) {
+        this.pathActions = pathActions;
     }
 
     public Image[] createImages() {

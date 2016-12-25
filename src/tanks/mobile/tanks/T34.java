@@ -12,12 +12,6 @@ import java.io.IOException;
 
 public class T34 extends AbstractTank {
 
-    public T34(BattleField bf) {
-        super(bf);
-        colorTank = new Color(0, 210, 0);
-        colorTower = new Color(255, 220, 0);
-    }
-
     public T34(BattleField bf, int x, int y, Direction direction, Mission mission) {
         super(bf, x, y, direction, mission);
         colorTank = new Color(0, 210, 0);

@@ -14,11 +14,6 @@ public class Tiger extends AbstractTank {
 
     private int armor;
 
-    public Tiger(BattleField bf) {
-        super(bf);
-        armor = 1;
-    }
-
     public Tiger(BattleField bf, int x, int y, Direction direction, Mission mission) {
         super(bf, x, y, direction, mission);
         armor = 1;
