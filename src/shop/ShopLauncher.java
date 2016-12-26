@@ -7,7 +7,7 @@ public class ShopLauncher {
 
     public static void main(String[] args) throws Exception {
         SplashScreen splash = SplashScreen.getSplashScreen();
-        Thread.sleep(5000);
+        Thread.sleep(500);
         splash.close();
 
         Shop shop = new Shop();

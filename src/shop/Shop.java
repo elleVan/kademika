@@ -56,7 +56,8 @@ public class Shop {
             if (customer != null) {
                 System.out.println(customer.getName().toUpperCase());
                 if (customer.getTransactions() != null) {
-                    for (Transaction transaction : customer.getTransactions()) {
+                    for (Object el : customer.getTransactions()) {
+                        Transaction transaction = (Transaction) el;
                         if (transaction != null) {
                             for (Sweet sweet : transaction.getSweets()) {
                                 System.out.println(sweet.getName() + " - " + sweet.getQuantity() + " - " +
