@@ -3,7 +3,7 @@ package lessonsJD.lesson7;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Container<J> {
+public class Container<J extends Drink> {
 
     private List<J> list = new ArrayList<J>();
 
