@@ -1,12 +1,13 @@
 package shop;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
 public class Base {
 
-    private String[][] sweets;
+    private List<List<String>> sweets;
     private HashSet<String> categories = new HashSet<>();
     private List<Customer> customers = new ArrayList<>();
     private List<Transaction> transactions = new ArrayList<>();
@@ -24,22 +25,20 @@ public class Base {
 
     private void initDemoSweets() {
 
-        sweets = new String[][] {
-                //name, price, in stock, category
-                {"Amour", "5", "10", "CHOCOLATES"},
-                {"Belissimo", "23", "5", "COMBINED"},
-                {"Konti", "3", "15", "FONDANT"},
-                {"MAK", "14", "6", "PRALINE"}
-        };
+        sweets = new ArrayList<>();
+        sweets.add(new ArrayList<>(Arrays.asList("Amour", "5", "10", "CHOCOLATES")));
+        sweets.add(new ArrayList<>(Arrays.asList("Belissimo", "23", "5", "COMBINED")));
+        sweets.add(new ArrayList<>(Arrays.asList("Konti", "3", "15", "FONDANT")));
+        sweets.add(new ArrayList<>(Arrays.asList("MAK", "14", "6", "PRALINE")));
     }
 
-    private void initCategories() {
-        for (String[] el : sweets) {
-            categories.add(el[Shop.CATEGORY]);
+    public void initCategories() {
+        for (List<String> el : sweets) {
+            categories.add(el.get(Shop.CATEGORY));
         }
     }
 
-    private void initDemoCustomers() {
+    public void initDemoCustomers() {
         customers.add(new Customer("Nick"));
         customers.add(new Customer("Ben"));
         customers.add(new Customer("Anna"));
@@ -47,20 +46,20 @@ public class Base {
 
     }
 
-    private void initDemoOrders() {
+    public void initDemoOrders() {
 
     }
 
-    public String[][] getSweets() {
-        return sweets;
+    public List<List<String>> getSweets() {
+        return new ArrayList<>(sweets);
     }
 
     public HashSet<String> getCategories() {
-        return new HashSet<>(categories);
+        return categories;
     }
 
     public List<Customer> getCustomers() {
-        return new ArrayList<>(customers);
+        return customers;
     }
 
     public List<Transaction> getTransactions() {

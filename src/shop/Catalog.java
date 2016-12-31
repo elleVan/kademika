@@ -1,6 +1,7 @@
 package shop;
 
 import java.util.HashSet;
+import java.util.List;
 
 public class Catalog {
 
@@ -12,9 +13,9 @@ public class Catalog {
 
         for (String category : categories) {
             System.out.println(category);
-            for (String[] sweet : shop.getSweets()) {
-                if (sweet != null && Shop.CATEGORY < sweet.length && sweet[Shop.CATEGORY].equals(category)) {
-                    System.out.println("\t" + sweet[Shop.NAME]);
+            for (List<String> sweet : shop.getSweets()) {
+                if (sweet != null && Shop.CATEGORY < sweet.size() && sweet.get(Shop.CATEGORY).equals(category)) {
+                    System.out.println("\t" + sweet.get(Shop.NAME));
                 }
             }
         }

@@ -1,10 +1,12 @@
 package shop;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
+import java.util.List;
 
 public class ShopUI {
 
@@ -13,20 +15,26 @@ public class ShopUI {
 
     private JFrame f;
 
+    private TransactionsModel transactionsModel;
+    private TransactionsView transactionsView;
+
+    private JMenuItem buyItem;
+    private JMenuItem transactionsMenuItem;
+
     public ShopUI(Shop shop) {
         this.shop = shop;
-        sweetName = shop.getSweets()[0][Shop.NAME];
+        sweetName = shop.getSweets().get(0).get(Shop.NAME);
 
         f = new JFrame();
         f.setLocation(300, 100);
         f.setMinimumSize(new Dimension(800, 600));
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        TransactionsModel model = new TransactionsModel(shop.getTransactions());
-        TransactionsView view = new TransactionsView(model);
+        transactionsModel = new TransactionsModel(shop.getTransactions());
+        transactionsView = new TransactionsView(transactionsModel);
 
         f.setJMenuBar(createMenuBar());
-        f.getContentPane().add(view);
+        f.getContentPane().add(transactionsView);
 
         f.pack();
         f.setVisible(true);
@@ -52,8 +60,8 @@ public class ShopUI {
         };
 
         int i = 0;
-        for (String[] el : shop.getSweets()) {
-            JRadioButton button = new JRadioButton(el[Shop.NAME]);
+        for (List<String> el : shop.getSweets()) {
+            JRadioButton button = new JRadioButton(el.get(Shop.NAME));
             button.addActionListener(rbListener);
 
             if (i == 0) {
@@ -82,15 +90,14 @@ public class ShopUI {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                shop.newTransaction(shop.newCustomer(tfName.getText()), new Sweet[] {
+                Transaction transaction = shop.newTransaction(shop.newCustomer(tfName.getText()), new Sweet[] {
                         shop.newSweet(sweetName, Integer.parseInt(tfQuantity.getText())),
                 });
                 shop.printBase();
-                f.getContentPane().removeAll();
-                f.getContentPane().add(new TransactionsView(new TransactionsModel(shop.getTransactions())));
+                DefaultTableModel tableModel = (DefaultTableModel) transactionsView.getTable().getModel();
+                tableModel.addRow(transactionsModel.addRow(transaction));
 
-                f.pack();
-                f.repaint();
+                showTransactions();
             }
         });
 
@@ -100,27 +107,49 @@ public class ShopUI {
     private JMenuBar createMenuBar() {
         JMenuBar menuBar;
         JMenu menu;
-        JMenuItem menuItem;
-
         menuBar = new JMenuBar();
 
         menu = new JMenu("File");
 
-        menuItem = new JMenuItem("Buy Sweets");
-        menuItem.addActionListener(new ActionListener() {
+        buyItem = new JMenuItem("Buy Sweets");
+        buyItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 f.getContentPane().removeAll();
                 f.getContentPane().add(createBuyingPanel());
 
+                transactionsMenuItem.setVisible(true);
+                buyItem.setVisible(false);
+
                 f.pack();
                 f.repaint();
             }
         });
-        menu.add(menuItem);
+        menu.add(buyItem);
+
+        transactionsMenuItem = new JMenuItem("View Transactions");
+        transactionsMenuItem.setVisible(false);
+        transactionsMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showTransactions();
+            }
+        });
+        menu.add(transactionsMenuItem);
 
         menuBar.add(menu);
 
         return menuBar;
+    }
+
+    private void showTransactions() {
+        f.getContentPane().removeAll();
+        f.getContentPane().add(transactionsView);
+
+        buyItem.setVisible(true);
+        transactionsMenuItem.setVisible(false);
+
+        f.pack();
+        f.repaint();
     }
 }

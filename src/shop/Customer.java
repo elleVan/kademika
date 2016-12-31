@@ -12,7 +12,7 @@ public class Customer {
     private String email;
     private String address;
 
-    private List<Object> transactions = new ArrayList<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
     public Customer() {
     }
@@ -21,7 +21,7 @@ public class Customer {
         this.name = name;
     }
 
-    public List<Object> getTransactions() {
+    public List<Transaction> getTransactions() {
         return new ArrayList<>(transactions);
     }
 
