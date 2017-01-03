@@ -1,4 +1,4 @@
-package lessonsJD.lesson7.F_7_3_6;
+package lessonsJD.lesson7.f_7_3_6;
 
 public class ServiceImpl implements Service {
 
