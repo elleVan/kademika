@@ -6,7 +6,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ShopUI {
 
@@ -23,7 +24,7 @@ public class ShopUI {
 
     public ShopUI(Shop shop) {
         this.shop = shop;
-        sweetName = shop.getSweets().get(0).get(Shop.NAME);
+        sweetName = shop.getSweets().get(0).getName();
 
         f = new JFrame();
         f.setLocation(300, 100);
@@ -60,8 +61,8 @@ public class ShopUI {
         };
 
         int i = 0;
-        for (List<String> el : shop.getSweets()) {
-            JRadioButton button = new JRadioButton(el.get(Shop.NAME));
+        for (Sweet sweet : shop.getSweets()) {
+            JRadioButton button = new JRadioButton(sweet.getName());
             button.addActionListener(rbListener);
 
             if (i == 0) {
@@ -90,9 +91,9 @@ public class ShopUI {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Transaction transaction = shop.newTransaction(shop.newCustomer(tfName.getText()), new Sweet[] {
-                        shop.newSweet(sweetName, Integer.parseInt(tfQuantity.getText())),
-                });
+                Transaction transaction = shop.carryOutTransaction(shop.chooseCustomer(tfName.getText()), new ArrayList<>(Arrays.asList(
+                        shop.chooseSweet(sweetName, Integer.parseInt(tfQuantity.getText()))
+                )));
                 shop.printBase();
                 DefaultTableModel tableModel = (DefaultTableModel) transactionsView.getTable().getModel();
                 tableModel.addRow(transactionsModel.addRow(transaction));

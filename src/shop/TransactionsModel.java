@@ -36,25 +36,23 @@ public class TransactionsModel {
 
             String sweetsStr = "";
             int totalCount = 0;
-            int sum = 0;
 
-            Sweet[] sweets = t.getSweets();
-            for (int j = 0; j < sweets.length; j++) {
-                Sweet sweet = t.getSweets()[j];
+            List<Sweet> sweets = t.getSweets();
+            for (int j = 0; j < sweets.size(); j++) {
+                Sweet sweet = t.getSweets().get(j);
 
-                if (j < sweets.length - 1) {
+                if (j < sweets.size() - 1) {
                     sweetsStr += sweet.getName() + ", ";
                 } else {
                     sweetsStr += sweet.getName();
                 }
 
                 totalCount += sweet.getQuantity();
-                sum += sweet.getPrice() * sweet.getQuantity();
             }
 
             result.add(sweetsStr);
             result.add(Integer.toString(totalCount));
-            result.add(Integer.toString(sum));
+            result.add(Integer.toString(t.getSum()));
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
             result.add(sdf.format(t.getDate()));

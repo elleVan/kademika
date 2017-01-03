@@ -8,24 +8,27 @@ public class Sweet {
     private int price;
     private int inStock;
 
-    private String category;
+    private Category category;
 
     public Sweet() {
     }
 
-    public Sweet(String name, int quantity, int price, int inStock) {
-        this.name = name;
-        this.quantity = quantity;
-        this.price = price;
-        this.inStock = inStock;
-    }
-
-    public Sweet(String name, int quantity, int price, int inStock, String category) {
+    public Sweet(String name, int quantity, int price, int inStock, Category category) {
         this.name = name;
         this.quantity = quantity;
         this.price = price;
         this.inStock = inStock;
         this.category = category;
+    }
+
+    public Sweet(Sweet sweet) {
+        if (sweet != null) {
+            this.name = sweet.name;
+            this.quantity = sweet.quantity;
+            this.price = sweet.price;
+            this.inStock = sweet.inStock;
+            this.category = sweet.category;
+        }
     }
 
     public String getName() {
@@ -56,11 +59,11 @@ public class Sweet {
         this.inStock = inStock;
     }
 
-    public String getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 }

@@ -6,22 +6,13 @@ public class Shop {
 
     public static final int FAIL = -1;
 
-    public static final int NAME = 0;
-    public static final int PRICE = 1;
-    public static final int IN_STOCK = 2;
-    public static final int CATEGORY = 3;
-
-    private List<List<String>> sweets;
-    private HashSet<String> categories;
+    private List<Sweet> sweets;
+    private HashSet<Category> categories;
     private List<Customer> customers;
     private List<Transaction> transactions;
 
     public Shop() {
         initShop(new Base());
-    }
-
-    public Shop(Base base) {
-        initShop(base);
     }
 
     private void initShop(Base base) {
@@ -32,23 +23,25 @@ public class Shop {
     }
 
     public void run() {
-        newTransaction(newCustomer("Alla"), new Sweet[] {
-                newSweet("MAK", 3),
-                newSweet("Konti", 5)
-        });
-        newTransaction(newCustomer("Ben"), new Sweet[] {
-                newSweet("Amour", 5),
-        });
+        carryOutTransaction(chooseCustomer("Alla"), new ArrayList<>(Arrays.asList(
+                chooseSweet("MAK", 3),
+                chooseSweet("Konti", 5)
+        )));
 
-        newTransaction(customers.get(1), new Sweet[] {
-                newSweet("Konti", 10)
-        });
+        carryOutTransaction(chooseCustomer("Ben"), new ArrayList<>(Arrays.asList(
+                chooseSweet("Amour", 5)
+        )));
+
+        carryOutTransaction(customers.get(1), new ArrayList<>(Arrays.asList(
+                chooseSweet("Konti", 10)
+        )));
     }
 
     public void printBase() {
         System.out.println("SWEETS");
-        for (List<String> sweet : sweets) {
-            System.out.println(Arrays.toString(sweet.toArray()));
+        for (Sweet sweet : sweets) {
+            System.out.println(sweet.getName()  + " - " + sweet.getPrice() + " - " +
+                    sweet.getInStock() + " - " + sweet.getCategory());
         }
         System.out.println();
         System.out.println("CUSTOMERS");
@@ -78,9 +71,9 @@ public class Shop {
 
     public void printPrices() {
         System.out.println("============ PRICES ============");
-        for (List<String> sweet : sweets) {
+        for (Sweet sweet : sweets) {
             if (sweet != null) {
-                System.out.println(sweet.get(NAME) + " - " + sweet.get(PRICE));
+                System.out.println(sweet.getName() + " - " + sweet.getPrice());
             }
         }
         System.out.println();
@@ -88,9 +81,9 @@ public class Shop {
 
     public void printStock() {
         System.out.println("============ STOCK =============");
-        for (List<String> sweet : sweets) {
+        for (Sweet sweet : sweets) {
             if (sweet != null) {
-                System.out.println(sweet.get(NAME) + " - " + sweet.get(IN_STOCK));
+                System.out.println(sweet.getName() + " - " + sweet.getInStock());
             }
         }
         System.out.println();
@@ -144,20 +137,20 @@ public class Shop {
         System.out.println("Total: " + ordersNum + " transactions  -  $" + sum + "  -  " + quantity + " kg");
     }
 
-    public Sweet newSweet(String name, int quantity) {
+    public Sweet chooseSweet(String name, int quantity) {
 
-        int price = getSweetsNumericField(name, PRICE);
-        int inStock = getSweetsNumericField(name, IN_STOCK);
-        String category = getSweetsStringField(name, CATEGORY);
+        Sweet basic = findSweet(name);
+        Sweet result = null;
 
-        if (price != FAIL && inStock != FAIL && quantity >= 0 && quantity <= inStock) {
-            return new Sweet(name, quantity, price, inStock, category);
+        if (basic != null) {
+            result = new Sweet(basic);
+            result.setQuantity(quantity);
         }
 
-        return null;
+        return result;
     }
 
-    public Customer newCustomer(String name) {
+    public Customer chooseCustomer(String name) {
         int idx = findCustomer(name);
         if (idx == FAIL) {
             customers.add(new Customer(name));
@@ -166,32 +159,45 @@ public class Shop {
         return customers.get(idx);
     }
 
-    public Transaction newTransaction(Customer customer, Sweet[] boughtSweets) {
-        if (boughtSweets != null) {
-            for (Sweet sweet : boughtSweets) {
-                int idx = findSweet(sweet.getName());
-                if (sweet.getQuantity() <= 0 || idx == FAIL) {
-                    continue;
-                }
+    public Transaction carryOutTransaction(Customer customer, List<Sweet> boughtSweets) {
 
-                int left = FAIL;
-                try {
-                    left = Integer.parseInt(sweets.get(idx).get(IN_STOCK)) - sweet.getQuantity();
-                } catch (NumberFormatException e) {
+        if (customer == null || boughtSweets == null) {
+            return null;
+        }
 
-                }
+        int sum = 0;
 
-                if (left < 0) {
-                    return null;
-                }
-                sweets.get(idx).set(IN_STOCK, Integer.toString(left));
+        boolean isBoughtSweet = false;
+        for (Sweet sweet : boughtSweets) {
+            Sweet basic = findSweet(sweet.getName());
+            if (sweet.getQuantity() <= 0 || basic == null || basic.getPrice() < 0) {
+                continue;
             }
+
+            int left = basic.getInStock() - sweet.getQuantity();
+            if (left < 0) {
+                return null;
+            }
+            sweet.setInStock(left);
+
+            int idx = sweets.indexOf(basic);
+            sweets.get(idx).setInStock(left);
+
+            sum += basic.getPrice() * sweet.getQuantity();
+
+            isBoughtSweet = true;
+        }
+
+        if (!isBoughtSweet) {
+            return null;
         }
 
         Transaction result = new Transaction(customer, boughtSweets);
+        result.calculateSum(sum);
+
         transactions.add(result);
 
-        customer.addTransaction(transactions.get(transactions.size() - 1));
+        customer.addTransaction(result);
 
         if (findCustomer(customer.getName()) == FAIL) {
             customers.add(customer);
@@ -213,51 +219,31 @@ public class Shop {
                 && calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH);
     }
 
-    public void addSweetToTheBase(String name, int price, int inStock, String category) {
+    public void addSweetToTheBase(Sweet sweet) {
 
-        List<String> row = new ArrayList<>(Arrays.asList(name, Integer.toString(price), Integer.toString(inStock), category));
-        int idx = findSweet(name);
-        if (idx == FAIL) {
-            sweets.add(row);
-        } else {
-            sweets.set(idx, row);
+        if (sweet != null) {
+            Sweet basic = findSweet(sweet.getName());
+            if (basic == null) {
+                sweets.add(sweet);
+            } else {
+                int idx = sweets.indexOf(basic);
+                sweets.set(idx, sweet);
+            }
         }
     }
 
     public void removeSweetFromTheBase(String name) {
-        int idx = findSweet(name);
-        sweets.remove(idx);
+        Sweet sweet = findSweet(name);
+        sweets.remove(sweet);
     }
 
-    public int getSweetsNumericField(String name, int field) {
-        int idx = findSweet(name);
-        int result = FAIL;
-        if (idx != FAIL && field < sweets.get(idx).size()) {
-            try {
-                result = Integer.parseInt(sweets.get(idx).get(field));
-            } catch (NumberFormatException e) {
-
+    public Sweet findSweet(String name) {
+        for (Sweet sweet : sweets) {
+            if (name.equals(sweet.getName())) {
+                return sweet;
             }
         }
-        return result;
-    }
-
-    public String getSweetsStringField(String name, int field) {
-        int idx = findSweet(name);
-        String result = null;
-        if (idx != FAIL && field < sweets.get(idx).size()) {
-            result = sweets.get(idx).get(field);
-        }
-        return result;
-    }
-
-    public int findSweet(String name) {
-        for (int i = 0; i < sweets.size(); i++) {
-            if (sweets.get(i) != null && sweets.get(i).get(NAME).equals(name)) {
-                return i;
-            }
-        }
-        return FAIL;
+        return null;
     }
 
     private int findCustomer(String name) {
@@ -269,11 +255,11 @@ public class Shop {
         return FAIL;
     }
 
-    public List<List<String>> getSweets() {
+    public List<Sweet> getSweets() {
         return new ArrayList<>(sweets);
     }
 
-    public HashSet<String> getCategories() {
+    public HashSet<Category> getCategories() {
         return new HashSet<>(categories);
     }
 

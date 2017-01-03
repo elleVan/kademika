@@ -7,8 +7,8 @@ import java.util.List;
 
 public class Base {
 
-    private List<List<String>> sweets;
-    private HashSet<String> categories = new HashSet<>();
+    private List<Sweet> sweets;
+    private HashSet<Category> categories = new HashSet<>();
     private List<Customer> customers = new ArrayList<>();
     private List<Transaction> transactions = new ArrayList<>();
 
@@ -26,15 +26,15 @@ public class Base {
     private void initDemoSweets() {
 
         sweets = new ArrayList<>();
-        sweets.add(new ArrayList<>(Arrays.asList("Amour", "5", "10", "CHOCOLATES")));
-        sweets.add(new ArrayList<>(Arrays.asList("Belissimo", "23", "5", "COMBINED")));
-        sweets.add(new ArrayList<>(Arrays.asList("Konti", "3", "15", "FONDANT")));
-        sweets.add(new ArrayList<>(Arrays.asList("MAK", "14", "6", "PRALINE")));
+        sweets.add(new Sweet("Amour", 0, 5, 10, Category.CHOCOLATES));
+        sweets.add(new Sweet("Belissimo", 0, 23, 5, Category.COMBINED));
+        sweets.add(new Sweet("Konti", 0, 3, 15, Category.FONDANT));
+        sweets.add(new Sweet("MAK", 0, 14, 6, Category.PRALINE));
     }
 
     public void initCategories() {
-        for (List<String> el : sweets) {
-            categories.add(el.get(Shop.CATEGORY));
+        for (Sweet sweet : sweets) {
+            categories.add(sweet.getCategory());
         }
     }
 
@@ -50,11 +50,11 @@ public class Base {
 
     }
 
-    public List<List<String>> getSweets() {
+    public List<Sweet> getSweets() {
         return new ArrayList<>(sweets);
     }
 
-    public HashSet<String> getCategories() {
+    public HashSet<Category> getCategories() {
         return categories;
     }
 
