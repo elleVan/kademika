@@ -33,6 +33,20 @@ public class F_7_4_4 {
             types[i] = params.get(i).getClass();
             if (types[i].equals(Integer.class)) {
                 types[i] = int.class;
+            } else if (types[i].equals(Long.class)) {
+                types[i] = long.class;
+            } else if (types[i].equals(Float.class)) {
+                types[i] = float.class;
+            } else if (types[i].equals(Double.class)) {
+                types[i] = double.class;
+            } else if (types[i].equals(Byte.class)) {
+                types[i] = byte.class;
+            } else if (types[i].equals(Short.class)) {
+                types[i] = short.class;
+            } else if (types[i].equals(Character.class)) {
+                types[i] = char.class;
+            } else if (types[i].equals(Boolean.class)) {
+                types[i] = boolean.class;
             }
         }
 
