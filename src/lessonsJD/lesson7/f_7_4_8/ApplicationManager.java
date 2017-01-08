@@ -1,9 +1,8 @@
-package lessonsJD.lesson7;
+package lessonsJD.lesson7.f_7_4_8;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ApplicationManager {
 
@@ -13,19 +12,18 @@ public class ApplicationManager {
     public ApplicationManager() {
     }
 
-    public <T> T get(Class<T> clazz, Map<String, Object> params) throws Exception {
+    public <T> T get(Class<T> clazz, List<Object> params) throws Exception {
 
         T result = null;
 
         if (services.size() < LIMIT && clazz.getAnnotation(Service.class) != null) {
             result = clazz.newInstance();
-            Field[] fields = clazz.getDeclaredFields();
+            Method[] methods = clazz.getDeclaredMethods();
 
-            for (Field field : fields) {
-                field.setAccessible(true);
-                Object value = params.get(field.getName());
-                if (value != null) {
-                    field.set(result, value);
+            for (Method method : methods) {
+                if (method.getAnnotation(initService.class) != null) {
+                    method.invoke(result, params.toArray());
+                    break;
                 }
             }
             services.add(result);

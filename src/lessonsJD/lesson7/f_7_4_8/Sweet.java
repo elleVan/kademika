@@ -1,4 +1,4 @@
-package lessonsJD.lesson7;
+package lessonsJD.lesson7.f_7_4_8;
 
 import shop.Category;
 
@@ -32,6 +32,16 @@ public class Sweet {
             this.inStock = sweet.inStock;
             this.category = sweet.category;
         }
+    }
+
+    @initService
+    public void init(String str) {
+        this.name = "Some Sweet";
+        this.quantity = 10;
+        this.price = 15;
+        this.inStock = 200;
+        this.category = Category.CHOCOLATES;
+        System.out.println(str);
     }
 
     public String getName() {
