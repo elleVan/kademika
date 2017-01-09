@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class F_7_4_4 {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         List<Object> list = new ArrayList<>();
 
@@ -25,33 +25,18 @@ public class F_7_4_4 {
                 + sweet.getInStock() + " - " + sweet.getCategory());
     }
 
-    public static <T> T initClass(Class<T> someClass, List<Object> params) throws Exception {
+    public static <T> T initClass(Class<T> someClass, List<Object> params) {
 
-        Class[] types = new Class[params.size()];
+        Object result = null;
+        Constructor[] constructors = someClass.getConstructors();
+        for (Constructor constructor : constructors) {
+            try {
+                result = constructor.newInstance(params.toArray());
+                break;
+            } catch (Exception e) {
 
-        for (int i = 0; i < params.size(); i++) {
-            types[i] = params.get(i).getClass();
-            if (types[i].equals(Integer.class)) {
-                types[i] = int.class;
-            } else if (types[i].equals(Long.class)) {
-                types[i] = long.class;
-            } else if (types[i].equals(Float.class)) {
-                types[i] = float.class;
-            } else if (types[i].equals(Double.class)) {
-                types[i] = double.class;
-            } else if (types[i].equals(Byte.class)) {
-                types[i] = byte.class;
-            } else if (types[i].equals(Short.class)) {
-                types[i] = short.class;
-            } else if (types[i].equals(Character.class)) {
-                types[i] = char.class;
-            } else if (types[i].equals(Boolean.class)) {
-                types[i] = boolean.class;
             }
         }
-
-        Constructor constructor = someClass.getConstructor(types);
-
-        return (T) constructor.newInstance(params.toArray());
+        return (T) result;
     }
 }
