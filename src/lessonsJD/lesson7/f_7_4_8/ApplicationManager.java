@@ -12,7 +12,7 @@ public class ApplicationManager {
     public ApplicationManager() {
     }
 
-    public <T> T get(Class<T> clazz, List<Object> params) throws Exception {
+    public <T> T getService(Class<T> clazz) throws Exception {
 
         T result = null;
 
@@ -22,7 +22,7 @@ public class ApplicationManager {
 
             for (Method method : methods) {
                 if (method.getAnnotation(initService.class) != null) {
-                    method.invoke(result, params.toArray());
+                    method.invoke(result);
                     break;
                 }
             }

@@ -35,13 +35,12 @@ public class Sweet {
     }
 
     @initService
-    public void init(String str) {
+    public void init() {
         this.name = "Some Sweet";
         this.quantity = 10;
         this.price = 15;
         this.inStock = 200;
         this.category = Category.CHOCOLATES;
-        System.out.println(str);
     }
 
     public String getName() {
