@@ -15,17 +15,6 @@ public class F_8_2_6 {
 
     public static void copyFile(File f) {
 
-        StringBuilder builder = new StringBuilder();
-
-        try (FileInputStream in = new FileInputStream(f)) {
-            int i;
-            while ((i = in.read()) != -1) {
-                builder.append((char) i);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         String path = f.getAbsolutePath();
         int idx = path.lastIndexOf(".");
 
@@ -35,10 +24,15 @@ public class F_8_2_6 {
         File newFile = new File(namePath + "Copy" + ext);
 
         try (
-                FileOutputStream fileOut = new FileOutputStream(newFile);
-                BufferedOutputStream out = new BufferedOutputStream(fileOut, 256)
+                FileInputStream in = new FileInputStream(f);
+                FileOutputStream out = new FileOutputStream(newFile)
         ) {
-            out.write(builder.toString().getBytes());
+            byte[] array = new byte[256];
+            int i;
+            while ((i = in.read(array)) != -1) {
+                out.write(array, 0, i);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
