@@ -1,7 +1,6 @@
 package test.lessonsJD.lesson7.f_7_3;
 
 import lessonsJD.lesson7.f_7_3.Drink;
-import lessonsJD.lesson7.f_7_3.GreenTea;
 import lessonsJD.lesson7.f_7_3.MulledWine;
 import static org.junit.Assert.*;
 import org.junit.Before;
