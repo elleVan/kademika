@@ -9,6 +9,7 @@ import tanks.helpers.Mission;
 import tanks.mobile.tanks.Tiger;
 
 import java.awt.*;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 
@@ -553,6 +554,7 @@ public abstract class AbstractTank implements Tank {
 
         if (toEnemy != null) {
             turn(toEnemy);
+            writeToFile(Action.FIRE);
             return Action.FIRE;
         }
 
@@ -582,7 +584,47 @@ public abstract class AbstractTank implements Tank {
             hide = false;
         }
 
+        writeToFile((Action) getPathActions().get(step));
         return (Action) getPathActions().get(step++);
+    }
+
+    private void writeToFile(Action action) {
+
+        StringBuilder str = new StringBuilder();
+        if (getMission() == Mission.DEFENDER) {
+            str.append("D");
+        } else if (getMission() == Mission.KILL_EAGLE) {
+            str.append("E");
+        } else {
+            str.append("A");
+        }
+
+        if (action == Action.MOVE) {
+            str.append("M");
+        } else {
+            str.append("F");
+        }
+
+        if (direction == Direction.DOWN) {
+            str.append("D");
+        } else if (direction == Direction.UP) {
+            str.append("U");
+        } else if (direction == Direction.RIGHT) {
+            str.append("R");
+        } else {
+            str.append("L");
+        }
+
+        try (
+                FileWriter fw = new FileWriter("src/tanks/log.txt", true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                PrintWriter writer = new PrintWriter(bw)
+        ) {
+            writer.println(str.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override

@@ -19,8 +19,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class ActionField extends JPanel {
 
@@ -85,6 +84,7 @@ here:   while (true) {
                 }
             }
         }
+
     }
 
     private void newTank(int model) {
@@ -93,23 +93,32 @@ here:   while (true) {
         int y;
         Mission mission;
 
+        StringBuilder builder = new StringBuilder();
+        builder.append("New ");
+
         if (model == MODEL_T34) {
             mission = missionT34;
+            builder.append("T34 ");
         } else if (model == MODEL_BT7) {
             mission = missionBT7;
+            builder.append("BT7 ");
         } else {
             mission = missionTiger;
+            builder.append("Tiger ");
         }
 
         if (mission == Mission.DEFENDER) {
             x = defenderX;
             y = defenderY;
+            builder.append("D");
         } else if (mission == Mission.KILL_EAGLE) {
             x = killEagleX;
             y = killEagleY;
+            builder.append("E");
         } else {
             x = killDefenderX;
             y = killDefenderY;
+            builder.append("A");
         }
 
         AbstractTank tank;
@@ -129,6 +138,16 @@ here:   while (true) {
             bf.setKillEagle(tank);
         } else {
             bf.setKillDefender(tank);
+        }
+
+        try (
+                FileWriter fw = new FileWriter("src/tanks/log.txt", true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                PrintWriter writer = new PrintWriter(bw)
+        ) {
+            writer.println(builder.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -312,6 +331,16 @@ here:   while (true) {
     }
 
     private void startTheGame() {
+
+        File log = new File("src/tanks/log.txt");
+        try {
+            if (log.exists()) {
+                log.delete();
+            }
+            log.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         bf = new BattleField();
         bullet = new Bullet(null, -100, -100, Direction.DOWN);
