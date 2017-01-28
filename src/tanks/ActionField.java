@@ -20,6 +20,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActionField extends JPanel {
 
@@ -48,8 +50,11 @@ public class ActionField extends JPanel {
     private static final int killDefenderY = 64;
 
     private int chosen = 0;
+    private String chosenLog;
 
     private JFrame loadingFrame;
+
+    private boolean replay = false;
 
     public ActionField() {
         loadingFrame = createLoadingFrame();
@@ -63,26 +68,53 @@ public class ActionField extends JPanel {
 
 here:   while (true) {
 
-            for (int i = 0; i < bf.getTanks().size(); i++) {
-                AbstractTank tank = (AbstractTank) bf.getTanks().get(i);
-                if (!bf.getDefender().isDestroyed() && !tank.isDestroyed()) {
-                    if (tank.getMission() == Mission.KILL_EAGLE && (tank.getPathActions().size() == tank.getStep())) {
-                        tank.findPath(4, 8);
-                        tank.setPathActions(tank.generatePathActions());
-                    } else if (tank.getMission() == Mission.KILL_DEFENDER) {
-                        tank.findPath(bf.getDefender().getX() / BattleField.Q_SIZE, bf.getDefender().getY() / BattleField.Q_SIZE);
-                        tank.setPathActions(tank.generatePathActions());
-                    } else if (tank.getMission() == Mission.DEFENDER) {
-                        tank.getDefenderPath();
-                        tank.setPathActions(tank.generatePathActions());
-                    }
+            if (!replay) {
+                for (int i = 0; i < bf.getTanks().size(); i++) {
+                    AbstractTank tank = (AbstractTank) bf.getTanks().get(i);
+                    if (!bf.getDefender().isDestroyed() && !tank.isDestroyed()) {
+                        if (tank.getMission() == Mission.KILL_EAGLE && (tank.getPathActions().size() == tank.getStep())) {
+                            tank.findPath(4, 8);
+                            tank.setPathActions(tank.generatePathActions());
+                        } else if (tank.getMission() == Mission.KILL_DEFENDER) {
+                            tank.findPath(bf.getDefender().getX() / BattleField.Q_SIZE, bf.getDefender().getY() / BattleField.Q_SIZE);
+                            tank.setPathActions(tank.generatePathActions());
+                        } else if (tank.getMission() == Mission.DEFENDER) {
+                            tank.getDefenderPath();
+                            tank.setPathActions(tank.generatePathActions());
+                        }
 
-                    processAction(tank.setUp(), tank);
+                        processAction(tank.setUp(), tank);
+                    }
+                    if (bf.getDefender().isDestroyed() || bf.getEagle().isDestroyed()) {
+                        break here;
+                    }
                 }
-                if (bf.getDefender().isDestroyed() || bf.getEagle().isDestroyed()) {
-                    break here;
+            } else {
+                bf = new BattleField();
+                bullet = new Bullet(null, -100, -100, Direction.DOWN);
+
+                try {
+                    imageBlank = ImageIO.read(new File("blank.jpg"));
+                } catch (IOException e) {
+                    System.err.println("Can't find imageName");
+                }
+
+                try (
+                        FileReader fr = new FileReader("src/tanks/logs/" + chosenLog);
+                        BufferedReader br = new BufferedReader(fr)
+                ) {
+                    String str;
+                    while ((str = br.readLine()) != null) {
+                        parse(str);
+                    }
+                    replay = false;
+                    break;
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
+
         }
 
     }
@@ -141,7 +173,7 @@ here:   while (true) {
         }
 
         try (
-                FileWriter fw = new FileWriter("src/tanks/log.txt", true);
+                FileWriter fw = new FileWriter("src/tanks/logs/log" + bf.getGameId() + ".txt", true);
                 BufferedWriter bw = new BufferedWriter(fw);
                 PrintWriter writer = new PrintWriter(bw)
         ) {
@@ -149,6 +181,112 @@ here:   while (true) {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void newTank(int model, Mission mission) {
+
+        int x;
+        int y;
+
+        if (mission == Mission.DEFENDER) {
+            x = defenderX;
+            y = defenderY;
+        } else if (mission == Mission.KILL_EAGLE) {
+            x = killEagleX;
+            y = killEagleY;
+        } else {
+            x = killDefenderX;
+            y = killDefenderY;
+        }
+
+        AbstractTank tank;
+        if (model == MODEL_T34) {
+            tank = new T34(bf, x, y, Direction.DOWN, mission);
+        } else if (model == MODEL_BT7) {
+            tank = new BT7(bf, x, y, Direction.DOWN, mission);
+        } else {
+            tank = new Tiger(bf, x, y, Direction.DOWN, mission);
+        }
+
+        bf.addTank(tank);
+
+        if (mission == Mission.DEFENDER) {
+            bf.setDefender(tank);
+        } else if (mission == Mission.KILL_EAGLE) {
+            bf.setKillEagle(tank);
+        } else {
+            bf.setKillDefender(tank);
+        }
+    }
+
+    private void parse(String str) throws InterruptedException {
+
+        String[] arr = str.split(" ");
+
+        if ("New".equals(arr[0])) {
+            Mission mission;
+            if ("D".equals(arr[2])) {
+                mission = Mission.DEFENDER;
+            } else if ("E".equals(arr[2])) {
+                mission = Mission.KILL_EAGLE;
+            } else {
+                mission = Mission.KILL_DEFENDER;
+            }
+
+            if ("T34".equals(arr[1])) {
+                newTank(MODEL_T34, mission);
+                return;
+            } else if ("BT7".equals(arr[1])) {
+                newTank(MODEL_BT7, mission);
+                return;
+            } else {
+                newTank(MODEL_TIGER, mission);
+                return;
+            }
+        }
+
+        if (arr.length == 1) {
+            String tankStr = str.substring(0, 1);
+            String actionStr = str.substring(1, 2);
+            String directionStr = str.substring(2);
+
+            AbstractTank tank;
+            Action action;
+            Direction direction;
+
+            if ("D".equals(tankStr)) {
+                tank = bf.getDefender();
+            } else if ("E".equals(tankStr)) {
+                tank = bf.getKillEagle();
+            } else {
+                tank = bf.getKillDefender();
+            }
+
+            if ("D".equals(directionStr)) {
+                direction = Direction.DOWN;
+            } else if ("U".equals(directionStr)) {
+                direction = Direction.UP;
+            } else if ("R".equals(directionStr)) {
+                direction = Direction.RIGHT;
+            } else {
+                direction = Direction.LEFT;
+            }
+
+            if (!tank.getDirection().equals(direction)) {
+                tank.turn(direction);
+                processTurn();
+            }
+
+            if ("M".equals(actionStr)) {
+                action = Action.MOVE;
+            } else {
+                action = Action.FIRE;
+            }
+            processAction(action, tank);
+        }
+
+
+
     }
 
     private void processAction(Action a, AbstractTank t) throws InterruptedException {
@@ -283,12 +421,14 @@ here:   while (true) {
                     if (tank.isDestroyed() && tank.getMission() != Mission.DEFENDER) {
                         bf.removeTank(tank);
                         Thread.sleep(1000);
-                        if (tank instanceof BT7) {
-                            newTank(MODEL_BT7);
-                        } else if (tank instanceof Tiger) {
-                            newTank(MODEL_TIGER);
-                        } else {
-                            newTank(MODEL_T34);
+                        if (!replay) {
+                            if (tank instanceof BT7) {
+                                newTank(MODEL_BT7);
+                            } else if (tank instanceof Tiger) {
+                                newTank(MODEL_TIGER);
+                            } else {
+                                newTank(MODEL_T34);
+                            }
                         }
                     }
                     return true;
@@ -332,18 +472,15 @@ here:   while (true) {
 
     private void startTheGame() {
 
-        File log = new File("src/tanks/log.txt");
+        bf = new BattleField();
+        bullet = new Bullet(null, -100, -100, Direction.DOWN);
+
+        File log = new File("src/tanks/logs/log" + bf.getGameId() + ".txt");
         try {
-            if (log.exists()) {
-                log.delete();
-            }
             log.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        bf = new BattleField();
-        bullet = new Bullet(null, -100, -100, Direction.DOWN);
 
         newTank(MODEL_T34);
         newTank(MODEL_BT7);
@@ -370,7 +507,7 @@ here:   while (true) {
         try {
             runTheGame();
         } catch (InterruptedException e) {
-
+            e.printStackTrace();
         }
 
         loadingFrame.setVisible(true);
@@ -393,6 +530,8 @@ here:   while (true) {
     private JPanel createLoadingPanel() {
 
         JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+
         JLabel lButtons = new JLabel("Choose the tank:");
         JPanel buttons = new JPanel(new GridLayout(0, 1));
         ButtonGroup group = new ButtonGroup();
@@ -422,11 +561,11 @@ here:   while (true) {
         buttons.add(button3);
         group.add(button3);
 
-        panel.add(lButtons);
-        panel.add(buttons);
+        panel.add(lButtons, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(buttons, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
 
         JButton button = new JButton("Start");
-        panel.add(button);
+        panel.add(button, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
 
         button.addActionListener(new ActionListener() {
             @Override
@@ -437,7 +576,42 @@ here:   while (true) {
             }
         });
 
+        Object[] logs = findLogs().toArray();
+        JComboBox comboBox = new JComboBox(logs);
+        chosenLog = (String) logs[0];
+
+        comboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JComboBox box = (JComboBox) e.getSource();
+                chosenLog = (String) box.getSelectedItem();
+            }
+        });
+        panel.add(comboBox, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(20, 0, 0, 0), 0, 0));
+
+        JButton buttonR = new JButton("Replay");
+        panel.add(buttonR, new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(20, 0, 0, 0), 0, 0));
+
+        buttonR.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                replay = true;
+                loadingFrame.setVisible(false);
+            }
+        });
+
         return panel;
+    }
+
+    private List<String> findLogs() {
+
+        File file = new File("src/tanks/logs");
+        List<String> result = new ArrayList<>();
+
+        for (File f : file.listFiles()) {
+            result.add(f.getName());
+        }
+        return result;
     }
 
     @Override

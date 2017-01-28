@@ -616,7 +616,7 @@ public abstract class AbstractTank implements Tank {
         }
 
         try (
-                FileWriter fw = new FileWriter("src/tanks/log.txt", true);
+                FileWriter fw = new FileWriter("src/tanks/logs/log" + bf.getGameId() + ".txt", true);
                 BufferedWriter bw = new BufferedWriter(fw);
                 PrintWriter writer = new PrintWriter(bw)
         ) {

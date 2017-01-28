@@ -29,6 +29,8 @@ public class BattleField implements Drawable {
     private List<Object> aroundEagle;
     private List<Object> waters;
 
+    private long gameId;
+
     private String[][] battleField = {
             { " ", " ", " ", " ", " ", " ", " ", " ", " " },
             { " ", "B", "B", "R", "R", "R", "B", "B", " " },
@@ -44,12 +46,14 @@ public class BattleField implements Drawable {
     public BattleField() {
         generateBFObj();
         tanks = new ArrayList<>();
+        gameId = System.currentTimeMillis();
     }
 
     public BattleField(String[][] battleField) {
         this.battleField = battleField;
         generateBFObj();
         tanks = new ArrayList<>();
+        gameId = System.currentTimeMillis();
     }
 
     private void generateBFObj() {
@@ -185,5 +189,9 @@ public class BattleField implements Drawable {
 
     public List<Object> getWaters() {
         return waters;
+    }
+
+    public long getGameId() {
+        return gameId;
     }
 }
