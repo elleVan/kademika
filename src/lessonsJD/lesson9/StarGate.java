@@ -29,7 +29,9 @@ public class StarGate extends JPanel {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                moveShip();
+                while (true) {
+                    moveShip();
+                }
             }
         }).start();
 
@@ -41,7 +43,8 @@ public class StarGate extends JPanel {
     }
 
     private void moveShip() {
-        while (ship.getX() < 450) {
+
+        if (ship.getX() < 450) {
             if (!gates.isOpen() && isShipInRange()) {
                 try {
                     synchronized (gates) {
@@ -63,7 +66,10 @@ public class StarGate extends JPanel {
 
             ship.updateX();
             sleep(10);
+        } else {
+            ship.setX(20);
         }
+
     }
 
     private void sleep(int time) {
@@ -83,24 +89,27 @@ public class StarGate extends JPanel {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    synchronized (gates) {
-                        gates.wait();
+
+                while (true) {
+                    try {
+                        synchronized (gates) {
+                            gates.wait();
+                        }
+                        while (!gates.isOpen()) {
+                            openGates();
+                        }
+                        synchronized (ship) {
+                            ship.notify();
+                        }
+                        synchronized (gates) {
+                            gates.wait();
+                        }
+                        while (gates.isOpen()) {
+                            closeGates();
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    while (!gates.isOpen()) {
-                        openGates();
-                    }
-                    synchronized (ship) {
-                        ship.notify();
-                    }
-                    synchronized (gates) {
-                        gates.wait();
-                    }
-                    while (gates.isOpen()) {
-                        closeGates();
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
         }).start();
