@@ -94,7 +94,7 @@ here:   while (true) {
                 bullet = new Bullet(null, -100, -100, Direction.DOWN);
 
                 try {
-                    imageBlank = ImageIO.read(new File("blank.jpg"));
+                    imageBlank = ImageIO.read(new File("src/tanks/images/blank.jpg"));
                 } catch (IOException e) {
                     System.err.println("Can't find imageName");
                 }
@@ -487,7 +487,7 @@ here:   while (true) {
         newTank(MODEL_TIGER);
 
         try {
-            imageBlank = ImageIO.read(new File("blank.jpg"));
+            imageBlank = ImageIO.read(new File("src/tanks/images/blank.jpg"));
         } catch (IOException e) {
             System.err.println("Can't find imageName");
         }

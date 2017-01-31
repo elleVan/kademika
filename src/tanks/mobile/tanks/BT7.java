@@ -20,10 +20,10 @@ public class BT7 extends AbstractTank {
     public Image[] createImages() {
         Image[] array = new Image[4];
         try {
-            array[0] = ImageIO.read(new File("tankBlue-U.png"));
-            array[1] = ImageIO.read(new File("tankBlue-D.png"));
-            array[2] = ImageIO.read(new File("tankBlue-L.png"));
-            array[3] = ImageIO.read(new File("tankBlue-R.png"));
+            array[0] = ImageIO.read(new File("src/tanks/images/tankBlue-U.png"));
+            array[1] = ImageIO.read(new File("src/tanks/images/tankBlue-D.png"));
+            array[2] = ImageIO.read(new File("src/tanks/images/tankBlue-L.png"));
+            array[3] = ImageIO.read(new File("src/tanks/images/tankBlue-R.png"));
         } catch (IOException e) {
             System.err.println("Can't find imageName");
         }

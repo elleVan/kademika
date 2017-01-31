@@ -24,7 +24,7 @@ public class Brick extends AbstractBFElement implements Destroyable{
     @Override
     public void addImage() {
         try {
-            setImage(ImageIO.read(new File("brick.jpg")));
+            setImage(ImageIO.read(new File("src/tanks/images/brick.jpg")));
         } catch (IOException e) {
             System.err.println("Can't find image");
         }
