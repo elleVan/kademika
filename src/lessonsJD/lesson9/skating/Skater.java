@@ -1,4 +1,4 @@
-package lessonsJD.lesson9;
+package lessonsJD.lesson9.skating;
 
 public class Skater {
 

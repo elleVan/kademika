@@ -1,4 +1,4 @@
-package lessonsJD.lesson9;
+package lessonsJD.lesson9.withdraw;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

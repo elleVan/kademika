@@ -1,4 +1,4 @@
-package lessonsJD.lesson9;
+package lessonsJD.lesson9.withdraw;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,16 +1,16 @@
-package lessonsJD.lesson9;
+package lessonsJD.lesson9.withdraw;
 
-public class LegacyAtm implements Atm {
+import lessonsJD.lesson9.withdraw.Atm;
+
+public class GoodAtm implements Atm {
 
     private int balance = 1000;
 
     @Override
     public void withdrawMoney(long accountId, int amount) {
 
-        synchronized (this) {
-            if (allowWithdrawal(accountId, amount)) {
-                updateBalance(accountId, amount);
-            }
+        if (allowWithdrawal(accountId, amount)) {
+            updateBalance(accountId, amount);
         }
     }
 

@@ -1,4 +1,4 @@
-package lessonsJD.lesson9;
+package lessonsJD.lesson9.balls;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package lessonsJD.lesson9;
+package lessonsJD.lesson9.stargates;
 
 import javax.swing.*;
 import java.awt.*;

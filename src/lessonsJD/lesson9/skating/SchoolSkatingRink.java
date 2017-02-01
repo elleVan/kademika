@@ -1,4 +1,4 @@
-package lessonsJD.lesson9;
+package lessonsJD.lesson9.skating;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,12 +8,10 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SchoolSkatingRink implements SkatingRink {
 
     private List<Skates> skatesList;
-    private List<Skater> skatersWait;
 
     private Lock lock;
 
     public SchoolSkatingRink() {
-        skatersWait = new ArrayList<>();
         skatesList = new ArrayList<>();
 
         skatesList.add(new Skates());
@@ -25,30 +23,25 @@ public class SchoolSkatingRink implements SkatingRink {
     @Override
     public Skates getSkates(Skater skater) {
 
-        lock.lock();
-
-        if (skatesList.size() == 0) {
-            skatersWait.add(skater);
-            lock.unlock();
+        if (skatesList.isEmpty()) {
 
             try {
-                synchronized (skater) {
+                synchronized (skatesList) {
                     System.out.println(skater.getName() + " waits");
-                    skater.wait();
-                    lock.lock();
+                    skatesList.wait();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
-        System.out.println(skater.getName() + " got skates");
+        lock.lock();
 
-        Skates skates = skatesList.get(0);
-        skatersWait.remove(skater);
-        skatesList.remove(skates);
+        Skates skates = skatesList.remove(0);
 
         lock.unlock();
+
+        System.out.println(skater.getName() + " got skates");
 
         return skates;
     }
@@ -56,18 +49,12 @@ public class SchoolSkatingRink implements SkatingRink {
     @Override
     public void returnSkates(Skates skates, Skater skater) {
 
-        lock.lock();
-
         skatesList.add(skates);
         System.out.println(skater.getName() + " returned skates");
 
-        if (skatersWait.size() > 0) {
-            synchronized (skatersWait.get(0)) {
-                System.out.println(skatersWait.get(0).getName() + " was notified");
-                skatersWait.get(0).notify();
-            }
+        synchronized (skatesList) {
+            skatesList.notify();
         }
 
-        lock.unlock();
     }
 }
