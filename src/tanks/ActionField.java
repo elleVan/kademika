@@ -274,7 +274,6 @@ here:   while (true) {
 
             if (!tank.getDirection().equals(direction)) {
                 tank.turn(direction);
-                processTurn();
             }
 
             if ("M".equals(actionStr)) {
@@ -293,13 +292,8 @@ here:   while (true) {
         if (a == Action.MOVE) {
             processMove(t);
         } else if (a == Action.FIRE) {
-                processTurn();
                 processFire(t.fire());
         }
-    }
-
-    private void processTurn() throws InterruptedException {
-        repaint();
     }
 
     private void processMove(AbstractTank tank) throws InterruptedException {
@@ -360,7 +354,6 @@ here:   while (true) {
                 covered += last;
             }
 
-            repaint();
             Thread.sleep(tank.getSpeed());
         }
     }
@@ -388,7 +381,6 @@ here:   while (true) {
                 bullet.destroy();
             }
 
-            repaint();
             Thread.sleep(bullet.getSpeed());
 
             if (bullet.isDestroyed()) {
@@ -503,6 +495,20 @@ here:   while (true) {
         frame.getContentPane().add(this);
         frame.pack();
         frame.setVisible(true);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    repaint();
+                    try {
+                        Thread.sleep(1000 / 60);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
 
         try {
             runTheGame();
