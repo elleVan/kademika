@@ -12,7 +12,7 @@ import java.io.IOException;
 public class Bullet implements Drawable, Destroyable {
 
     public static final int STEP = 1;
-    private final int speed = 1;
+    private final int speed = 6;
 
     private AbstractTank tank;
 

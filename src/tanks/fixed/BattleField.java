@@ -9,6 +9,8 @@ import tanks.mobile.AbstractTank;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BattleField implements Drawable {
 
@@ -17,7 +19,7 @@ public class BattleField implements Drawable {
     public static final int Q_MIN = 0;
     public static final int Q_MAX = 8;
 
-    private List<Object> tanks;
+    private List<AbstractTank> tanks;
     private AbstractBFElement eagle;
 
     private AbstractTank defender;
@@ -45,14 +47,14 @@ public class BattleField implements Drawable {
 
     public BattleField() {
         generateBFObj();
-        tanks = new ArrayList<>();
+        tanks = new CopyOnWriteArrayList<>();
         gameId = System.currentTimeMillis();
     }
 
     public BattleField(String[][] battleField) {
         this.battleField = battleField;
         generateBFObj();
-        tanks = new ArrayList<>();
+        tanks = new CopyOnWriteArrayList<>();
         gameId = System.currentTimeMillis();
     }
 
@@ -143,8 +145,8 @@ public class BattleField implements Drawable {
         }
     }
 
-    public List<Object> getTanks() {
-        return new ArrayList<>(tanks);
+    public List<AbstractTank> getTanks() {
+        return new CopyOnWriteArrayList<>(tanks);
     }
 
     public void addTank(AbstractTank tank) {

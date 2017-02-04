@@ -17,7 +17,7 @@ public abstract class AbstractTank implements Tank {
 
     public static final int TANK_STEP = 1;
 
-    protected int speed = 10;
+    protected int speed = 24;
     private Mission mission;
 
     private int x;
@@ -44,6 +44,8 @@ public abstract class AbstractTank implements Tank {
 
     private BattleField bf;
 
+    private boolean fired = false;
+
     public AbstractTank(BattleField bf) {
         this(bf, 256, 256, Direction.DOWN, Mission.KILL_EAGLE);
     }
@@ -58,9 +60,9 @@ public abstract class AbstractTank implements Tank {
         images = createImages();
     }
 
-    private List<Object> detectEnemy() {
+    private List<AbstractTank> detectEnemy() {
 
-        List<Object> result = new ArrayList<>();
+        List<AbstractTank> result = new ArrayList<>();
         if (mission == Mission.DEFENDER) {
             result.add(bf.getKillEagle());
             result.add(bf.getKillDefender());
@@ -70,18 +72,19 @@ public abstract class AbstractTank implements Tank {
         return result;
     }
 
-    private Direction turnToEnemy(List<Object> enemies) {
+    private Direction turnToEnemy(List<AbstractTank> enemies) {
 
-        for (Object el : enemies) {
-            AbstractTank enemy = (AbstractTank) el;
+        for (AbstractTank enemy : enemies) {
             if (enemy != null) {
-                if (x == enemy.getX() && isQuadrantVisible(x, y, enemy.getX(), enemy.getY()) && !hide) {
+                if (enemy.getX() > x - BattleField.Q_SIZE && enemy.getX() < x + BattleField.Q_SIZE
+                        && isQuadrantVisible(x, y, enemy.getX(), enemy.getY()) && !hide) {
                     if (y < enemy.getY()) {
                         return Direction.DOWN;
                     } else {
                         return Direction.UP;
                     }
-                } else if (y == enemy.getY() && isQuadrantVisible(x, y, enemy.getX(), enemy.getY()) && !hide) {
+                } else if (enemy.getY() > y - BattleField.Q_SIZE && enemy.getY() < y + BattleField.Q_SIZE
+                        && isQuadrantVisible(x, y, enemy.getX(), enemy.getY()) && !hide) {
                     if (x < enemy.getX()) {
                         return Direction.RIGHT;
                     } else {
@@ -98,35 +101,35 @@ public abstract class AbstractTank implements Tank {
         int possibleX = initX;
         int possibleY = initY;
 
-        if (initX == destX) {
+        if (destX > initX - BattleField.Q_SIZE && destX < initX + BattleField.Q_SIZE) {
             if (initY < destY) {
-                while (!bf.isOccupied(possibleX, possibleY, Direction.DOWN) && !(possibleY == destY)) {
+                while (!bf.isOccupied(possibleX, possibleY, Direction.DOWN) && !(possibleY >= destY)) {
                     possibleY += BattleField.Q_SIZE;
                 }
-                if (possibleY == destY) {
+                if (possibleY >= destY) {
                     return true;
                 }
             } else {
-                while (!bf.isOccupied(possibleX, possibleY, Direction.UP) && !(possibleY == destY)) {
+                while (!bf.isOccupied(possibleX, possibleY, Direction.UP) && !(possibleY <= destY)) {
                     possibleY -= BattleField.Q_SIZE;
                 }
-                if (possibleY == destY) {
+                if (possibleY <= destY) {
                     return true;
                 }
             }
-        } else if (initY == destY) {
+        } else if (destY > initY - BattleField.Q_SIZE && destY < initY + BattleField.Q_SIZE) {
             if (initX < destX) {
-                while (!bf.isOccupied(possibleX, possibleY, Direction.RIGHT) && !(possibleX == destX)) {
+                while (!bf.isOccupied(possibleX, possibleY, Direction.RIGHT) && !(possibleX >= destX)) {
                     possibleX += BattleField.Q_SIZE;
                 }
-                if (possibleX == destX) {
+                if (possibleX >= destX) {
                     return true;
                 }
             } else {
-                while (!bf.isOccupied(possibleX, possibleY, Direction.LEFT) && !(possibleX == destX)) {
+                while (!bf.isOccupied(possibleX, possibleY, Direction.LEFT) && !(possibleX <= destX)) {
                     possibleX -= BattleField.Q_SIZE;
                 }
-                if (possibleX == destX) {
+                if (possibleX <= destX) {
                     return true;
                 }
             }
@@ -511,22 +514,37 @@ public abstract class AbstractTank implements Tank {
 
     private boolean isTankInNextQuadrant() {
 
-        int destX = x / BattleField.Q_SIZE;
-        int destY = y / BattleField.Q_SIZE;
+        int minX;
+        int maxX;
+        int minY;
+        int maxY;
 
         if (direction == Direction.UP) {
-            destY -= 1;
+            minX = x - BattleField.Q_SIZE;
+            maxX = x + BattleField.Q_SIZE;
+            minY = y - 2 * BattleField.Q_SIZE;
+            maxY = y;
         } else if (direction == Direction.DOWN) {
-            destY += 1;
+            minX = x - BattleField.Q_SIZE;
+            maxX = x + BattleField.Q_SIZE;
+            minY = y + BattleField.Q_SIZE - 1;
+            maxY = y + 2 * BattleField.Q_SIZE;
         } else if (direction == Direction.LEFT) {
-            destX -= 1;
+            minX = x - 2 * BattleField.Q_SIZE;
+            maxX = x;
+            minY = y - BattleField.Q_SIZE;
+            maxY = y + BattleField.Q_SIZE;
         } else {
-            destX += 1;
+            minX = x + BattleField.Q_SIZE - 1;
+            maxX = x + 2 * BattleField.Q_SIZE;
+            minY = y - BattleField.Q_SIZE;
+            maxY = y + BattleField.Q_SIZE;
         }
 
         for (Object el : bf.getTanks()) {
             AbstractTank tank = (AbstractTank) el;
-            if (!this.equals(tank) && (tank.getX() == (destX * BattleField.Q_SIZE)) && (tank.getY() == destY * BattleField.Q_SIZE)) {
+            if (!this.equals(tank) && (tank.getX() > minX) && (tank.getX() < maxX)
+                    && (tank.getY() > minY) && (tank.getY() < maxY)) {
                 return true;
             }
         }
@@ -535,9 +553,15 @@ public abstract class AbstractTank implements Tank {
 
     private boolean isTankInNextQuadrant(AbstractBFElement bfElement) {
 
+        int minX = bfElement.getX() - BattleField.Q_SIZE;
+        int maxX = bfElement.getX() + BattleField.Q_SIZE;
+        int minY = bfElement.getY() - BattleField.Q_SIZE;
+        int maxY = bfElement.getY() + BattleField.Q_SIZE;
+
         for (Object el : bf.getTanks()) {
             AbstractTank tank = (AbstractTank) el;
-            if (!tank.isDestroyed() && !this.equals(tank) && tank.getX() == bfElement.getX() && tank.getY() == bfElement.getY()) {
+            if (!this.equals(tank) && (tank.getX() > minX) && (tank.getX() < maxX)
+                    && (tank.getY() > minY) && (tank.getY() < maxY)) {
                 return true;
             }
         }
@@ -552,10 +576,13 @@ public abstract class AbstractTank implements Tank {
 
         Direction toEnemy = turnToEnemy(detectEnemy());
 
-        if (toEnemy != null) {
+        if (toEnemy != null && !fired) {
             turn(toEnemy);
+            fired = true;
             writeToFile(Action.FIRE);
             return Action.FIRE;
+        } else if (toEnemy == null && fired) {
+            fired = false;
         }
 
         while (!(getPathActions().get(step) instanceof Action)) {
