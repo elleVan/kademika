@@ -1,19 +1,14 @@
 package tanks;
 
 import tanks.fixed.*;
-import tanks.fixed.bfelements.Blank;
-import tanks.fixed.bfelements.Rock;
-import tanks.fixed.bfelements.Water;
+import tanks.fixed.bfelements.*;
 import tanks.helpers.*;
-import tanks.mobile.AbstractTank;
-import tanks.mobile.Bullet;
-import tanks.mobile.tanks.BT7;
-import tanks.mobile.tanks.T34;
+import tanks.mobile.*;
+import tanks.mobile.tanks.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import tanks.helpers.Action;
-import tanks.mobile.tanks.Tiger;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -64,25 +59,20 @@ public class ActionField extends JPanel {
     private void runTheGame(AbstractTank tank) {
 
         while (true) {
-            if (!bf.getDefender().isDestroyed() && !tank.isDestroyed()) {
-                if (tank.getMission() == Mission.KILL_EAGLE) {
-                    tank.findPath(4, 8);
-                    tank.setPathActions(tank.generatePathActions());
-                } else if (tank.getMission() == Mission.KILL_DEFENDER) {
-                    tank.findPath(bf.getDefender().getX() / BattleField.Q_SIZE, bf.getDefender().getY() / BattleField.Q_SIZE);
-                    tank.setPathActions(tank.generatePathActions());
-                } else if (tank.getMission() == Mission.DEFENDER) {
-                    tank.getDefenderPath();
-                    tank.setPathActions(tank.generatePathActions());
-                }
-
-                Action action = tank.setUp();
-                processAction(action, tank);
-
-            }
             if (tank.isDestroyed() || bf.getDefender().isDestroyed() || bf.getEagle().isDestroyed()) {
                 break;
             }
+
+            if (tank.getMission() == Mission.KILL_EAGLE) {
+                tank.findPath(4, 8);
+            } else if (tank.getMission() == Mission.KILL_DEFENDER) {
+                tank.findPath(bf.getDefender().getX() / BattleField.Q_SIZE, bf.getDefender().getY() / BattleField.Q_SIZE);
+            } else if (tank.getMission() == Mission.DEFENDER) {
+                tank.getDefenderPath();
+            }
+
+            tank.setPathActions(tank.generatePathActions());
+            processAction(tank.setUp(), tank);
         }
     }
 
@@ -91,9 +81,6 @@ public class ActionField extends JPanel {
                 FileReader fr = new FileReader("src/tanks/logs/" + chosenLog);
                 BufferedReader br = new BufferedReader(fr)
         ) {
-
-            String str;
-            int i = 0;
 
             String tankCode;
 
@@ -105,57 +92,62 @@ public class ActionField extends JPanel {
                 tankCode = "A";
             }
 
+            String str;
+            boolean flag = false;
+
             while ((str = br.readLine()) != null) {
-                if (!(str.contains("New") && i < 3)) {
-                    String[] arr = str.split(" ");
-
-                    if (arr.length == 1) {
-                        String tankStr = str.substring(0, 1);
-                        String actionStr = str.substring(1, 2);
-                        String directionStr = str.substring(2);
-
-                        Action action;
-                        Direction direction;
-
-                        if (!tankCode.equals(tankStr)) {
-                            continue;
-                        }
-
-                        if ("D".equals(directionStr)) {
-                            direction = Direction.DOWN;
-                        } else if ("U".equals(directionStr)) {
-                            direction = Direction.UP;
-                        } else if ("R".equals(directionStr)) {
-                            direction = Direction.RIGHT;
-                        } else {
-                            direction = Direction.LEFT;
-                        }
-
-                        if (!tank.getDirection().equals(direction)) {
-                            tank.turn(direction);
-                        }
-
-                        if ("M".equals(actionStr)) {
-                            action = Action.MOVE;
-                        } else {
-                            action = Action.FIRE;
-                        }
-
-                        processAction(action, tank);
-                    }
-
-                    if (str.contains("New") && tankCode.equals(arr[2])) {
-                        if ("T34".equals(arr[1])) {
-                            tank = newTank(MODEL_T34, tank.getMission());
-                        } else if ("BT7".equals(arr[1])) {
-                            tank = newTank(MODEL_BT7, tank.getMission());
-                        } else {
-                            tank = newTank(MODEL_TIGER, tank.getMission());
-                        }
-                    }
-
+                if (str.contains("New") && !flag) {
+                    continue;
                 }
-                i++;
+
+                String[] arr = str.split(" ");
+
+                if (arr.length == 1) {
+                    flag = true;
+
+                    String tankStr = str.substring(0, 1);
+                    String actionStr = str.substring(1, 2);
+                    String directionStr = str.substring(2);
+
+                    Action action;
+                    Direction direction;
+
+                    if (!tankCode.equals(tankStr)) {
+                        continue;
+                    }
+
+                    if ("D".equals(directionStr)) {
+                        direction = Direction.DOWN;
+                    } else if ("U".equals(directionStr)) {
+                        direction = Direction.UP;
+                    } else if ("R".equals(directionStr)) {
+                        direction = Direction.RIGHT;
+                    } else {
+                        direction = Direction.LEFT;
+                    }
+
+                    if (!tank.getDirection().equals(direction)) {
+                        tank.turn(direction);
+                    }
+
+                    if ("M".equals(actionStr)) {
+                        action = Action.MOVE;
+                    } else {
+                        action = Action.FIRE;
+                    }
+
+                    processAction(action, tank);
+                }
+
+                if (str.contains("New") && tankCode.equals(arr[2])) {
+                    if ("T34".equals(arr[1])) {
+                        tank = newTankForReplay(MODEL_T34, tank.getMission());
+                    } else if ("BT7".equals(arr[1])) {
+                        tank = newTankForReplay(MODEL_BT7, tank.getMission());
+                    } else {
+                        tank = newTankForReplay(MODEL_TIGER, tank.getMission());
+                    }
+                }
 
             }
         } catch (IOException e) {
@@ -188,11 +180,11 @@ public class ActionField extends JPanel {
                 }
 
                 if ("T34".equals(arr[1])) {
-                    tanks.add(newTank(MODEL_T34, mission));
+                    tanks.add(newTankForReplay(MODEL_T34, mission));
                 } else if ("BT7".equals(arr[1])) {
-                    tanks.add(newTank(MODEL_BT7, mission));
+                    tanks.add(newTankForReplay(MODEL_BT7, mission));
                 } else {
-                    tanks.add(newTank(MODEL_TIGER, mission));
+                    tanks.add(newTankForReplay(MODEL_TIGER, mission));
                 }
 
             }
@@ -292,7 +284,7 @@ public class ActionField extends JPanel {
         return tank;
     }
 
-    private AbstractTank newTank(int model, Mission mission) {
+    private AbstractTank newTankForReplay(int model, Mission mission) {
 
         int x;
         int y;
@@ -338,18 +330,10 @@ public class ActionField extends JPanel {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        processFire(bullet);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    processFire(bullet);
                 }
             }).start();
-            try {
-                Thread.sleep(t.getSpeed());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            sleep(t.getSpeed());
         }
     }
 
@@ -411,16 +395,11 @@ public class ActionField extends JPanel {
                 covered += last;
             }
 
-            try {
-                Thread.sleep(tank.getSpeed());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
+            sleep(tank.getSpeed());
         }
     }
 
-    private void processFire(Bullet bullet) throws InterruptedException {
+    private void processFire(Bullet bullet) {
 
         bullets.add(bullet);
 
@@ -444,7 +423,7 @@ public class ActionField extends JPanel {
                 bullets.remove(bullet);
             }
 
-            Thread.sleep(bullet.getSpeed());
+            sleep(bullet.getSpeed());
 
             if (bullet.isDestroyed()) {
                 break;
@@ -452,7 +431,7 @@ public class ActionField extends JPanel {
         }
     }
 
-    private boolean processInterception(Bullet bullet) throws InterruptedException {
+    private boolean processInterception(Bullet bullet) {
 
         int x = bullet.getX() / BattleField.Q_SIZE;
         int y = bullet.getY() / BattleField.Q_SIZE;
@@ -473,17 +452,13 @@ public class ActionField extends JPanel {
                 if (!tank.isDestroyed() && bullet.getTank() != tank &&
                         checkInterception(tank.getX(), tank.getY(), bullet.getX(), bullet.getY())) {
                     tank.destroy();
-                    if (tank.isDestroyed() && tank.getMission() != Mission.DEFENDER) {
+                    if (tank.getMission() != Mission.DEFENDER) {
                         bf.removeTank(tank);
                         if (!replay) {
                             new Thread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    try {
-                                        Thread.sleep(1000);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
+                                    sleep(1000);
 
                                     AbstractTank newTank;
                                     if (tank instanceof BT7) {
@@ -495,7 +470,6 @@ public class ActionField extends JPanel {
                                     }
 
                                     runTheGame(newTank);
-
                                 }
                             }).start();
                         }
@@ -529,11 +503,11 @@ public class ActionField extends JPanel {
 
     private void chooseTanksMissions(int def) {
 
-        if (def == 0) {
+        if (def == MODEL_T34) {
             missionT34 = Mission.DEFENDER;
             missionBT7 = Mission.KILL_EAGLE;
             missionTiger = Mission.KILL_DEFENDER;
-        } else if (def == 1) {
+        } else if (def == MODEL_BT7) {
             missionBT7 = Mission.DEFENDER;
             missionT34 = Mission.KILL_EAGLE;
             missionTiger = Mission.KILL_DEFENDER;
@@ -546,27 +520,9 @@ public class ActionField extends JPanel {
 
     private void startTheGame() {
 
-        bf = new BattleField();
-
-        File log = new File("src/tanks/logs/log" + bf.getGameId() + ".txt");
-        try {
-            log.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         newTank(MODEL_T34);
         newTank(MODEL_BT7);
         newTank(MODEL_TIGER);
-
-        try {
-            imageBlank = ImageIO.read(new File("src/tanks/images/blank.jpg"));
-        } catch (IOException e) {
-            System.err.println("Can't find imageName");
-        }
-    }
-
-    private JFrame createGameFrame() {
 
         Thread defenderThread = null;
 
@@ -591,8 +547,6 @@ public class ActionField extends JPanel {
 
         CardLayout cardLayout = (CardLayout) loadingFrame.getContentPane().getLayout();
         cardLayout.next(loadingFrame.getContentPane());
-
-        return loadingFrame;
     }
 
     private JFrame createLoadingFrame() {
@@ -612,11 +566,7 @@ public class ActionField extends JPanel {
             public void run() {
                 while (true) {
                     repaint();
-                    try {
-                        Thread.sleep(1000 / 60);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    sleep(1000 / 60);
                 }
             }
         }).start();
@@ -673,16 +623,16 @@ public class ActionField extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 chooseTanksMissions(chosen);
-                startTheGame();
-
                 replay = false;
+
+                prepareBFForNewGame();
 
                 CardLayout cardLayout = (CardLayout) loadingFrame.getContentPane().getLayout();
                 cardLayout.next(loadingFrame.getContentPane());
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        createGameFrame();
+                        startTheGame();
                     }
                 });
                 thread.start();
@@ -707,15 +657,8 @@ public class ActionField extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                bf = new BattleField();
-
-                try {
-                    imageBlank = ImageIO.read(new File("src/tanks/images/blank.jpg"));
-                } catch (IOException ex) {
-                    System.err.println("Can't find imageName");
-                }
-
                 replay = true;
+                prepareBFForNewGame();
 
                 CardLayout cardLayout = (CardLayout) loadingFrame.getContentPane().getLayout();
                 cardLayout.next(loadingFrame.getContentPane());
@@ -741,6 +684,33 @@ public class ActionField extends JPanel {
             result.add(f.getName());
         }
         return result;
+    }
+
+    private void prepareBFForNewGame() {
+        bf = new BattleField();
+
+        try {
+            imageBlank = ImageIO.read(new File("src/tanks/images/blank.jpg"));
+        } catch (IOException ex) {
+            System.err.println("Can't find imageName");
+        }
+
+        if (!replay) {
+            File log = new File("src/tanks/logs/log" + bf.getGameId() + ".txt");
+            try {
+                log.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sleep(int timeout) {
+        try {
+            Thread.sleep(timeout);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
