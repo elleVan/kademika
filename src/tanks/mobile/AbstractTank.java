@@ -300,7 +300,7 @@ public abstract class AbstractTank implements Tank {
         next = findNext(current);
 
         for (int i = 0; i < next.size(); i++) {
-            if (isTankInNextQuadrant((AbstractBFElement) next.get(i))) {
+            if (isTankInNextQuadrant(next.get(i))) {
                 next.remove(i);
             }
         }
@@ -510,7 +510,7 @@ public abstract class AbstractTank implements Tank {
         return bf.isQuadrantOnTheField(destX, destY) && !(bf.scanQuadrant(destX, destY) instanceof Rock && !bf.scanQuadrant(destX, destY).isDestroyed());
     }
 
-    private boolean isTankInNextQuadrant() {
+    public boolean isTankInNextQuadrant() {
 
         int minX;
         int maxX;
@@ -613,7 +613,7 @@ public abstract class AbstractTank implements Tank {
         return (Action) getPathActions().get(step++);
     }
 
-    private void writeToFile(Action action) {
+    public void writeToFile(Action action) {
 
         StringBuilder str = new StringBuilder();
         if (getMission() == Mission.DEFENDER) {
@@ -626,6 +626,10 @@ public abstract class AbstractTank implements Tank {
 
         if (action == Action.MOVE) {
             str.append("M");
+        } else if (action == Action.PIXEL_MOVE) {
+            str.append("P");
+        } else if (action == Action.WAIT) {
+            str.append("W");
         } else {
             str.append("F");
         }
@@ -640,15 +644,15 @@ public abstract class AbstractTank implements Tank {
             str.append("L");
         }
 
-        try (
-                FileWriter fw = new FileWriter("src/tanks/logs/log" + bf.getGameId() + ".txt", true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                PrintWriter writer = new PrintWriter(bw)
-        ) {
-            writer.println(str.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try (
+//                FileWriter fw = new FileWriter("src/tanks/logs/log" + bf.getGameId() + ".txt", true);
+//                BufferedWriter bw = new BufferedWriter(fw);
+//                PrintWriter writer = new PrintWriter(bw)
+//        ) {
+//            writer.println(str.toString());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
     }
 
