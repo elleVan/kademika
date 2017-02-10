@@ -24,7 +24,7 @@ public class Eagle extends AbstractBFElement implements Destroyable{
     @Override
     public void addImage() {
         try {
-            setImage(ImageIO.read(new File("src/tanks/images/eagle.png")));
+            setImage(ImageIO.read(getClass().getResource("/tanks/images/eagle.png")));
         } catch (IOException e) {
             System.err.println("Can't find image");
         }

@@ -44,8 +44,6 @@ public abstract class AbstractTank implements Tank {
 
     private BattleField bf;
 
-    private boolean fired = false;
-
     public AbstractTank(BattleField bf) {
         this(bf, 256, 256, Direction.DOWN, Mission.KILL_EAGLE);
     }
@@ -574,13 +572,10 @@ public abstract class AbstractTank implements Tank {
 
         Direction toEnemy = turnToEnemy(detectEnemy());
 
-        if (toEnemy != null && !fired) {
+        if (toEnemy != null) {
             turn(toEnemy);
-            fired = true;
             writeToFile(Action.FIRE);
             return Action.FIRE;
-        } else if (toEnemy == null && fired) {
-            fired = false;
         }
 
         while (!(getPathActions().get(step) instanceof Action)) {

@@ -22,6 +22,7 @@ public class ActionField extends JPanel {
     private static final boolean COLORED_MODE = false;
 
     private Image imageBlank;
+    private Image imageGameOver;
 
     private BattleField bf;
     private List<Bullet> bullets = new ArrayList<>();
@@ -56,6 +57,8 @@ public class ActionField extends JPanel {
 
     private volatile int countMove = 0;
 
+    private volatile boolean gameOver = false;
+
     public ActionField() {
         createLoadingFrame();
     }
@@ -83,6 +86,7 @@ public class ActionField extends JPanel {
                 }
             } else {
 //                processWait(tank);
+                  sleep(2);
             }
         }
     }
@@ -100,7 +104,8 @@ public class ActionField extends JPanel {
                 tank.writeToFile(Action.FIRE);
                 processAction(Action.FIRE, tank);
                 pressedFire = false;
-                sleep(500);
+            } else {
+                sleep(10);
             }
         }
     }
@@ -224,7 +229,7 @@ public class ActionField extends JPanel {
 
             Thread defenderThread = null;
 
-            for (AbstractTank tank : tanks) {
+            for (final AbstractTank tank : tanks) {
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -363,14 +368,14 @@ public class ActionField extends JPanel {
         } else if (a == Action.WAIT) {
             processWait(t);
         } else if (a == Action.FIRE) {
-            Bullet bullet = t.fire();
+            final Bullet bullet = t.fire();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     processFire(bullet);
                 }
             }).start();
-            sleep(t.getSpeed());
+            sleep(500);
         }
     }
 
@@ -592,7 +597,7 @@ public class ActionField extends JPanel {
             }
 
             for (int i = 0; i < bf.getTanks().size(); i++) {
-                AbstractTank tank = bf.getTanks().get(i);
+                final AbstractTank tank = bf.getTanks().get(i);
                 if (!tank.isDestroyed() && bullet.getTank() != tank &&
                         checkInterception(tank.getX(), tank.getY(), bullet.getX(), bullet.getY())) {
                     tank.destroy();
@@ -670,7 +675,7 @@ public class ActionField extends JPanel {
 
         Thread defenderThread = null;
 
-        for (AbstractTank tank : bf.getTanks()) {
+        for (final AbstractTank tank : bf.getTanks()) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -698,6 +703,10 @@ public class ActionField extends JPanel {
 
         defenderTurn = null;
         pressedFire = false;
+
+        gameOver = true;
+        sleep(3000);
+        gameOver = false;
 
         CardLayout cardLayout = (CardLayout) loadingFrame.getContentPane().getLayout();
         cardLayout.next(loadingFrame.getContentPane());
@@ -808,10 +817,10 @@ public class ActionField extends JPanel {
         buttons.add(button3);
         group.add(button3);
 
-        logs = findLogs().toArray();
-        JComboBox comboBox = new JComboBox();
-        comboBox.setModel(new DefaultComboBoxModel(logs));
-        chosenLog = (String) logs[0];
+//        logs = findLogs().toArray();
+//        JComboBox comboBox = new JComboBox();
+//        comboBox.setModel(new DefaultComboBoxModel(logs));
+//        chosenLog = (String) logs[0];
 
         panel.add(lButtons, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
         panel.add(buttons, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
@@ -819,7 +828,7 @@ public class ActionField extends JPanel {
         JButton button = new JButton("Start");
         panel.add(button, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
 
-        JPanel gamePanel = this;
+        final JPanel gamePanel = this;
 
         button.addActionListener(new ActionListener() {
             @Override
@@ -841,18 +850,18 @@ public class ActionField extends JPanel {
                     }
                 });
                 thread.start();
-                logs = findLogs().toArray();
-                comboBox.setModel(new DefaultComboBoxModel(logs));
+//                logs = findLogs().toArray();
+//                comboBox.setModel(new DefaultComboBoxModel(logs));
             }
         });
 
-        comboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JComboBox box = (JComboBox) e.getSource();
-                chosenLog = (String) box.getSelectedItem();
-            }
-        });
+//        comboBox.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                JComboBox box = (JComboBox) e.getSource();
+//                chosenLog = (String) box.getSelectedItem();
+//            }
+//        });
 //        panel.add(comboBox, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(20, 0, 0, 0), 0, 0));
 
         JButton buttonR = new JButton("Replay");
@@ -895,7 +904,8 @@ public class ActionField extends JPanel {
         bf = new BattleField();
 
         try {
-            imageBlank = ImageIO.read(new File("src/tanks/images/blank.jpg"));
+            imageBlank = ImageIO.read(getClass().getResource("/tanks/images/blank.jpg"));
+            imageGameOver = ImageIO.read(getClass().getResource("/tanks/images/gameover.jpg"));
         } catch (IOException ex) {
             System.err.println("Can't find imageName");
         }
@@ -962,6 +972,11 @@ public class ActionField extends JPanel {
 
         for (int j = 0; j < bullets.size(); j++) {
             bullets.get(j).draw(g);
+        }
+
+        if (gameOver) {
+            g.drawImage(imageGameOver, 0, 0, (BattleField.Q_MAX + 1) * BattleField.Q_SIZE,
+                    (BattleField.Q_MAX + 1) * BattleField.Q_SIZE, null);
         }
     }
 }

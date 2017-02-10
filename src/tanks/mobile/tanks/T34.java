@@ -21,10 +21,10 @@ public class T34 extends AbstractTank {
     public Image[] createImages() {
         Image[] array = new Image[4];
         try {
-            array[0] = ImageIO.read(new File("src/tanks/images/tank-U.png"));
-            array[1] = ImageIO.read(new File("src/tanks/images/tank-D.png"));
-            array[2] = ImageIO.read(new File("src/tanks/images/tank-L.png"));
-            array[3] = ImageIO.read(new File("src/tanks/images/tank-R.png"));
+            array[0] = ImageIO.read(getClass().getResource("/tanks/images/tank-U.png"));
+            array[1] = ImageIO.read(getClass().getResource("/tanks/images/tank-D.png"));
+            array[2] = ImageIO.read(getClass().getResource("/tanks/images/tank-L.png"));
+            array[3] = ImageIO.read(getClass().getResource("/tanks/images/tank-R.png"));
         } catch (IOException e) {
             System.err.println("Can't find imageName");
         }

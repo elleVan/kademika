@@ -24,7 +24,7 @@ public class Rock extends AbstractBFElement implements Destroyable {
     @Override
     public void addImage() {
         try {
-            setImage(ImageIO.read(new File("src/tanks/images/rock.jpg")));
+            setImage(ImageIO.read(getClass().getResource("/tanks/images/rock.jpg")));
         } catch (IOException e) {
             System.err.println("Can't find image");
         }

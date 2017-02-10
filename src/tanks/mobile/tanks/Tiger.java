@@ -32,10 +32,10 @@ public class Tiger extends AbstractTank {
     public Image[] createImages() {
         Image[] array = new Image[4];
         try {
-            array[0] = ImageIO.read(new File("src/tanks/images/tankRed-U.png"));
-            array[1] = ImageIO.read(new File("src/tanks/images/tankRed-D.png"));
-            array[2] = ImageIO.read(new File("src/tanks/images/tankRed-L.png"));
-            array[3] = ImageIO.read(new File("src/tanks/images/tankRed-R.png"));
+            array[0] = ImageIO.read(getClass().getResource("/tanks/images/tankRed-U.png"));
+            array[1] = ImageIO.read(getClass().getResource("/tanks/images/tankRed-D.png"));
+            array[2] = ImageIO.read(getClass().getResource("/tanks/images/tankRed-L.png"));
+            array[3] = ImageIO.read(getClass().getResource("/tanks/images/tankRed-R.png"));
         } catch (IOException e) {
             System.err.println("Can't find imageName");
         }

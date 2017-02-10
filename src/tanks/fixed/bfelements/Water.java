@@ -34,7 +34,7 @@ public class Water extends AbstractBFElement {
     @Override
     public void addImage() {
         try {
-            setImage(ImageIO.read(new File("src/tanks/images/water.jpg")));
+            setImage(ImageIO.read(getClass().getResource("/tanks/images/water.jpg")));
         } catch (IOException e) {
             System.err.println("Can't find image");
         }

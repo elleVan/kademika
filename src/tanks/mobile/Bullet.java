@@ -30,7 +30,7 @@ public class Bullet implements Drawable, Destroyable {
         this.direction = direction;
         this.destroyed = false;
         try {
-            image = ImageIO.read(new File("src/tanks/images/bullet.png"));
+            image = ImageIO.read(getClass().getResource("/tanks/images/bullet.png"));
         } catch (IOException e) {
             System.err.println("Can't find image");
         }
