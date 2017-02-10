@@ -46,7 +46,7 @@ public class ShopUI {
         panel.setLayout(new GridBagLayout());
 
         JLabel lName = new JLabel("Your name:");
-        JTextField tfName = new JTextField(10);
+        final JTextField tfName = new JTextField(10);
         panel.add(lName, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 5), 0, 0));
         panel.add(tfName, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
 
@@ -78,7 +78,7 @@ public class ShopUI {
 
         JLabel lQuantity = new JLabel("Quantity:");
         NumberFormat nf = NumberFormat.getNumberInstance();
-        JFormattedTextField tfQuantity = new JFormattedTextField(nf);
+        final JFormattedTextField tfQuantity = new JFormattedTextField(nf);
         tfQuantity.setColumns(3);
         tfQuantity.setValue(1);
 

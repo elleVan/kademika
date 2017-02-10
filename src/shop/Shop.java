@@ -12,10 +12,10 @@ public class Shop {
     private List<Transaction> transactions;
 
     public Shop() {
-        initShop(new Base());
+        initShop(new BaseMemory());
     }
 
-    private void initShop(Base base) {
+    private void initShop(BaseMemory base) {
         sweets = base.getSweets();
         categories = base.getCategories();
         customers = base.getCustomers();
