@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class IdGenerator {
 
     public static void main(String[] args) {
-        IdGenerator idGenerator = new IdGenerator();
-        CountDownLatch cdl = new CountDownLatch(10);
+        final IdGenerator idGenerator = new IdGenerator();
+        final CountDownLatch cdl = new CountDownLatch(10);
 
         for (int i = 0; i < 10; i++) {
             Thread thread = new Thread(new Runnable() {

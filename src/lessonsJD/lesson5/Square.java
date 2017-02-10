@@ -23,7 +23,7 @@ public class Square {
     }
 
     private JPanel createPanel() {
-        JPanel panel = new JPanel() {
+        final JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 g.setColor(color);

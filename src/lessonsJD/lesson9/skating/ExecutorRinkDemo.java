@@ -9,15 +9,15 @@ public class ExecutorRinkDemo {
 
     public static void main(String[] args) {
 
-        AnotherSkatingRink skatingRink = new AnotherSkatingRink();
+        final AnotherSkatingRink skatingRink = new AnotherSkatingRink();
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
-        Random random = new Random();
+        final Random random = new Random();
 
         try {
             for (int i = 0; i < 10; i++) {
 
-                Skater skater = new Skater("Skater " + i);
+                final Skater skater = new Skater("Skater " + i);
 
                 executor.submit(new Callable<Object>() {
                     @Override

@@ -8,13 +8,13 @@ public class RinkDemo {
 
     public static void main(String[] args) {
 
-        AnotherSkatingRink skatingRink = new AnotherSkatingRink();
-        Lock lock = new ReentrantLock();
-        Random random = new Random();
+        final AnotherSkatingRink skatingRink = new AnotherSkatingRink();
+        final Lock lock = new ReentrantLock();
+        final Random random = new Random();
 
         for (int i = 0; i < 10; i++) {
 
-            Skater skater = new Skater("Skater " + i);
+            final Skater skater = new Skater("Skater " + i);
 
             new Thread(new Runnable() {
                 @Override

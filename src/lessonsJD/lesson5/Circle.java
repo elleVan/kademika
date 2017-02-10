@@ -37,7 +37,7 @@ public class Circle {
 
         JPanel medium = new JPanel();
 
-        JPanel panel = new JPanel() {
+        final JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);

@@ -29,7 +29,7 @@ public class RaceConditions {
         }
     }
 
-    private Runnable createWithdrawalThread(long accountId, int amount) {
+    private Runnable createWithdrawalThread(final long accountId, final int amount) {
 
         return new Runnable() {
             @Override
