@@ -8,6 +8,8 @@ import tanks.mobile.tanks.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.text.StyledDocument;
+
 import tanks.helpers.Action;
 
 import java.awt.*;
@@ -788,7 +790,33 @@ public class ActionField extends JPanel {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
 
-        JLabel lButtons = new JLabel("Choose the tank:");
+        JLabel rulesLabel = new JLabel("Правила:");
+        JLabel rulesText1 = new JLabel("Цель игры - как можно дольше оставаться в живых защищая штаб, ");
+        JLabel rulesText2 = new JLabel("штаб это квадрат с орлом внизу поля.");
+        JLabel rulesText3 = new JLabel("Ваш танк в начале игры находится возле штаба, вражеские танки - вверху по сторонам.");
+
+        JLabel controlsLabel = new JLabel("Управление:");
+        JLabel controlsText1 = new JLabel("Для движения вверх, вправо, вниз или влево удерживайте соответствующую стрелочку.");
+        JLabel controlsText2 = new JLabel("Для выстрела нажмите пробел.");
+
+        rulesText1.setFont(new Font("Arial", Font.PLAIN, 12));
+        rulesText2.setFont(new Font("Arial", Font.PLAIN, 12));
+        rulesText3.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        controlsText1.setFont(new Font("Arial", Font.PLAIN, 12));
+        controlsText2.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        panel.add(rulesLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(rulesText1, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(rulesText2, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(rulesText3, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+
+
+        panel.add(controlsLabel, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(10, 0, 0, 0), 0, 0));
+        panel.add(controlsText1, new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(controlsText2, new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+
+        JLabel lButtons = new JLabel("Выберите танк:");
         JPanel buttons = new JPanel(new GridLayout(0, 1));
         ButtonGroup group = new ButtonGroup();
         ActionListener rbListener = new ActionListener() {
@@ -798,20 +826,20 @@ public class ActionField extends JPanel {
             }
         };
 
-        JRadioButton button1 = new JRadioButton("T34");
+        JRadioButton button1 = new JRadioButton("T34 (скорость: 1, броня: 1)");
         button1.addActionListener(rbListener);
         button1.setActionCommand("0");
         button1.setSelected(true);
         buttons.add(button1);
         group.add(button1);
 
-        JRadioButton button2 = new JRadioButton("BT7");
+        JRadioButton button2 = new JRadioButton("BT7 (скорость: 2, броня: 1)");
         button2.addActionListener(rbListener);
         button2.setActionCommand("1");
         buttons.add(button2);
         group.add(button2);
 
-        JRadioButton button3 = new JRadioButton("Tiger");
+        JRadioButton button3 = new JRadioButton("Tiger (скорость: 1, броня: 2)");
         button3.addActionListener(rbListener);
         button3.setActionCommand("2");
         buttons.add(button3);
@@ -822,11 +850,11 @@ public class ActionField extends JPanel {
 //        comboBox.setModel(new DefaultComboBoxModel(logs));
 //        chosenLog = (String) logs[0];
 
-        panel.add(lButtons, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(buttons, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(lButtons, new GridBagConstraints(0, 7, 1, 1, 0, 0, GridBagConstraints.CENTER, 0, new Insets(20, 0, 5, 0), 0, 0));
+        panel.add(buttons, new GridBagConstraints(0, 8, 1, 1, 0, 0, GridBagConstraints.CENTER, 0, new Insets(0, 0, 0, 0), 0, 0));
 
         JButton button = new JButton("Start");
-        panel.add(button, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, 0, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(button, new GridBagConstraints(0, 9, 1, 1, 0, 0, GridBagConstraints.CENTER, 0, new Insets(20, 0, 0, 0), 20, 20));
 
         final JPanel gamePanel = this;
 
